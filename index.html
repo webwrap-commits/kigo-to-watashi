@@ -3,16 +3,55 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>季語と私 - 準備中</title>
+    <title>季語と私</title>
     <style>
-        body { font-family: sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; background-color: #f4f1ea; color: #5d5245; }
-        .container { text-align: center; border: 1px solid #d3cdc0; padding: 2rem; border-radius: 8px; background: white; }
+        body { font-family: 'Hiragino Mincho ProN', 'serif'; background-color: #f4f1ea; color: #333; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
+        .card { background: white; padding: 2rem; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); max-width: 400px; width: 90%; text-align: center; }
+        .date { font-size: 0.9rem; color: #888; margin-bottom: 0.5rem; }
+        .kigo { font-size: 2.5rem; font-weight: bold; color: #5d5245; margin-bottom: 1rem; }
+        .origin { font-size: 1rem; line-height: 1.6; text-align: left; background: #faf8f5; padding: 1rem; border-left: 3px solid #d3cdc0; }
+        .season { margin-top: 1rem; display: inline-block; font-size: 0.8rem; background: #e0dace; padding: 2px 8px; border-radius: 4px; }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>季語と私</h1>
-        <p>現在、新しいお家を建てています。お楽しみに。</p>
+    <div class="card" id="kigo-card">
+        <div id="display-date" class="date">読み込み中...</div>
+        <div id="display-kigo" class="kigo">...</div>
+        <div id="display-origin" class="origin"></div>
+        <div id="display-season" class="season"></div>
     </div>
+
+    <script>
+        async function loadKigo() {
+            const today = new Date();
+            const month = String(today.getMonth() + 1).padStart(2, '0');
+            const day = String(today.getDate()).padStart(2, '0');
+            const targetDate = `${month}-${day}`;
+
+            try {
+                const response = await fetch('kigo_data.csv');
+                const data = await response.text();
+                const lines = data.split('\n').slice(1); // ヘッダーを飛ばす
+
+                const todayKigo = lines.map(line => {
+                    const [date, kigo, origin, season] = line.split(',');
+                    return { date, kigo, origin, season };
+                }).find(item => item.date === targetDate);
+
+                if (todayKigo) {
+                    document.getElementById('display-date').textContent = today.toLocaleDateString('ja-JP', { month: 'long', day: 'numeric' });
+                    document.getElementById('display-kigo').textContent = todayKigo.kigo;
+                    document.getElementById('display-origin').textContent = todayKigo.origin;
+                    document.getElementById('display-season').textContent = todayKigo.season;
+                } else {
+                    document.getElementById('display-date').textContent = "データ準備中";
+                    document.getElementById('display-kigo').textContent = "お待ちください";
+                }
+            } catch (error) {
+                console.error('Error:', error);
+            }
+        }
+        loadKigo();
+    </script>
 </body>
 </html>
