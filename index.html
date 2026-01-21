@@ -4,13 +4,18 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>季語と私</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
-        body { font-family: 'Hiragino Mincho ProN', 'serif'; background-color: #f4f1ea; color: #333; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
-        .card { background: white; padding: 2rem; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); max-width: 400px; width: 90%; text-align: center; }
+        body { font-family: 'Hiragino Mincho ProN', 'serif'; background-color: #f4f1ea; color: #333; display: flex; flex-direction: column; align-items: center; min-height: 100vh; margin: 0; padding-top: 2rem; }
+        .card { background: white; padding: 2rem; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); max-width: 400px; width: 90%; text-align: center; margin-bottom: 2rem; }
         .date { font-size: 0.9rem; color: #888; margin-bottom: 0.5rem; }
         .kigo { font-size: 2.5rem; font-weight: bold; color: #5d5245; margin-bottom: 1rem; }
         .origin { font-size: 1rem; line-height: 1.6; text-align: left; background: #faf8f5; padding: 1rem; border-left: 3px solid #d3cdc0; }
         .season { margin-top: 1rem; display: inline-block; font-size: 0.8rem; background: #e0dace; padding: 2px 8px; border-radius: 4px; }
+        .post-area { max-width: 400px; width: 90%; }
+        textarea { width: 100%; height: 150px; padding: 1rem; border: 1px solid #d3cdc0; border-radius: 8px; font-family: inherit; font-size: 1rem; box-sizing: border-box; resize: none; outline: none; }
+        button { margin-top: 1rem; width: 100%; padding: 0.8rem; background-color: #5d5245; color: white; border: none; border-radius: 8px; font-size: 1rem; cursor: pointer; transition: background 0.3s; }
+        button:hover { background-color: #4a4137; }
     </style>
 </head>
 <body>
@@ -21,7 +26,19 @@
         <div id="display-season" class="season"></div>
     </div>
 
+    <div class="post-area">
+        <textarea id="user-post" placeholder="今日の季語に寄せて、想いを綴ってください。"></textarea>
+        <button id="save-btn" onclick="savePost()">この言葉を刻む</button>
+    </div>
+
     <script>
+        // Supabaseの接続設定
+        const SUPABASE_URL = 'https://ciklywhqswbujsogqiva.supabase.co';
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNpa2x5d2hxc3didWpzb2dxaXZhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njg5MzAyNzcsImV4cCI6MjA4NDUwNjI3N30._REwuc__qmpW1eQVhfm-RvsoMJCGYXjqtqBVn4w48Oc';
+        const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        let currentKigo = "";
+
         async function loadKigo() {
             const today = new Date();
             const month = String(today.getMonth() + 1).padStart(2, '0');
@@ -31,26 +48,52 @@
             try {
                 const response = await fetch('kigo_data.csv');
                 const data = await response.text();
-                const lines = data.split('\n').slice(1); // ヘッダーを飛ばす
+                const lines = data.split('\n').slice(1);
 
                 const todayKigo = lines.map(line => {
-                    const [date, kigo, origin, season] = line.split(',');
-                    return { date, kigo, origin, season };
+                    const parts = line.split(',');
+                    return { date: parts[0], kigo: parts[1], origin: parts[2], season: parts[3] };
                 }).find(item => item.date === targetDate);
 
                 if (todayKigo) {
+                    currentKigo = todayKigo.kigo;
                     document.getElementById('display-date').textContent = today.toLocaleDateString('ja-JP', { month: 'long', day: 'numeric' });
                     document.getElementById('display-kigo').textContent = todayKigo.kigo;
                     document.getElementById('display-origin').textContent = todayKigo.origin;
                     document.getElementById('display-season').textContent = todayKigo.season;
-                } else {
-                    document.getElementById('display-date').textContent = "データ準備中";
-                    document.getElementById('display-kigo').textContent = "お待ちください";
                 }
             } catch (error) {
-                console.error('Error:', error);
+                console.error('Error loading kigo:', error);
             }
         }
+
+        async function savePost() {
+            const text = document.getElementById('user-post').value;
+            const btn = document.getElementById('save-btn');
+
+            if (!text) {
+                alert("何か言葉を綴ってみてください。");
+                return;
+            }
+
+            btn.disabled = true;
+            btn.textContent = "刻んでいます...";
+
+            const { error } = await supabase
+                .from('posts')
+                .insert([{ content: text, kigo: currentKigo }]);
+
+            if (error) {
+                console.error('Error saving post:', error);
+                alert("うまく刻めませんでした。もう一度試してみてください。");
+            } else {
+                alert("心に刻まれました。");
+                document.getElementById('user-post').value = "";
+            }
+            btn.disabled = false;
+            btn.textContent = "この言葉を刻む";
+        }
+
         loadKigo();
     </script>
 </body>
