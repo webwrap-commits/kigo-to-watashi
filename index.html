@@ -3,102 +3,354 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>季語と私</title>
+    <title>季語と私の綴りごと</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
-        body { font-family: 'Hiragino Mincho ProN', 'serif'; background-color: #f4f1ea; color: #333; display: flex; flex-direction: column; align-items: center; min-height: 100vh; margin: 0; padding-top: 2rem; }
-        .card { background: white; padding: 2rem; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); max-width: 400px; width: 90%; text-align: center; margin-bottom: 2rem; }
-        .date { font-size: 0.9rem; color: #888; margin-bottom: 0.5rem; }
-        .kigo { font-size: 2.5rem; font-weight: bold; color: #5d5245; margin-bottom: 1rem; }
-        .origin { font-size: 1rem; line-height: 1.6; text-align: left; background: #faf8f5; padding: 1rem; border-left: 3px solid #d3cdc0; }
-        .season { margin-top: 1rem; display: inline-block; font-size: 0.8rem; background: #e0dace; padding: 2px 8px; border-radius: 4px; }
-        .post-area { max-width: 400px; width: 90%; }
-        textarea { width: 100%; height: 150px; padding: 1rem; border: 1px solid #d3cdc0; border-radius: 8px; font-family: inherit; font-size: 1rem; box-sizing: border-box; resize: none; outline: none; }
-        button { margin-top: 1rem; width: 100%; padding: 0.8rem; background-color: #5d5245; color: white; border: none; border-radius: 8px; font-size: 1rem; cursor: pointer; transition: background 0.3s; }
-        button:hover { background-color: #4a4137; }
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@300;500&display=swap');
+
+        :root {
+            --bg-color: #ffffff;
+            --text-color: #333333;
+            --border-color: #eeeeee;
+        }
+
+        body {
+            font-family: 'Noto Serif JP', serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 0;
+            line-height: 1.8;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        header {
+            width: 100%;
+            padding: 60px 0 40px 0;
+            text-align: center;
+        }
+
+        h1 {
+            font-weight: 300;
+            font-size: 1.1rem;
+            letter-spacing: 0.3rem;
+            margin: 0;
+            color: #888;
+        }
+
+        main {
+            width: 90%;
+            max-width: 600px;
+            flex-grow: 1;
+            padding-bottom: 100px;
+            text-align: center;
+        }
+
+        #date-display {
+            font-size: 0.85rem;
+            color: #aaa;
+            margin-bottom: 20px;
+            letter-spacing: 0.1rem;
+        }
+
+        #kigo-display {
+            font-size: 3rem;
+            font-weight: 500;
+            margin-bottom: 60px;
+            letter-spacing: 0.8rem;
+            color: var(--text-color);
+        }
+
+        .action-button {
+            background: none;
+            border: 1px solid #ccc;
+            color: var(--text-color);
+            padding: 15px 60px;
+            cursor: pointer;
+            font-size: 0.95rem;
+            font-family: inherit;
+            transition: all 0.4s;
+            letter-spacing: 0.2rem;
+        }
+
+        .action-button:hover {
+            border-color: var(--text-color);
+            background-color: #fafafa;
+        }
+
+        /* 投稿フォーム */
+        #editor-section {
+            display: none;
+            text-align: left;
+            margin: 40px auto;
+            max-width: 500px;
+            animation: fadeIn 1s ease;
+        }
+
+        .input-group {
+            margin-bottom: 25px;
+        }
+
+        input[type="text"], textarea {
+            width: 100%;
+            border: none;
+            border-bottom: 1px solid var(--border-color);
+            font-family: inherit;
+            padding: 12px 0;
+            outline: none;
+            background: transparent;
+            font-size: 0.95rem;
+        }
+
+        textarea {
+            height: 250px;
+            resize: none;
+            line-height: 2;
+        }
+
+        .char-count {
+            font-size: 0.75rem;
+            color: #bbb;
+            text-align: right;
+            margin-top: 5px;
+        }
+
+        .form-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 30px;
+        }
+
+        .config-label {
+            font-size: 0.8rem;
+            color: #888;
+            cursor: pointer;
+        }
+
+        /* タイムライン・マイページ */
+        .tab-menu {
+            margin-top: 100px;
+            display: flex;
+            gap: 30px;
+            justify-content: center;
+            font-size: 0.85rem;
+            border-top: 1px solid var(--border-color);
+            padding-top: 40px;
+        }
+
+        .tab-btn {
+            cursor: pointer;
+            color: #bbb;
+            border: none;
+            background: none;
+            font-family: inherit;
+            letter-spacing: 0.1rem;
+            transition: color 0.3s;
+        }
+
+        .tab-btn.active {
+            color: var(--text-color);
+            font-weight: 500;
+        }
+
+        #posts-list {
+            margin-top: 40px;
+            text-align: left;
+        }
+
+        .post-card {
+            margin-bottom: 60px;
+            animation: fadeIn 1s ease;
+        }
+
+        .post-meta {
+            font-size: 0.75rem;
+            color: #aaa;
+            margin-bottom: 15px;
+            letter-spacing: 0.05rem;
+        }
+
+        .post-content {
+            font-size: 1rem;
+            margin-bottom: 25px;
+            white-space: pre-wrap;
+            color: #444;
+        }
+
+        .biyori-message {
+            background-color: #fcfcfc;
+            padding: 20px;
+            font-size: 0.85rem;
+            border-left: 1px solid #eee;
+            color: #666;
+            line-height: 1.8;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .error-msg {
+            color: #999;
+            font-size: 0.8rem;
+            margin-top: 10px;
+            text-align: center;
+            min-height: 1.2rem;
+        }
     </style>
 </head>
 <body>
-    <div class="card" id="kigo-card">
-        <div id="display-date" class="date">読み込み中...</div>
-        <div id="display-kigo" class="kigo">...</div>
-        <div id="display-origin" class="origin"></div>
-        <div id="display-season" class="season"></div>
+
+<header>
+    <h1>季語と私の綴りごと</h1>
+</header>
+
+<main>
+    <div id="date-display"></div>
+    <div id="kigo-display"></div>
+    
+    <button id="show-editor-btn" class="action-button">綴る</button>
+
+    <section id="editor-section">
+        <div class="input-group">
+            <input type="text" id="pen-name" placeholder="ペンネーム" maxlength="20">
+        </div>
+        <div class="input-group">
+            <textarea id="post-text" placeholder="四百字以内で物語を綴ってください" maxlength="400"></textarea>
+            <div class="char-count"><span id="char-num">0</span> / 400</div>
+        </div>
+        <div id="validation-msg" class="error-msg"></div>
+        <div class="form-footer">
+            <label class="config-label">
+                <input type="checkbox" id="is-public" checked> 全員に公開
+            </label>
+            <button id="submit-btn" class="action-button" style="padding: 10px 30px;">刻む</button>
+        </div>
+    </section>
+
+    <div class="tab-menu">
+        <button id="btn-public" class="tab-btn active" onclick="loadPosts('public')">みんなの綴りごと</button>
+        <button id="btn-private" class="tab-btn" onclick="loadPosts('private')">私の歩み</button>
     </div>
 
-    <div class="post-area">
-        <textarea id="user-post" placeholder="今日の季語に寄せて、想いを綴ってください。"></textarea>
-        <button id="save-btn" onclick="savePost()">この言葉を刻む</button>
-    </div>
+    <div id="posts-list"></div>
+</main>
 
-    <script>
-        // Supabaseの接続設定
-        const SUPABASE_URL = 'https://ciklywhqswbujsogqiva.supabase.co';
-        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNpa2x5d2hxc3didWpzb2dxaXZhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njg5MzAyNzcsImV4cCI6MjA4NDUwNjI3N30._REwuc__qmpW1eQVhfm-RvsoMJCGYXjqtqBVn4w48Oc';
+<script>
+    // Supabase設定（あなたのプロジェクト専用）
+    const SUPABASE_URL = 'https://syixuozdfnuxivpxpsba.supabase.co';
+    const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InN5aXh1b3pkZm51eGl2cHhwc2JhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzYxOTI5MjYsImV4cCI6MjA1MTc2ODkyNn0.6XW8_Gnd9x5L_0OqI0X9iV5S-C4jW_m2_u6S0S8_o80';
+    const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+    let currentKigo = "";
+
+    async function init() {
+        // 日付表示
+        const now = new Date();
+        const options = { year: 'numeric', month: 'long', day: 'numeric', weekday: 'long' };
+        document.getElementById('date-display').innerText = now.toLocaleDateString('ja-JP', options);
+
+        // 季語取得
+        try {
+            const response = await fetch('kigo.csv');
+            const data = await response.text();
+            const lines = data.split('\n').filter(line => line.trim() !== "");
+            const dayOfYear = Math.floor((now - new Date(now.getFullYear(), 0, 0)) / (1000 * 60 * 60 * 24));
+            currentKigo = lines[dayOfYear % lines.length].trim();
+            document.getElementById('kigo-display').innerText = currentKigo;
+        } catch (e) {
+            currentKigo = "寒雀";
+            document.getElementById('kigo-display').innerText = currentKigo;
+        }
+        loadPosts('public');
+    }
+
+    // 綴るボタン
+    document.getElementById('show-editor-btn').addEventListener('click', () => {
+        document.getElementById('editor-section').style.display = 'block';
+        document.getElementById('show-editor-btn').style.display = 'none';
+    });
+
+    // 文字数
+    document.getElementById('post-text').addEventListener('input', (e) => {
+        document.getElementById('char-num').innerText = e.target.value.length;
+    });
+
+    // 投稿
+    document.getElementById('submit-btn').addEventListener('click', async () => {
+        const text = document.getElementById('post-text').value;
+        const penName = document.getElementById('pen-name').value || '私';
+        const isPublic = document.getElementById('is-public').checked;
+        const vMsg = document.getElementById('validation-msg');
+
+        if (!text.includes(currentKigo)) {
+            vMsg.innerText = `文章の中に、今日の季語「${currentKigo}」を添えてください。`;
+            return;
+        }
+        vMsg.innerText = "刻んでいます...";
+
+        const { error } = await supabase
+            .from('posts')
+            .insert([{ 
+                content: text, 
+                kigo: currentKigo, 
+                pen_name: penName,
+                is_public: isPublic,
+                biyori_message: "（ことば日和があなたの言葉を読み解いています...）" 
+            }]);
+
+        if (error) {
+            vMsg.innerText = "エラーが発生しました。";
+        } else {
+            document.getElementById('post-text').value = "";
+            document.getElementById('editor-section').style.display = 'none';
+            document.getElementById('show-editor-btn').style.display = 'inline-block';
+            vMsg.innerText = "";
+            loadPosts('public');
+        }
+    });
+
+    // 読み込み
+    async function loadPosts(type) {
+        const btnPub = document.getElementById('btn-public');
+        const btnPriv = document.getElementById('btn-private');
         
-        // 変数名の重複を避けるために名前を変更しました
-        const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-
-        let currentKigo = "";
-
-        async function loadKigo() {
-            const today = new Date();
-            const month = String(today.getMonth() + 1).padStart(2, '0');
-            const day = String(today.getDate()).padStart(2, '0');
-            const targetDate = `${month}-${day}`;
-
-            try {
-                const response = await fetch('kigo_data.csv');
-                if (!response.ok) throw new Error('CSV load failed');
-                const data = await response.text();
-                const lines = data.split('\n').slice(1);
-
-                const todayKigo = lines.map(line => {
-                    const parts = line.split(',');
-                    return { date: parts[0], kigo: parts[1], origin: parts[2], season: parts[3] };
-                }).find(item => item.date === targetDate);
-
-                if (todayKigo) {
-                    currentKigo = todayKigo.kigo;
-                    document.getElementById('display-date').textContent = today.toLocaleDateString('ja-JP', { month: 'long', day: 'numeric' });
-                    document.getElementById('display-kigo').textContent = todayKigo.kigo;
-                    document.getElementById('display-origin').textContent = todayKigo.origin;
-                    document.getElementById('display-season').textContent = todayKigo.season;
-                }
-            } catch (error) {
-                console.error('Error loading kigo:', error);
-                document.getElementById('display-date').textContent = "エラーが発生しました";
-            }
+        if (type === 'public') {
+            btnPub.classList.add('active');
+            btnPriv.classList.remove('active');
+        } else {
+            btnPriv.classList.add('active');
+            btnPub.classList.remove('active');
         }
 
-        async function savePost() {
-            const text = document.getElementById('user-post').value;
-            const btn = document.getElementById('save-btn');
+        let query = supabase.from('posts').select('*').order('created_at', { ascending: false });
+        if (type === 'public') query = query.eq('is_public', true);
 
-            if (!text) {
-                alert("何か言葉を綴ってみてください。");
-                return;
-            }
+        const { data, error } = await query;
+        const list = document.getElementById('posts-list');
+        list.innerHTML = "";
 
-            btn.disabled = true;
-            btn.textContent = "刻んでいます...";
-
-            const { error } = await _supabase
-                .from('posts')
-                .insert([{ content: text, kigo: currentKigo }]);
-
-            if (error) {
-                console.error('Error saving post:', error);
-                alert("うまく刻めませんでした。もう一度試してみてください。");
-            } else {
-                alert("心に刻まれました。");
-                document.getElementById('user-post').value = "";
-            }
-            btn.disabled = false;
-            btn.textContent = "この言葉を刻む";
+        if (data) {
+            data.forEach(post => {
+                const date = new Date(post.created_at).toLocaleDateString('ja-JP');
+                const card = document.createElement('div');
+                card.className = 'post-card';
+                card.innerHTML = `
+                    <div class="post-meta">${date} | ${post.pen_name} | ${post.kigo}</div>
+                    <div class="post-content">${post.content}</div>
+                    ${post.biyori_message ? `<div class="biyori-message">ことば日和：${post.biyori_message}</div>` : ''}
+                `;
+                list.appendChild(card);
+            });
         }
+    }
 
-        loadKigo();
-    </script>
+    init();
+</script>
 </body>
 </html>
