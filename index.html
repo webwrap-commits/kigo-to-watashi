@@ -54,6 +54,7 @@
             color: #aaa;
             margin-bottom: 20px;
             letter-spacing: 0.1rem;
+            min-height: 1.5em;
         }
 
         #kigo-display {
@@ -62,6 +63,7 @@
             margin-bottom: 60px;
             letter-spacing: 0.8rem;
             color: var(--text-color);
+            min-height: 1.2em;
         }
 
         .action-button {
@@ -74,6 +76,7 @@
             font-family: inherit;
             transition: all 0.4s;
             letter-spacing: 0.2rem;
+            display: inline-block;
         }
 
         .action-button:hover {
@@ -81,18 +84,14 @@
             background-color: #fafafa;
         }
 
-        /* 投稿フォーム */
         #editor-section {
             display: none;
             text-align: left;
             margin: 40px auto;
             max-width: 500px;
-            animation: fadeIn 1s ease;
         }
 
-        .input-group {
-            margin-bottom: 25px;
-        }
+        .input-group { margin-bottom: 25px; }
 
         input[type="text"], textarea {
             width: 100%;
@@ -105,18 +104,9 @@
             font-size: 0.95rem;
         }
 
-        textarea {
-            height: 250px;
-            resize: none;
-            line-height: 2;
-        }
+        textarea { height: 250px; resize: none; line-height: 2; }
 
-        .char-count {
-            font-size: 0.75rem;
-            color: #bbb;
-            text-align: right;
-            margin-top: 5px;
-        }
+        .char-count { font-size: 0.75rem; color: #bbb; text-align: right; }
 
         .form-footer {
             display: flex;
@@ -125,13 +115,6 @@
             margin-top: 30px;
         }
 
-        .config-label {
-            font-size: 0.8rem;
-            color: #888;
-            cursor: pointer;
-        }
-
-        /* タイムライン・マイページ */
         .tab-menu {
             margin-top: 100px;
             display: flex;
@@ -148,38 +131,17 @@
             border: none;
             background: none;
             font-family: inherit;
-            letter-spacing: 0.1rem;
-            transition: color 0.3s;
         }
 
-        .tab-btn.active {
-            color: var(--text-color);
-            font-weight: 500;
-        }
+        .tab-btn.active { color: var(--text-color); font-weight: 500; }
 
-        #posts-list {
-            margin-top: 40px;
-            text-align: left;
-        }
+        #posts-list { margin-top: 40px; text-align: left; }
 
-        .post-card {
-            margin-bottom: 60px;
-            animation: fadeIn 1s ease;
-        }
+        .post-card { margin-bottom: 60px; }
 
-        .post-meta {
-            font-size: 0.75rem;
-            color: #aaa;
-            margin-bottom: 15px;
-            letter-spacing: 0.05rem;
-        }
+        .post-meta { font-size: 0.75rem; color: #aaa; margin-bottom: 15px; }
 
-        .post-content {
-            font-size: 1rem;
-            margin-bottom: 25px;
-            white-space: pre-wrap;
-            color: #444;
-        }
+        .post-content { font-size: 1rem; margin-bottom: 25px; white-space: pre-wrap; color: #444; }
 
         .biyori-message {
             background-color: #fcfcfc;
@@ -187,21 +149,9 @@
             font-size: 0.85rem;
             border-left: 1px solid #eee;
             color: #666;
-            line-height: 1.8;
         }
 
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(5px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        .error-msg {
-            color: #999;
-            font-size: 0.8rem;
-            margin-top: 10px;
-            text-align: center;
-            min-height: 1.2rem;
-        }
+        .error-msg { color: #999; font-size: 0.8rem; margin-top: 10px; text-align: center; }
     </style>
 </head>
 <body>
@@ -226,7 +176,7 @@
         </div>
         <div id="validation-msg" class="error-msg"></div>
         <div class="form-footer">
-            <label class="config-label">
+            <label style="font-size: 0.8rem; color: #888;">
                 <input type="checkbox" id="is-public" checked> 全員に公開
             </label>
             <button id="submit-btn" class="action-button" style="padding: 10px 30px;">刻む</button>
@@ -242,46 +192,34 @@
 </main>
 
 <script>
-    // Supabase設定（あなたのプロジェクト専用）
     const SUPABASE_URL = 'https://syixuozdfnuxivpxpsba.supabase.co';
     const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InN5aXh1b3pkZm51eGl2cHhwc2JhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzYxOTI5MjYsImV4cCI6MjA1MTc2ODkyNn0.6XW8_Gnd9x5L_0OqI0X9iV5S-C4jW_m2_u6S0S8_o80';
-    const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-    let currentKigo = "";
+    let currentKigo = "寒雀"; // デフォルト
 
-    async function init() {
-        // 日付表示
+    function init() {
         const now = new Date();
         const options = { year: 'numeric', month: 'long', day: 'numeric', weekday: 'long' };
         document.getElementById('date-display').innerText = now.toLocaleDateString('ja-JP', options);
 
-        // 季語取得
-        try {
-            const response = await fetch('kigo.csv');
-            const data = await response.text();
-            const lines = data.split('\n').filter(line => line.trim() !== "");
-            const dayOfYear = Math.floor((now - new Date(now.getFullYear(), 0, 0)) / (1000 * 60 * 60 * 24));
-            currentKigo = lines[dayOfYear % lines.length].trim();
-            document.getElementById('kigo-display').innerText = currentKigo;
-        } catch (e) {
-            currentKigo = "寒雀";
-            document.getElementById('kigo-display').innerText = currentKigo;
-        }
+        // とりあえず今日の季語（1月21日は大寒、寒雀など）
+        const sampleKigo = ["大寒", "寒雀", "冬日和", "氷", "寒にじみ"];
+        currentKigo = sampleKigo[now.getDate() % sampleKigo.length];
+        document.getElementById('kigo-display').innerText = currentKigo;
+
         loadPosts('public');
     }
 
-    // 綴るボタン
     document.getElementById('show-editor-btn').addEventListener('click', () => {
         document.getElementById('editor-section').style.display = 'block';
         document.getElementById('show-editor-btn').style.display = 'none';
     });
 
-    // 文字数
     document.getElementById('post-text').addEventListener('input', (e) => {
         document.getElementById('char-num').innerText = e.target.value.length;
     });
 
-    // 投稿
     document.getElementById('submit-btn').addEventListener('click', async () => {
         const text = document.getElementById('post-text').value;
         const penName = document.getElementById('pen-name').value || '私';
@@ -292,9 +230,10 @@
             vMsg.innerText = `文章の中に、今日の季語「${currentKigo}」を添えてください。`;
             return;
         }
+
         vMsg.innerText = "刻んでいます...";
 
-        const { error } = await supabase
+        const { error } = await supabaseClient
             .from('posts')
             .insert([{ 
                 content: text, 
@@ -305,7 +244,7 @@
             }]);
 
         if (error) {
-            vMsg.innerText = "エラーが発生しました。";
+            vMsg.innerText = "エラー: " + error.message;
         } else {
             document.getElementById('post-text').value = "";
             document.getElementById('editor-section').style.display = 'none';
@@ -315,20 +254,11 @@
         }
     });
 
-    // 読み込み
     async function loadPosts(type) {
-        const btnPub = document.getElementById('btn-public');
-        const btnPriv = document.getElementById('btn-private');
-        
-        if (type === 'public') {
-            btnPub.classList.add('active');
-            btnPriv.classList.remove('active');
-        } else {
-            btnPriv.classList.add('active');
-            btnPub.classList.remove('active');
-        }
+        document.getElementById('btn-public').classList.toggle('active', type === 'public');
+        document.getElementById('btn-private').classList.toggle('active', type === 'private');
 
-        let query = supabase.from('posts').select('*').order('created_at', { ascending: false });
+        let query = supabaseClient.from('posts').select('*').order('created_at', { ascending: false });
         if (type === 'public') query = query.eq('is_public', true);
 
         const { data, error } = await query;
