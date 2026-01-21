@@ -35,7 +35,9 @@
         // Supabaseの接続設定
         const SUPABASE_URL = 'https://ciklywhqswbujsogqiva.supabase.co';
         const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNpa2x5d2hxc3didWpzb2dxaXZhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njg5MzAyNzcsImV4cCI6MjA4NDUwNjI3N30._REwuc__qmpW1eQVhfm-RvsoMJCGYXjqtqBVn4w48Oc';
-        const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        
+        // 変数名の重複を避けるために名前を変更しました
+        const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
         let currentKigo = "";
 
@@ -47,6 +49,7 @@
 
             try {
                 const response = await fetch('kigo_data.csv');
+                if (!response.ok) throw new Error('CSV load failed');
                 const data = await response.text();
                 const lines = data.split('\n').slice(1);
 
@@ -64,6 +67,7 @@
                 }
             } catch (error) {
                 console.error('Error loading kigo:', error);
+                document.getElementById('display-date').textContent = "エラーが発生しました";
             }
         }
 
@@ -79,7 +83,7 @@
             btn.disabled = true;
             btn.textContent = "刻んでいます...";
 
-            const { error } = await supabase
+            const { error } = await _supabase
                 .from('posts')
                 .insert([{ content: text, kigo: currentKigo }]);
 
