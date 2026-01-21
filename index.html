@@ -6,189 +6,247 @@
     <title>季語と私の綴りごと</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@300;500&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@200;400;500&display=swap');
 
         :root {
-            --bg-color: #ffffff;
-            --text-color: #333333;
-            --border-color: #eeeeee;
+            /* ManusのCSSから配色を抽出 */
+            --background: #ffffff;
+            --foreground: #333333;
+            --card-bg: #fdfdfd;
+            --border: #e0e0e0;
+            --muted-text: #888888;
+            --ai-bg: #f8f8f8;
         }
 
         body {
             font-family: 'Noto Serif JP', serif;
-            background-color: var(--bg-color);
-            color: var(--text-color);
+            background-color: var(--background);
+            color: var(--foreground);
             margin: 0;
-            padding: 0;
             line-height: 1.8;
             display: flex;
             flex-direction: column;
             align-items: center;
-            min-height: 100vh;
         }
 
-        header {
+        /* ヘッダー周り */
+        .app-header {
             width: 100%;
-            padding: 60px 0 40px 0;
-            text-align: center;
+            max-width: 800px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 60px 20px;
+            position: relative;
         }
 
-        h1 {
-            font-weight: 300;
-            font-size: 1.1rem;
-            letter-spacing: 0.3rem;
+        .app-title {
+            font-size: 1.5rem;
+            font-weight: 200;
+            letter-spacing: 0.4rem;
             margin: 0;
-            color: #888;
         }
 
+        .mypage-btn {
+            position: absolute;
+            right: 20px;
+            border: 1px solid var(--border);
+            padding: 5px 15px;
+            font-size: 0.8rem;
+            color: var(--muted-text);
+            cursor: pointer;
+            text-decoration: none;
+            background: none;
+        }
+
+        /* メインエリア */
         main {
             width: 90%;
-            max-width: 600px;
-            flex-grow: 1;
-            padding-bottom: 100px;
+            max-width: 700px;
             text-align: center;
         }
 
-        #date-display {
-            font-size: 0.85rem;
-            color: #aaa;
-            margin-bottom: 20px;
-            letter-spacing: 0.1rem;
-            min-height: 1.5em;
+        .kigo-section {
+            margin: 60px 0;
         }
 
-        #kigo-display {
-            font-size: 3rem;
+        .current-date {
+            font-size: 0.8rem;
+            color: var(--muted-text);
+            margin-bottom: 10px;
+        }
+
+        .current-kigo {
+            font-size: 3.5rem;
             font-weight: 500;
-            margin-bottom: 60px;
-            letter-spacing: 0.8rem;
-            color: var(--text-color);
-            min-height: 1.2em;
+            letter-spacing: 1rem;
+            margin: 20px 0;
         }
 
-        .action-button {
+        /* 綴るボタン */
+        .write-toggle-btn {
+            border: 1px solid var(--foreground);
             background: none;
-            border: 1px solid #ccc;
-            color: var(--text-color);
-            padding: 15px 60px;
-            cursor: pointer;
-            font-size: 0.95rem;
-            font-family: inherit;
-            transition: all 0.4s;
+            padding: 12px 50px;
+            font-size: 0.9rem;
             letter-spacing: 0.2rem;
-            display: inline-block;
+            cursor: pointer;
+            transition: 0.3s;
+            margin-bottom: 40px;
         }
 
-        .action-button:hover {
-            border-color: var(--text-color);
-            background-color: #fafafa;
+        .write-toggle-btn:hover {
+            background: var(--foreground);
+            color: white;
         }
 
+        /* 投稿フォーム (Manus風) */
         #editor-section {
             display: none;
             text-align: left;
-            margin: 40px auto;
-            max-width: 500px;
+            margin-bottom: 80px;
+            animation: fadeIn 0.8s ease;
         }
 
-        .input-group { margin-bottom: 25px; }
-
-        input[type="text"], textarea {
-            width: 100%;
-            border: none;
-            border-bottom: 1px solid var(--border-color);
-            font-family: inherit;
-            padding: 12px 0;
-            outline: none;
-            background: transparent;
-            font-size: 0.95rem;
-        }
-
-        textarea { height: 250px; resize: none; line-height: 2; }
-
-        .char-count { font-size: 0.75rem; color: #bbb; text-align: right; }
-
-        .form-footer {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-top: 30px;
-        }
-
-        .tab-menu {
-            margin-top: 100px;
-            display: flex;
-            gap: 30px;
-            justify-content: center;
-            font-size: 0.85rem;
-            border-top: 1px solid var(--border-color);
+        .editor-container {
+            border-top: 1px solid var(--border);
             padding-top: 40px;
         }
 
-        .tab-btn {
-            cursor: pointer;
-            color: #bbb;
+        .input-minimal {
+            width: 100%;
             border: none;
-            background: none;
+            border-bottom: 1px solid var(--border);
+            background: transparent;
             font-family: inherit;
+            padding: 10px 0;
+            margin-bottom: 20px;
+            outline: none;
+            font-size: 1rem;
         }
 
-        .tab-btn.active { color: var(--text-color); font-weight: 500; }
+        textarea.input-minimal {
+            height: 250px;
+            line-height: 2.2;
+            resize: none;
+        }
 
-        #posts-list { margin-top: 40px; text-align: left; }
+        .editor-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.75rem;
+            color: var(--muted-text);
+        }
 
-        .post-card { margin-bottom: 60px; }
+        /* タイムライン (Manusのカード再現) */
+        .timeline-title {
+            font-size: 1rem;
+            color: var(--muted-text);
+            margin: 100px 0 40px;
+            font-weight: 200;
+        }
 
-        .post-meta { font-size: 0.75rem; color: #aaa; margin-bottom: 15px; }
+        .post-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            padding: 40px;
+            margin-bottom: 60px;
+            text-align: left;
+            position: relative;
+        }
 
-        .post-content { font-size: 1rem; margin-bottom: 25px; white-space: pre-wrap; color: #444; }
+        .post-header {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.8rem;
+            color: var(--muted-text);
+            margin-bottom: 20px;
+        }
 
-        .biyori-message {
-            background-color: #fcfcfc;
+        .post-kigo-tag {
+            font-size: 0.8rem;
+            margin-bottom: 20px;
+            color: var(--muted-text);
+        }
+
+        .post-content {
+            font-size: 1.05rem;
+            line-height: 2.2;
+            margin-bottom: 30px;
+            white-space: pre-wrap;
+        }
+
+        /* ことば日和 (AI返信) */
+        .ai-section {
+            border-top: 1px solid #eee;
+            padding-top: 20px;
+            margin-top: 20px;
+        }
+
+        .ai-label {
+            font-size: 0.75rem;
+            color: var(--muted-text);
+            margin-bottom: 15px;
+            display: block;
+        }
+
+        .ai-content {
+            background: var(--ai-bg);
             padding: 20px;
-            font-size: 0.85rem;
-            border-left: 1px solid #eee;
-            color: #666;
+            font-size: 0.9rem;
+            color: #555;
+            line-height: 1.8;
         }
 
-        .error-msg { color: #999; font-size: 0.8rem; margin-top: 10px; text-align: center; }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .error-message {
+            color: #888;
+            font-size: 0.8rem;
+            margin: 10px 0;
+        }
+
+        .hidden-config { display: none; } /* 不要な設定を隠す */
     </style>
 </head>
 <body>
 
-<header>
-    <h1>季語と私の綴りごと</h1>
+<header class="app-header">
+    <h1 class="app-title">季語と私の綴りごと</h1>
+    <button class="mypage-btn" onclick="toggleMypage()">マイページ</button>
 </header>
 
 <main>
-    <div id="date-display"></div>
-    <div id="kigo-display"></div>
-    
-    <button id="show-editor-btn" class="action-button">綴る</button>
+    <div class="kigo-section">
+        <div id="date-display" class="current-date"></div>
+        <div id="kigo-display" class="current-kigo"></div>
+        <button id="show-editor-btn" class="write-toggle-btn">綴る</button>
+    </div>
 
     <section id="editor-section">
-        <div class="input-group">
-            <input type="text" id="pen-name" placeholder="ペンネーム" maxlength="20">
-        </div>
-        <div class="input-group">
-            <textarea id="post-text" placeholder="四百字以内で物語を綴ってください" maxlength="400"></textarea>
-            <div class="char-count"><span id="char-num">0</span> / 400</div>
-        </div>
-        <div id="validation-msg" class="error-msg"></div>
-        <div class="form-footer">
-            <label style="font-size: 0.8rem; color: #888;">
-                <input type="checkbox" id="is-public" checked> 全員に公開
-            </label>
-            <button id="submit-btn" class="action-button" style="padding: 10px 30px;">刻む</button>
+        <div class="editor-container">
+            <input type="text" id="pen-name" class="input-minimal" placeholder="うめみ">
+            <textarea id="post-text" class="input-minimal" placeholder="四百字以内で物語を綴ってください"></textarea>
+            
+            <div id="validation-msg" class="error-message"></div>
+            
+            <div class="editor-info">
+                <span id="char-count">0 / 400</span>
+                <div class="hidden-config">
+                    <input type="checkbox" id="is-public" checked> 公開
+                </div>
+                <button id="submit-btn" class="write-toggle-btn" style="padding: 8px 30px; margin: 0;">刻む</button>
+            </div>
         </div>
     </section>
 
-    <div class="tab-menu">
-        <button id="btn-public" class="tab-btn active" onclick="loadPosts('public')">みんなの綴りごと</button>
-        <button id="btn-private" class="tab-btn" onclick="loadPosts('private')">私の歩み</button>
-    </div>
-
-    <div id="posts-list"></div>
+    <h2 class="timeline-title" id="list-type-title">みんなの綴りごと</h2>
+    <div id="posts-list">
+        </div>
 </main>
 
 <script>
@@ -196,34 +254,37 @@
     const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InN5aXh1b3pkZm51eGl2cHhwc2JhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzYxOTI5MjYsImV4cCI6MjA1MTc2ODkyNn0.6XW8_Gnd9x5L_0OqI0X9iV5S-C4jW_m2_u6S0S8_o80';
     const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-    let currentKigo = "寒雀"; // デフォルト
+    let currentKigo = "";
+    let isShowingMypage = false;
 
     function init() {
         const now = new Date();
         const options = { year: 'numeric', month: 'long', day: 'numeric', weekday: 'long' };
         document.getElementById('date-display').innerText = now.toLocaleDateString('ja-JP', options);
 
-        // とりあえず今日の季語（1月21日は大寒、寒雀など）
-        const sampleKigo = ["大寒", "寒雀", "冬日和", "氷", "寒にじみ"];
-        currentKigo = sampleKigo[now.getDate() % sampleKigo.length];
+        // 季語のロジック (とりあえず固定)
+        const kigos = ["寒雀", "冬日和", "大寒", "氷", "雪見"];
+        currentKigo = kigos[now.getDate() % kigos.length];
         document.getElementById('kigo-display').innerText = currentKigo;
 
-        loadPosts('public');
+        loadPosts();
     }
 
+    // 表示切り替え
     document.getElementById('show-editor-btn').addEventListener('click', () => {
         document.getElementById('editor-section').style.display = 'block';
         document.getElementById('show-editor-btn').style.display = 'none';
     });
 
+    // 文字数
     document.getElementById('post-text').addEventListener('input', (e) => {
-        document.getElementById('char-num').innerText = e.target.value.length;
+        document.getElementById('char-count').innerText = `${e.target.value.length} / 400`;
     });
 
+    // 投稿
     document.getElementById('submit-btn').addEventListener('click', async () => {
         const text = document.getElementById('post-text').value;
-        const penName = document.getElementById('pen-name').value || '私';
-        const isPublic = document.getElementById('is-public').checked;
+        const penName = document.getElementById('pen-name').value || 'うめみ';
         const vMsg = document.getElementById('validation-msg');
 
         if (!text.includes(currentKigo)) {
@@ -239,45 +300,50 @@
                 content: text, 
                 kigo: currentKigo, 
                 pen_name: penName,
-                is_public: isPublic,
-                biyori_message: "（ことば日和があなたの言葉を読み解いています...）" 
+                is_public: true,
+                biyori_message: "（ことば日和があなたの物語を読み解いています...）" 
             }]);
 
         if (error) {
-            vMsg.innerText = "エラー: " + error.message;
+            vMsg.innerText = "エラーが発生しました。";
         } else {
-            document.getElementById('post-text').value = "";
-            document.getElementById('editor-section').style.display = 'none';
-            document.getElementById('show-editor-btn').style.display = 'inline-block';
-            vMsg.innerText = "";
-            loadPosts('public');
+            location.reload();
         }
     });
 
-    async function loadPosts(type) {
-        document.getElementById('btn-public').classList.toggle('active', type === 'public');
-        document.getElementById('btn-private').classList.toggle('active', type === 'private');
-
+    async function loadPosts() {
         let query = supabaseClient.from('posts').select('*').order('created_at', { ascending: false });
-        if (type === 'public') query = query.eq('is_public', true);
+        if (!isShowingMypage) query = query.eq('is_public', true);
 
-        const { data, error } = await query;
+        const { data } = await query;
         const list = document.getElementById('posts-list');
         list.innerHTML = "";
 
-        if (data) {
-            data.forEach(post => {
-                const date = new Date(post.created_at).toLocaleDateString('ja-JP');
-                const card = document.createElement('div');
-                card.className = 'post-card';
-                card.innerHTML = `
-                    <div class="post-meta">${date} | ${post.pen_name} | ${post.kigo}</div>
-                    <div class="post-content">${post.content}</div>
-                    ${post.biyori_message ? `<div class="biyori-message">ことば日和：${post.biyori_message}</div>` : ''}
-                `;
-                list.appendChild(card);
-            });
-        }
+        data?.forEach(post => {
+            const date = new Date(post.created_at).toLocaleDateString('ja-JP');
+            const card = document.createElement('div');
+            card.className = 'post-card';
+            card.innerHTML = `
+                <div class="post-header">
+                    <span>${post.pen_name}</span>
+                    <span>${date}</span>
+                </div>
+                <div class="post-kigo-tag">季語：${post.kigo}</div>
+                <div class="post-content">${post.content}</div>
+                <div class="ai-section">
+                    <span class="ai-label">ことば日和より</span>
+                    <div class="ai-content">${post.biyori_message || '...'}</div>
+                </div>
+            `;
+            list.appendChild(card);
+        });
+    }
+
+    function toggleMypage() {
+        isShowingMypage = !isShowingMypage;
+        document.getElementById('list-type-title').innerText = isShowingMypage ? "私の歩み" : "みんなの綴りごと";
+        document.querySelector('.mypage-btn').innerText = isShowingMypage ? "ホームへ" : "マイページ";
+        loadPosts();
     }
 
     init();
