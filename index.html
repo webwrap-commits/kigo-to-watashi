@@ -34,10 +34,10 @@
         .kigo-section { text-align: center; margin: 3rem 0 6rem; width: 100%; padding: 0 1rem; box-sizing: border-box; }
         .kigo-label { font-family: var(--font-serif); font-size: 0.8rem; color: var(--muted-foreground); margin-bottom: 2rem; letter-spacing: 0.3rem; }
         
-        /* 季語：クリックできることを示すためカーソルを指の形に */
+        /* 季語：クリック可能であることを明示 */
         .kigo-word { font-family: var(--font-serif); font-size: 4rem; font-weight: 200; letter-spacing: 1.2rem; margin: 0; text-indent: 1.2rem; cursor: pointer; user-select: none; }
         
-        /* 説明文：初期状態は非表示（display: none）に */
+        /* 説明文：最初は隠しておく */
         .kigo-description { max-width: 28rem; margin: 2.5rem auto 0; font-size: 0.9rem; color: var(--muted-foreground); line-height: 2.2; text-align: left; display: none; }
         
         .btn-write {
@@ -82,7 +82,7 @@
 <main>
     <section class="kigo-section">
         <div class="kigo-label">今日の季語</div>
-        <div id="kigo-display" class="kigo-word">...</div>
+        <div id="kigo-display" class="kigo-word" onclick="toggleDescription()">...</div>
         <div id="kigo-desc-area" class="kigo-description"></div>
         <button id="toggle-editor" class="btn-write"><span class="material-symbols-outlined">edit_note</span>綴る</button>
     </section>
@@ -113,6 +113,16 @@
 
     let currentKigo = "";
 
+    // 説明文の表示・非表示を切り替える関数
+    function toggleDescription() {
+        const desc = document.getElementById('kigo-desc-area');
+        if (desc.style.display === 'block') {
+            desc.style.display = 'none';
+        } else {
+            desc.style.display = 'block';
+        }
+    }
+
     async function init() {
         const now = new Date();
         try {
@@ -123,18 +133,8 @@
             const todayData = lines[dayIdx % lines.length].split(',');
             
             currentKigo = todayData[0].trim();
-            const kigoWordEl = document.getElementById('kigo-display');
-            const kigoDescEl = document.getElementById('kigo-desc-area');
-            
-            kigoWordEl.innerText = currentKigo;
-            kigoDescEl.innerText = todayData[1] ? todayData[1].trim() : "";
-            
-            // 【復活】季語をクリックした時の動作
-            kigoWordEl.addEventListener('click', () => {
-                const isVisible = kigoDescEl.style.display === 'block';
-                kigoDescEl.style.display = isVisible ? 'none' : 'block';
-            });
-
+            document.getElementById('kigo-display').innerText = currentKigo;
+            document.getElementById('kigo-desc-area').innerText = todayData[1] ? todayData[1].trim() : "";
             document.getElementById('content-label').innerText = `文章（「${currentKigo}」を添えて）`;
         } catch (e) {
             currentKigo = "大寒";
