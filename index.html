@@ -33,10 +33,12 @@
 
         .kigo-section { text-align: center; margin: 3rem 0 6rem; width: 100%; padding: 0 1rem; box-sizing: border-box; }
         .kigo-label { font-family: var(--font-serif); font-size: 0.8rem; color: var(--muted-foreground); margin-bottom: 2rem; letter-spacing: 0.3rem; }
-        .kigo-word { font-family: var(--font-serif); font-size: 4rem; font-weight: 200; letter-spacing: 1.2rem; margin: 0; text-indent: 1.2rem; }
         
-        /* 説明文の表示エリア */
-        .kigo-description { max-width: 28rem; margin: 2.5rem auto 0; font-size: 0.9rem; color: var(--muted-foreground); line-height: 2.2; text-align: left; }
+        /* 季語：クリックできることを示すためカーソルを指の形に */
+        .kigo-word { font-family: var(--font-serif); font-size: 4rem; font-weight: 200; letter-spacing: 1.2rem; margin: 0; text-indent: 1.2rem; cursor: pointer; user-select: none; }
+        
+        /* 説明文：初期状態は非表示（display: none）に */
+        .kigo-description { max-width: 28rem; margin: 2.5rem auto 0; font-size: 0.9rem; color: var(--muted-foreground); line-height: 2.2; text-align: left; display: none; }
         
         .btn-write {
             display: inline-flex; align-items: center; gap: 0.8rem; margin-top: 4rem; border: 1px solid var(--foreground);
@@ -121,9 +123,18 @@
             const todayData = lines[dayIdx % lines.length].split(',');
             
             currentKigo = todayData[0].trim();
-            document.getElementById('kigo-display').innerText = currentKigo;
-            // 説明文のIDを修正しました
-            document.getElementById('kigo-desc-area').innerText = todayData[1] ? todayData[1].trim() : "";
+            const kigoWordEl = document.getElementById('kigo-display');
+            const kigoDescEl = document.getElementById('kigo-desc-area');
+            
+            kigoWordEl.innerText = currentKigo;
+            kigoDescEl.innerText = todayData[1] ? todayData[1].trim() : "";
+            
+            // 【復活】季語をクリックした時の動作
+            kigoWordEl.addEventListener('click', () => {
+                const isVisible = kigoDescEl.style.display === 'block';
+                kigoDescEl.style.display = isVisible ? 'none' : 'block';
+            });
+
             document.getElementById('content-label').innerText = `文章（「${currentKigo}」を添えて）`;
         } catch (e) {
             currentKigo = "大寒";
