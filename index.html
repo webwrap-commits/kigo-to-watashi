@@ -19,35 +19,16 @@
         }
 
         body {
-            font-family: var(--font-sans);
-            background-color: var(--background);
-            color: var(--foreground);
-            margin: 0;
-            padding: 0;
-            line-height: 1.8;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            font-weight: 200;
+            font-family: var(--font-sans); background-color: var(--background); color: var(--foreground);
+            margin: 0; padding: 0; line-height: 1.8; display: flex; flex-direction: column; align-items: center; font-weight: 200;
         }
 
-        header {
-            width: 100%;
-            max-width: 48rem;
-            padding: 4rem 1.5rem 1rem;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            box-sizing: border-box;
-        }
-
+        header { width: 100%; max-width: 48rem; padding: 4rem 1.5rem 1rem; display: flex; justify-content: space-between; align-items: center; box-sizing: border-box; }
         h1 { font-family: var(--font-serif); font-size: 1.25rem; font-weight: 200; letter-spacing: 0.4rem; margin: 0; }
 
         .btn-outline {
-            display: flex; align-items: center; gap: 0.5rem;
-            border: 1px solid var(--border); background: white;
-            padding: 0.5rem 1.2rem; border-radius: 0.5rem;
-            font-size: 0.8rem; cursor: pointer; font-family: var(--font-sans);
+            display: flex; align-items: center; gap: 0.5rem; border: 1px solid var(--border); background: white;
+            padding: 0.5rem 1.2rem; border-radius: 0.5rem; font-size: 0.8rem; cursor: pointer; font-family: var(--font-sans);
         }
 
         .kigo-section { text-align: center; margin: 3rem 0 6rem; width: 100%; padding: 0 1rem; box-sizing: border-box; }
@@ -56,24 +37,16 @@
         .kigo-description { max-width: 28rem; margin: 2.5rem auto 0; font-size: 0.9rem; color: var(--muted-foreground); line-height: 2.2; text-align: left; }
         
         .btn-write {
-            display: inline-flex; align-items: center; gap: 0.8rem;
-            margin-top: 4rem; border: 1px solid var(--foreground);
-            padding: 1.25rem 3.5rem; border-radius: 3rem; background: white;
-            font-family: var(--font-serif); font-size: 1.1rem; letter-spacing: 0.3rem; cursor: pointer;
+            display: inline-flex; align-items: center; gap: 0.8rem; margin-top: 4rem; border: 1px solid var(--foreground);
+            padding: 1.25rem 3.5rem; border-radius: 3rem; background: white; font-family: var(--font-serif); font-size: 1.1rem; letter-spacing: 0.3rem; cursor: pointer;
         }
 
-        .card {
-            background-color: var(--card); border: 1px solid var(--border);
-            border-radius: var(--radius-xl); box-shadow: 0 12px 40px -12px rgba(0, 0, 0, 0.08);
-            width: 100%; max-width: 42rem; margin-bottom: 3.5rem; overflow: hidden;
-        }
-
+        .card { background-color: var(--card); border: 1px solid var(--border); border-radius: var(--radius-xl); box-shadow: 0 12px 40px -12px rgba(0, 0, 0, 0.08); width: 100%; max-width: 42rem; margin-bottom: 3.5rem; overflow: hidden; }
         .card-inner { padding: 2.5rem; }
         .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; }
         .pen-name { font-family: var(--font-serif); font-weight: 600; font-size: 0.95rem; }
         .post-date { font-size: 0.75rem; color: var(--muted-foreground); }
         .kigo-tag { display: inline-flex; align-items: center; gap: 0.3rem; font-size: 0.8rem; color: var(--muted-foreground); margin-bottom: 1.5rem; }
-        
         .card-content { font-family: var(--font-sans); font-size: 1.05rem; line-height: 2.4; white-space: pre-wrap; color: #2c2c2c; }
         .card-content strong { font-weight: 600; color: #000; border-bottom: 1px solid #eee; }
 
@@ -107,9 +80,7 @@
         <div class="kigo-label">今日の季語</div>
         <div id="kigo-display" class="kigo-word">...</div>
         <div id="kigo-description" class="kigo-description"></div>
-        <button id="toggle-editor" class="btn-write">
-            <span class="material-symbols-outlined">edit_note</span>綴る
-        </button>
+        <button id="toggle-editor" class="btn-write"><span class="material-symbols-outlined">edit_note</span>綴る</button>
     </section>
 
     <div id="editor-container">
@@ -151,36 +122,23 @@
             document.getElementById('kigo-description').innerText = todayData[1] ? todayData[1].trim() : "";
             document.getElementById('content-label').innerText = `文章（「${currentKigo}」を添えて）`;
         } catch (e) {
-            currentKigo = "大寒";
-            document.getElementById('kigo-display').innerText = currentKigo;
+            currentKigo = "大寒"; document.getElementById('kigo-display').innerText = currentKigo;
         }
         loadPosts();
     }
 
-    function closeEditor() {
-        document.getElementById('editor-container').style.display = 'none';
-        document.getElementById('toggle-editor').style.display = 'inline-block';
-    }
-
-    document.getElementById('toggle-editor').addEventListener('click', () => {
-        document.getElementById('editor-container').style.display = 'block';
-        document.getElementById('toggle-editor').style.display = 'none';
-        document.getElementById('editor-container').scrollIntoView({ behavior: 'smooth' });
-    });
+    function closeEditor() { document.getElementById('editor-container').style.display = 'none'; document.getElementById('toggle-editor').style.display = 'inline-block'; }
+    document.getElementById('toggle-editor').addEventListener('click', () => { document.getElementById('editor-container').style.display = 'block'; document.getElementById('toggle-editor').style.display = 'none'; document.getElementById('editor-container').scrollIntoView({ behavior: 'smooth' }); });
 
     document.getElementById('btn-save').addEventListener('click', async () => {
         const penName = document.getElementById('pen-name').value || '私';
         const content = document.getElementById('post-content').value;
         const err = document.getElementById('error-msg');
 
-        if (!content.includes(currentKigo)) {
-            err.innerText = `文章の中に「${currentKigo}」を綴ってください。`;
-            return;
-        }
-
+        if (!content.includes(currentKigo)) { err.innerText = `文章の中に「${currentKigo}」を綴ってください。`; return; }
         err.innerText = "物語を刻んでいます...";
 
-        // 余計な項目をすべて削り、確実に存在する列だけに絞りました
+        // 以前成功していた時の「content, kigo, pen_name」のみで送信
         const { error } = await supabaseClient.from('posts').insert([{
             content: content,
             kigo: currentKigo,
@@ -188,11 +146,8 @@
         }]);
 
         if (error) { 
-            err.innerText = "エラーが発生しました。"; 
-            console.error("詳細:", error);
-        } else { 
-            location.reload(); 
-        }
+            err.innerText = "エラーが発生しました。"; console.error("詳細:", error);
+        } else { location.reload(); }
     });
 
     async function loadPosts() {
@@ -205,10 +160,7 @@
             card.className = 'card';
             card.innerHTML = `
                 <div class="card-inner">
-                    <div class="card-header">
-                        <span class="pen-name">${post.pen_name || '私'}</span>
-                        <span class="post-date">${date}</span>
-                    </div>
+                    <div class="card-header"><span class="pen-name">${post.pen_name || '私'}</span><span class="post-date">${date}</span></div>
                     <span class="kigo-tag"><span class="material-symbols-outlined" style="font-size:1rem">filter_vintage</span>季語：${post.kigo}</span>
                     <div class="card-content">${highlighted}</div>
                 </div>
