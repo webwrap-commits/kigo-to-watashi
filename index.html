@@ -34,6 +34,8 @@
         .kigo-section { text-align: center; margin: 3rem 0 6rem; width: 100%; padding: 0 1rem; box-sizing: border-box; }
         .kigo-label { font-family: var(--font-serif); font-size: 0.8rem; color: var(--muted-foreground); margin-bottom: 2rem; letter-spacing: 0.3rem; }
         .kigo-word { font-family: var(--font-serif); font-size: 4rem; font-weight: 200; letter-spacing: 1.2rem; margin: 0; text-indent: 1.2rem; }
+        
+        /* 説明文の表示エリア */
         .kigo-description { max-width: 28rem; margin: 2.5rem auto 0; font-size: 0.9rem; color: var(--muted-foreground); line-height: 2.2; text-align: left; }
         
         .btn-write {
@@ -79,7 +81,7 @@
     <section class="kigo-section">
         <div class="kigo-label">今日の季語</div>
         <div id="kigo-display" class="kigo-word">...</div>
-        <div id="kigo-description" class="kigo-description"></div>
+        <div id="kigo-desc-area" class="kigo-description"></div>
         <button id="toggle-editor" class="btn-write"><span class="material-symbols-outlined">edit_note</span>綴る</button>
     </section>
 
@@ -103,7 +105,6 @@
 </main>
 
 <script>
-    // 正しい接続情報に差し替えました
     const SUPABASE_URL = 'https://ciklywhqswbujsogqiva.supabase.co';
     const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNpa2x5d2hxc3didWpzb2dxaXZhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njg5MzAyNzcsImV4cCI6MjA4NDUwNjI3N30._REwuc__qmpW1eQVhfm-RvsoMJCGYXjqtqBVn4w48Oc';
     const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
@@ -118,12 +119,15 @@
             const lines = csv.split('\n').filter(l => l.includes(','));
             const dayIdx = (Math.floor((now - new Date(now.getFullYear(), 0, 0)) / 86400000) - 1);
             const todayData = lines[dayIdx % lines.length].split(',');
+            
             currentKigo = todayData[0].trim();
             document.getElementById('kigo-display').innerText = currentKigo;
-            document.getElementById('kigo-description').innerText = todayData[1] ? todayData[1].trim() : "";
+            // 説明文のIDを修正しました
+            document.getElementById('kigo-desc-area').innerText = todayData[1] ? todayData[1].trim() : "";
             document.getElementById('content-label').innerText = `文章（「${currentKigo}」を添えて）`;
         } catch (e) {
-            currentKigo = "大寒"; document.getElementById('kigo-display').innerText = currentKigo;
+            currentKigo = "大寒";
+            document.getElementById('kigo-display').innerText = currentKigo;
         }
         loadPosts();
     }
@@ -139,7 +143,6 @@
         if (!content.includes(currentKigo)) { err.innerText = `文章の中に「${currentKigo}」を綴ってください。`; return; }
         err.innerText = "物語を刻んでいます...";
 
-        // あなたのテーブル定義に基づいた全項目送信
         const { error } = await supabaseClient.from('posts').insert([{
             content: content,
             kigo: currentKigo,
