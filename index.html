@@ -5,20 +5,22 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>季語と私の綴りごと</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@200&family=Noto+Serif+JP:wght@200;600&family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,200,0,0&display=swap" rel="stylesheet">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@200;400;600&display=swap');
-
         :root {
-            --background: #f8f9fa; /* カードを引き立てる微かなグレー */
+            --background: #fdfdfd;
             --foreground: #1a1a1a;
             --card: #ffffff;
             --border: #e4e4e7;
             --muted-foreground: #71717a;
             --radius-xl: 0.75rem;
+            /* Font Families */
+            --font-serif: 'Noto Serif JP', serif;
+            --font-sans: 'Noto Sans JP', sans-serif;
         }
 
         body {
-            font-family: 'Noto Serif JP', serif;
+            font-family: var(--font-sans);
             background-color: var(--background);
             color: var(--foreground);
             margin: 0;
@@ -27,6 +29,7 @@
             display: flex;
             flex-direction: column;
             align-items: center;
+            font-weight: 200;
         }
 
         header {
@@ -39,99 +42,164 @@
             box-sizing: border-box;
         }
 
-        h1 { font-size: 1.25rem; font-weight: 200; letter-spacing: 0.4rem; margin: 0; }
+        h1 { 
+            font-family: var(--font-serif);
+            font-size: 1.25rem; 
+            font-weight: 200; 
+            letter-spacing: 0.4rem; 
+            margin: 0; 
+        }
 
         .btn-outline {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
             border: 1px solid var(--border);
             background: white;
             padding: 0.5rem 1.2rem;
             border-radius: 0.5rem;
             font-size: 0.8rem;
             cursor: pointer;
-            font-family: inherit;
-            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+            font-family: var(--font-sans);
+            font-weight: 200;
             transition: all 0.2s;
         }
-        .btn-outline:hover { background: #fdfdfd; border-color: #ccc; }
+        .btn-outline:hover { background: #f8f8f8; }
 
-        /* 季語表示セクション (Manus風) */
+        /* 季語表示セクション */
         .kigo-section { text-align: center; margin: 3rem 0 6rem; width: 100%; padding: 0 1rem; box-sizing: border-box; }
-        .kigo-label { font-size: 0.8rem; color: var(--muted-foreground); margin-bottom: 2rem; letter-spacing: 0.3rem; }
-        .kigo-word { font-size: 3.5rem; font-weight: 200; letter-spacing: 1rem; margin: 0; text-indent: 1rem; }
+        .kigo-label { 
+            font-family: var(--font-serif);
+            font-size: 0.8rem; 
+            color: var(--muted-foreground); 
+            margin-bottom: 2rem; 
+            letter-spacing: 0.3rem; 
+        }
+        .kigo-word { 
+            font-family: var(--font-serif);
+            font-size: 4rem; 
+            font-weight: 200; 
+            letter-spacing: 1.2rem; 
+            margin: 0; 
+            text-indent: 1.2rem; 
+        }
         .kigo-description { 
-            max-width: 30rem; margin: 2rem auto 0; font-size: 0.9rem; color: var(--muted-foreground); 
-            line-height: 2; font-weight: 400; opacity: 0.9;
+            max-width: 28rem; 
+            margin: 2.5rem auto 0; 
+            font-size: 0.9rem; 
+            color: var(--muted-foreground); 
+            line-height: 2.2;
+            text-align: left;
         }
         
         .btn-write {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.8rem;
             margin-top: 4rem;
             border: 1px solid var(--foreground);
-            padding: 1.25rem 4rem;
+            padding: 1.25rem 3.5rem;
             border-radius: 3rem;
             background: white;
-            font-family: inherit;
-            font-size: 1rem;
+            font-family: var(--font-serif);
+            font-size: 1.1rem;
             letter-spacing: 0.3rem;
             cursor: pointer;
-            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            transition: all 0.4s ease;
         }
-        .btn-write:hover { transform: translateY(-3px); box-shadow: 0 10px 25px rgba(0,0,0,0.1); background: #1a1a1a; color: white; }
+        .btn-write:hover { background: var(--foreground); color: white; transform: translateY(-2px); }
 
-        /* 投稿カード (Manus デザイン完全移植) */
+        /* 投稿カード */
         .card {
             background-color: var(--card);
             border: 1px solid var(--border);
             border-radius: var(--radius-xl);
-            box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.08); /* 奥行きのある影 */
+            box-shadow: 0 12px 40px -12px rgba(0, 0, 0, 0.08);
             width: 100%;
             max-width: 42rem;
-            margin-bottom: 3rem;
+            margin-bottom: 3.5rem;
             overflow: hidden;
-            text-align: left;
-            box-sizing: border-box;
             animation: fadeIn 0.8s ease forwards;
         }
 
         .card-inner { padding: 2.5rem; }
-        .card-header { display: flex; justify-content: space-between; margin-bottom: 1.5rem; border-bottom: 1px solid #f8f8f8; padding-bottom: 1rem; }
-        .pen-name { font-weight: 600; font-size: 0.9rem; color: #444; }
-        .post-date { font-size: 0.75rem; color: var(--muted-foreground); }
-        .kigo-tag { font-size: 0.8rem; color: var(--muted-foreground); margin-bottom: 1.5rem; display: block; }
-        
-        .card-content { font-size: 1.05rem; line-height: 2.3; white-space: pre-wrap; color: #222; }
-        .card-content strong { font-weight: 600; color: #000; border-bottom: 1px solid #ddd; }
-
-        /* ことば日和 (返信エリア) */
-        .ai-footer { background-color: #fafafa; padding: 2rem 2.5rem; border-top: 1px solid #f0f0f0; }
-        .ai-label { font-size: 0.7rem; color: var(--muted-foreground); margin-bottom: 1rem; display: block; letter-spacing: 0.1rem; }
-        .ai-box { font-size: 0.95rem; color: #555; line-height: 2; font-style: italic; }
-
-        /* 投稿フォーム */
-        #editor-container { display: none; width: 100%; max-width: 42rem; margin-bottom: 5rem; }
-        .editor-card { background: white; border: 1px solid var(--border); border-radius: var(--radius-xl); padding: 3rem; box-shadow: 0 20px 50px rgba(0,0,0,0.1); }
-        .input-label { font-size: 0.85rem; font-weight: 600; margin-bottom: 0.8rem; display: block; }
-        .input-minimal { 
-            width: 100%; border: 1px solid #e2e2e2; border-radius: 0.5rem; padding: 1rem; font-family: inherit; 
-            margin-bottom: 2rem; box-sizing: border-box; background: #fff; font-size: 1rem; outline: none;
-            transition: border-color 0.3s;
+        .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; }
+        .pen-name { 
+            font-family: var(--font-serif);
+            font-weight: 600; 
+            font-size: 0.95rem; 
         }
-        .input-minimal:focus { border-color: #1a1a1a; }
-        textarea.input-minimal { height: 250px; resize: none; line-height: 2; }
-        .btn-submit { background: var(--foreground); color: white; border: none; padding: 1rem 3rem; border-radius: 3rem; cursor: pointer; font-family: inherit; font-size: 0.9rem; float: right; }
+        .post-date { font-size: 0.75rem; color: var(--muted-foreground); }
+        .kigo-tag { 
+            display: inline-flex;
+            align-items: center;
+            gap: 0.3rem;
+            font-size: 0.8rem; 
+            color: var(--muted-foreground); 
+            margin-bottom: 1.5rem; 
+            font-family: var(--font-sans);
+        }
+        
+        .card-content { 
+            font-family: var(--font-sans);
+            font-size: 1.05rem; 
+            line-height: 2.4; 
+            white-space: pre-wrap; 
+            color: #2c2c2c; 
+        }
+        .card-content strong { font-weight: 600; color: #000; border-bottom: 1px solid #eee; }
 
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        /* ことば日和 */
+        .ai-footer { background-color: #fcfcfc; padding: 2rem 2.5rem; border-top: 1px solid #f6f6f6; }
+        .ai-label { 
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            font-size: 0.75rem; 
+            color: var(--muted-foreground); 
+            margin-bottom: 1rem; 
+            font-family: var(--font-serif);
+        }
+        .ai-box { font-family: var(--font-sans); font-size: 0.95rem; color: #555; line-height: 2; }
 
+        /* フォーム */
+        #editor-container { display: none; width: 100%; max-width: 42rem; margin-bottom: 5rem; }
+        .editor-card { background: white; border: 1px solid var(--border); border-radius: var(--radius-xl); padding: 3rem; box-shadow: 0 30px 60px -20px rgba(0,0,0,0.12); }
+        .input-label { font-family: var(--font-serif); font-size: 0.85rem; margin-bottom: 0.8rem; display: block; }
+        .input-minimal { 
+            width: 100%; border: 1px solid #eee; border-radius: 0.5rem; padding: 1rem; font-family: var(--font-sans); 
+            margin-bottom: 2rem; box-sizing: border-box; font-size: 1rem; outline: none; font-weight: 200;
+        }
+        textarea.input-minimal { height: 250px; resize: none; }
+        .btn-submit { 
+            background: var(--foreground); 
+            color: white; 
+            border: none; 
+            padding: 1.1rem 3rem; 
+            border-radius: 3rem; 
+            cursor: pointer; 
+            font-family: var(--font-serif); 
+            font-size: 1rem; 
+            letter-spacing: 0.2rem;
+            float: right; 
+            transition: opacity 0.3s;
+        }
+        .btn-submit:hover { opacity: 0.9; }
+
+        .material-symbols-outlined { vertical-align: middle; font-size: 1.2rem; }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
         main { width: 100%; display: flex; flex-direction: column; align-items: center; padding: 0 1.5rem; box-sizing: border-box; }
-        .timeline { width: 100%; max-width: 42rem; margin-top: 6rem; }
-        .timeline-title { font-size: 1rem; font-weight: 400; margin-bottom: 4rem; text-align: center; color: var(--muted-foreground); letter-spacing: 0.4rem; }
+        .timeline-title { font-family: var(--font-serif); font-size: 0.9rem; margin: 6rem 0 4rem; color: var(--muted-foreground); letter-spacing: 0.5rem; }
     </style>
 </head>
 <body>
 
 <header>
     <h1>季語と私の綴りごと</h1>
-    <button class="btn-outline" onclick="location.href='/mypage'">マイページ</button>
+    <button class="btn-outline" onclick="location.href='/mypage'">
+        <span class="material-symbols-outlined">person</span>マイページ
+    </button>
 </header>
 
 <main>
@@ -139,7 +207,9 @@
         <div class="kigo-label">今日の季語</div>
         <div id="kigo-display" class="kigo-word">...</div>
         <div id="kigo-description" class="kigo-description"></div>
-        <button id="toggle-editor" class="btn-write">綴る</button>
+        <button id="toggle-editor" class="btn-write">
+            <span class="material-symbols-outlined">edit_note</span>綴る
+        </button>
     </section>
 
     <div id="editor-container">
@@ -151,16 +221,15 @@
             <textarea id="post-content" class="input-minimal" placeholder="物語を綴ってください..."></textarea>
             
             <div style="overflow: hidden; width: 100%;">
-                <button class="btn-outline" onclick="closeEditor()" style="float: left; padding: 0.9rem 2rem;">戻る</button>
-                <button id="btn-save" class="btn-submit">投稿を刻む</button>
+                <button class="btn-outline" onclick="closeEditor()" style="float: left; padding: 1rem 2rem;">戻る</button>
+                <button id="btn-save" class="btn-submit">物語を綴る</button>
             </div>
             <p id="error-msg" style="color: #ef4444; font-size: 0.85rem; margin-top: 1.5rem; text-align: center;"></p>
         </div>
     </div>
 
-    <div class="timeline">
+    <div id="posts-list" style="width: 100%; max-width: 42rem;">
         <h2 class="timeline-title">みんなの綴りごと</h2>
-        <div id="posts-list"></div>
     </div>
 </main>
 
@@ -170,31 +239,22 @@
     const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
     let currentKigo = "";
-    let currentDesc = "";
 
     async function init() {
         const now = new Date();
         try {
-            // あなたのGitHubのkigo.csvを直接読み込み
             const res = await fetch('https://raw.githubusercontent.com/miu-fukada/kotoba-biyori/main/kigo.csv');
             const csv = await res.text();
-            const lines = csv.split('\n').filter(l => l.trim().includes(','));
-            
-            const startOfYear = new Date(now.getFullYear(), 0, 0);
-            const diff = now - startOfYear;
-            const dayIdx = Math.floor(diff / (1000 * 60 * 60 * 24)) - 1;
-            
+            const lines = csv.split('\n').filter(l => l.includes(','));
+            const dayIdx = (Math.floor((now - new Date(now.getFullYear(), 0, 0)) / 86400000) - 1);
             const todayData = lines[dayIdx % lines.length].split(',');
             currentKigo = todayData[0].trim();
-            currentDesc = todayData[1] ? todayData[1].trim() : "（解説はありません）";
-            
             document.getElementById('kigo-display').innerText = currentKigo;
-            document.getElementById('kigo-description').innerText = currentDesc;
+            document.getElementById('kigo-description').innerText = todayData[1] ? todayData[1].trim() : "";
             document.getElementById('content-label').innerText = `文章（「${currentKigo}」を添えて）`;
         } catch (e) {
             currentKigo = "大寒";
             document.getElementById('kigo-display').innerText = currentKigo;
-            document.getElementById('kigo-description').innerText = "一年で最も寒さが厳しくなる頃。";
         }
         loadPosts();
     }
@@ -202,7 +262,6 @@
     function closeEditor() {
         document.getElementById('editor-container').style.display = 'none';
         document.getElementById('toggle-editor').style.display = 'inline-block';
-        window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
     document.getElementById('toggle-editor').addEventListener('click', () => {
@@ -223,7 +282,6 @@
 
         err.innerText = "物語を刻んでいます...";
 
-        // 修正：Supabaseのテーブル定義に合わせて項目名を調整
         const { error } = await supabaseClient.from('posts').insert([{
             content: content,
             pen_name: penName,
@@ -232,23 +290,15 @@
             biyori_message: "（ことば日和があなたの物語を静かに読み解いています...）"
         }]);
 
-        if (error) {
-            err.innerText = "エラー: データベースへの保存に失敗しました。";
-            console.error(error);
-        } else {
-            location.reload();
-        }
+        if (error) { err.innerText = "エラーが発生しました。"; } else { location.reload(); }
     });
 
     async function loadPosts() {
         const { data } = await supabaseClient.from('posts').select('*').eq('is_public', true).order('created_at', { ascending: false });
         const list = document.getElementById('posts-list');
-        list.innerHTML = "";
-
         data?.forEach(post => {
-            const date = new Date(post.created_at).toLocaleDateString('ja-JP', { year: 'numeric', month: 'long', day: 'numeric' });
+            const date = new Date(post.created_at).toLocaleDateString('ja-JP');
             const highlighted = post.content.split(post.kigo).join(`<strong>${post.kigo}</strong>`);
-
             const card = document.createElement('div');
             card.className = 'card';
             card.innerHTML = `
@@ -257,18 +307,17 @@
                         <span class="pen-name">${post.pen_name}</span>
                         <span class="post-date">${date}</span>
                     </div>
-                    <span class="kigo-tag">季語：${post.kigo}</span>
+                    <span class="kigo-tag"><span class="material-symbols-outlined" style="font-size:1rem">filter_vintage</span>季語：${post.kigo}</span>
                     <div class="card-content">${highlighted}</div>
                 </div>
                 <div class="ai-footer">
-                    <span class="ai-label">ことば日和より</span>
+                    <span class="ai-label"><span class="material-symbols-outlined" style="font-size:0.9rem">auto_awesome</span>ことば日和より</span>
                     <div class="ai-box">${post.biyori_message || '...'}</div>
                 </div>
             `;
             list.appendChild(card);
         });
     }
-
     init();
 </script>
 </body>
