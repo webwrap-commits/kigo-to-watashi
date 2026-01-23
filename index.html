@@ -103,8 +103,9 @@
 </main>
 
 <script>
-    const SUPABASE_URL = 'https://syixuozdfnuxivpxpsba.supabase.co';
-    const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InN5aXh1b3pkZm51eGl2cHhwc2JhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzYxOTI5MjYsImV4cCI6MjA1MTc2ODkyNn0.6XW8_Gnd9x5L_0OqI0X9iV5S-C4jW_m2_u6S0S8_o80';
+    // 正しい接続情報に差し替えました
+    const SUPABASE_URL = 'https://ciklywhqswbujsogqiva.supabase.co';
+    const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNpa2x5d2hxc3didWpzb2dxaXZhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njg5MzAyNzcsImV4cCI6MjA4NDUwNjI3N30._REwuc__qmpW1eQVhfm-RvsoMJCGYXjqtqBVn4w48Oc';
     const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
     let currentKigo = "";
@@ -138,15 +139,19 @@
         if (!content.includes(currentKigo)) { err.innerText = `文章の中に「${currentKigo}」を綴ってください。`; return; }
         err.innerText = "物語を刻んでいます...";
 
-        // 以前成功していた時の「content, kigo, pen_name」のみで送信
+        // あなたのテーブル定義に基づいた全項目送信
         const { error } = await supabaseClient.from('posts').insert([{
             content: content,
             kigo: currentKigo,
-            pen_name: penName
+            pen_name: penName,
+            author_name: "", 
+            is_public: true, 
+            biyori_message: "ことば日和があなたの物語を読み解いています..."
         }]);
 
         if (error) { 
-            err.innerText = "エラーが発生しました。"; console.error("詳細:", error);
+            err.innerText = "保存に失敗しました。"; 
+            console.error(error);
         } else { location.reload(); }
     });
 
@@ -166,7 +171,7 @@
                 </div>
                 <div class="ai-footer">
                     <span class="ai-label"><span class="material-symbols-outlined" style="font-size:0.9rem">auto_awesome</span>ことば日和より</span>
-                    <div class="ai-box">${post.biyori_message || 'ことば日和があなたの物語を静かに読み解いています...'}</div>
+                    <div class="ai-box">${post.biyori_message || 'ことば日和が読み解いています...'}</div>
                 </div>
             `;
             list.appendChild(card);
