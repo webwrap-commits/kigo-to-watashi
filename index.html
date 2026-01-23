@@ -61,7 +61,7 @@
             margin-top: 4rem; border: 1px solid var(--foreground);
             padding: 1.25rem 3.5rem; border-radius: 3rem; background: white;
             font-family: var(--font-serif); font-size: 1.1rem; letter-spacing: 0.3rem; cursor: pointer;
-            transition: all 0.3s;
+            transition: all 0.3s ease;
         }
         .btn-write:hover { background: var(--foreground); color: white; }
 
@@ -69,6 +69,7 @@
             background-color: var(--card); border: 1px solid var(--border);
             border-radius: var(--radius-xl); box-shadow: 0 12px 40px -12px rgba(0, 0, 0, 0.08);
             width: 100%; max-width: 42rem; margin-bottom: 3.5rem; overflow: hidden;
+            animation: fadeIn 0.8s ease forwards;
         }
 
         .card-inner { padding: 2.5rem; }
@@ -92,6 +93,7 @@
         .btn-submit { background: var(--foreground); color: white; border: none; padding: 1.1rem 3rem; border-radius: 3rem; cursor: pointer; font-family: var(--font-serif); font-size: 1rem; letter-spacing: 0.2rem; float: right; }
 
         .material-symbols-outlined { vertical-align: middle; font-size: 1.2rem; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
         main { width: 100%; display: flex; flex-direction: column; align-items: center; padding: 0 1.5rem; box-sizing: border-box; }
         .timeline-title { font-family: var(--font-serif); font-size: 0.9rem; margin: 6rem 0 4rem; color: var(--muted-foreground); letter-spacing: 0.5rem; }
     </style>
@@ -183,17 +185,15 @@
 
         err.innerText = "物語を刻んでいます...";
 
-        // テーブル項目（content, kigo, pen_name, author_name, biyori_message）に合わせました
+        // 以前成功していた時の最小限のデータ構成
         const { error } = await supabaseClient.from('posts').insert([{
             content: content,
             kigo: currentKigo,
-            pen_name: penName,
-            author_name: "",
-            biyori_message: "ことば日和があなたの物語を静かに読み解いています..."
+            pen_name: penName
         }]);
 
         if (error) { 
-            err.innerText = "エラーが発生しました。"; 
+            err.innerText = "エラーが発生しました。コンソールを確認してください。"; 
             console.error(error);
         } else { 
             location.reload(); 
@@ -201,7 +201,11 @@
     });
 
     async function loadPosts() {
-        const { data } = await supabaseClient.from('posts').select('*').order('created_at', { ascending: false });
+        // 全データを取得（is_publicフィルタも一旦外して確実性を優先）
+        const { data } = await supabaseClient.from('posts')
+            .select('*')
+            .order('created_at', { ascending: false });
+            
         const list = document.getElementById('posts-list');
         data?.forEach(post => {
             const date = new Date(post.created_at).toLocaleDateString('ja-JP');
@@ -219,7 +223,7 @@
                 </div>
                 <div class="ai-footer">
                     <span class="ai-label"><span class="material-symbols-outlined" style="font-size:0.9rem">auto_awesome</span>ことば日和より</span>
-                    <div class="ai-box">${post.biyori_message || 'ことば日和が準備をしています...'}</div>
+                    <div class="ai-box">${post.biyori_message || 'ことば日和があなたの物語を静かに読み解いています...'}</div>
                 </div>
             `;
             list.appendChild(card);
