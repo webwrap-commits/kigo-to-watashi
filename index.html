@@ -48,7 +48,6 @@
             border: 1px solid var(--border); background: white;
             padding: 0.5rem 1.2rem; border-radius: 0.5rem;
             font-size: 0.8rem; cursor: pointer; font-family: var(--font-sans);
-            font-weight: 200;
         }
 
         .kigo-section { text-align: center; margin: 3rem 0 6rem; width: 100%; padding: 0 1rem; box-sizing: border-box; }
@@ -61,15 +60,12 @@
             margin-top: 4rem; border: 1px solid var(--foreground);
             padding: 1.25rem 3.5rem; border-radius: 3rem; background: white;
             font-family: var(--font-serif); font-size: 1.1rem; letter-spacing: 0.3rem; cursor: pointer;
-            transition: all 0.3s ease;
         }
-        .btn-write:hover { background: var(--foreground); color: white; }
 
         .card {
             background-color: var(--card); border: 1px solid var(--border);
             border-radius: var(--radius-xl); box-shadow: 0 12px 40px -12px rgba(0, 0, 0, 0.08);
             width: 100%; max-width: 42rem; margin-bottom: 3.5rem; overflow: hidden;
-            animation: fadeIn 0.8s ease forwards;
         }
 
         .card-inner { padding: 2.5rem; }
@@ -93,7 +89,6 @@
         .btn-submit { background: var(--foreground); color: white; border: none; padding: 1.1rem 3rem; border-radius: 3rem; cursor: pointer; font-family: var(--font-serif); font-size: 1rem; letter-spacing: 0.2rem; float: right; }
 
         .material-symbols-outlined { vertical-align: middle; font-size: 1.2rem; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
         main { width: 100%; display: flex; flex-direction: column; align-items: center; padding: 0 1.5rem; box-sizing: border-box; }
         .timeline-title { font-family: var(--font-serif); font-size: 0.9rem; margin: 6rem 0 4rem; color: var(--muted-foreground); letter-spacing: 0.5rem; }
     </style>
@@ -185,7 +180,7 @@
 
         err.innerText = "物語を刻んでいます...";
 
-        // 以前成功していた時の最小限のデータ構成
+        // 余計な項目をすべて削り、確実に存在する列だけに絞りました
         const { error } = await supabaseClient.from('posts').insert([{
             content: content,
             kigo: currentKigo,
@@ -193,19 +188,15 @@
         }]);
 
         if (error) { 
-            err.innerText = "エラーが発生しました。コンソールを確認してください。"; 
-            console.error(error);
+            err.innerText = "エラーが発生しました。"; 
+            console.error("詳細:", error);
         } else { 
             location.reload(); 
         }
     });
 
     async function loadPosts() {
-        // 全データを取得（is_publicフィルタも一旦外して確実性を優先）
-        const { data } = await supabaseClient.from('posts')
-            .select('*')
-            .order('created_at', { ascending: false });
-            
+        const { data } = await supabaseClient.from('posts').select('*').order('created_at', { ascending: false });
         const list = document.getElementById('posts-list');
         data?.forEach(post => {
             const date = new Date(post.created_at).toLocaleDateString('ja-JP');
