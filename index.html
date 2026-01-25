@@ -27,14 +27,18 @@
         .eto-image { width: 100%; height: 100%; object-fit: contain; }
         .eto-pointer { position: absolute; width: 16px; height: 16px; background: rgba(212, 175, 55, 0.7); border-radius: 50%; box-shadow: 0 0 12px rgba(212, 175, 55, 0.9); transform: translate(-50%, -50%); transition: all 0.5s ease; z-index: 10; }
         .eto-desc { font-size: 0.9rem; color: #555; line-height: 1.8; text-align: left; max-width: 28rem; margin: 0 auto; }
+        .tab-container { display: flex; gap: 2rem; margin-bottom: 2rem; border-bottom: 1px solid var(--border); width: 100%; max-width: 42rem; justify-content: center; }
+        .tab-btn { padding: 0.8rem 1rem; cursor: pointer; font-size: 0.85rem; color: var(--muted-foreground); position: relative; }
+        .tab-btn.active { color: var(--foreground); font-weight: 600; }
+        .tab-btn.active::after { content: ""; position: absolute; bottom: -1px; left: 0; width: 100%; height: 2px; background: var(--foreground); }
+        .btn-write { display: inline-flex; align-items: center; justify-content: center; gap: 0.8rem; margin-top: 1rem; border: 1px solid var(--foreground); padding: 0.8rem 2.5rem; border-radius: 3rem; font-family: var(--font-serif); font-size: 0.95rem; letter-spacing: 0.2rem; cursor: pointer; background: white; color: var(--foreground); }
+        .audio-control-btn { background: none; border: 1px solid var(--border); border-radius: 2rem; padding: 0.4rem 1rem; display: flex; align-items: center; gap: 0.5rem; font-size: 0.65rem; color: var(--muted-foreground); margin: 1.5rem auto; cursor: pointer; }
         #posts-list, #mypage-posts-list { width: 100%; max-width: 42rem; padding: 0 1.5rem 5rem; box-sizing: border-box; }
         .card { background-color: var(--card); border: 1px solid var(--border); border-radius: var(--radius-xl); margin-bottom: 2rem; overflow: hidden; position: relative; }
         .card-inner { padding: 1.5rem 1.5rem 3.5rem 1.5rem; }
         .pen-name { font-family: var(--font-serif); font-weight: 600; font-size: 0.85rem; }
         .post-date { font-size: 0.65rem; color: var(--muted-foreground); }
         .card-content { font-family: var(--font-sans); font-size: 0.9rem; line-height: 2; white-space: pre-wrap; color: #333; margin-top: 1rem; }
-        .btn-save-post { position: absolute; bottom: 1.2rem; right: 1.2rem; color: var(--muted-foreground); cursor: pointer; font-size: 1.4rem; padding: 0.5rem; }
-        .btn-save-post.saved { color: #d4af37; }
         .ai-footer { background-color: #fafafa; padding: 1rem 1.5rem; border-top: 1px solid #f0f0f0; }
         .ai-box { font-family: var(--font-sans); font-size: 0.8rem; color: #666; line-height: 1.7; }
         #editor-container { display: none; width: 100%; max-width: 42rem; padding: 0 1.5rem 5rem; box-sizing: border-box; }
@@ -42,12 +46,6 @@
         #pen-name, #post-content { width: 100%; padding: 0.8rem; border: 1px solid #eee; border-radius: 0.4rem; box-sizing: border-box; font-family: var(--font-sans); font-size: 0.9rem; color: var(--foreground); margin-bottom: 1rem; }
         #post-content { height: 180px; resize: none; }
         .btn-submit { background: var(--foreground); color: white; padding: 0.8rem; border-radius: 3rem; font-family: var(--font-serif); font-size: 0.9rem; width: 100%; border: none; cursor: pointer; }
-        .btn-write { display: inline-flex; align-items: center; justify-content: center; gap: 0.8rem; margin-top: 1rem; border: 1px solid var(--foreground); padding: 0.8rem 2.5rem; border-radius: 3rem; font-family: var(--font-serif); font-size: 0.95rem; letter-spacing: 0.2rem; cursor: pointer; background: white; color: var(--foreground); }
-        .audio-control-btn { background: none; border: 1px solid var(--border); border-radius: 2rem; padding: 0.4rem 1rem; display: flex; align-items: center; gap: 0.5rem; font-size: 0.65rem; color: var(--muted-foreground); margin: 1.5rem auto; cursor: pointer; }
-        .tab-container { display: flex; gap: 2rem; margin-bottom: 2rem; border-bottom: 1px solid var(--border); width: 100%; max-width: 42rem; justify-content: center; }
-        .tab-btn { padding: 0.8rem 1rem; cursor: pointer; font-size: 0.85rem; color: var(--muted-foreground); position: relative; }
-        .tab-btn.active { color: var(--foreground); font-weight: 600; }
-        .tab-btn.active::after { content: ""; position: absolute; bottom: -1px; left: 0; width: 100%; height: 2px; background: var(--foreground); }
         @media (max-width: 640px) { header { padding: 2.5rem 1.5rem 1rem; } .kigo-word { font-size: 2.2rem; letter-spacing: 0.5rem; } .eto-container { width: 240px; height: 240px; } }
     </style>
 </head>
@@ -64,7 +62,7 @@
     <div id="timeline-view" class="active">
         <section class="kigo-section">
             <div class="kigo-label">今日の季語</div>
-            <div id="kigo-display" class="kigo-word">雪間の</div>
+            <div id="kigo-display" class="kigo-word">読み込み中...</div>
             <div id="kigo-desc-area"></div>
             <button id="audio-toggle" class="audio-control-btn"><span id="audio-icon" class="material-symbols-outlined" style="font-size: 1rem;">volume_off</span><span id="audio-text">静寂の中</span></button>
             <button id="toggle-editor" class="btn-write"><span class="material-symbols-outlined">edit_note</span>綴る</button>
@@ -101,7 +99,7 @@
     const SUPABASE_URL = 'https://ciklywhqswbujsogqiva.supabase.co';
     const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNpa2x5d2hxc3didWpzb2dxaXZhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njg5MzAyNzcsImV4cCI6MjA4NDUwNjI3N30._REwuc__qmpW1eQVhfm-RvsoMJCGYXjqtqBVn4w48Oc';
     const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-    let currentKigo = "雪間の";
+    let currentKigo = "";
     const bgm = document.getElementById('bgm');
     bgm.volume = 0.3;
 
@@ -120,10 +118,38 @@
         { name: "亥", angle: 330, desc: "情熱を持って進む日。無病息災を願う日でもあります。" }
     ];
 
+    function getJST() {
+        return new Date(new Date().toLocaleString("en-US", {timeZone: "Asia/Tokyo"}));
+    }
+
+    async function fetchKigo() {
+        try {
+            const res = await fetch(`https://raw.githubusercontent.com/miu-fukada/kotoba-biyori/main/kigo.csv?t=${Date.now()}`);
+            const csv = await res.text();
+            const now = getJST();
+            const key = `${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`;
+            const lines = csv.split(/\r?\n/);
+            for (let line of lines) {
+                const p = line.split('\t');
+                if (p[0] === key) {
+                    currentKigo = p[1].trim();
+                    document.getElementById('kigo-display').innerText = currentKigo;
+                    document.getElementById('kigo-desc-area').innerHTML = p[3] ? `読み方：${p[3]}<br><br>${p[2]}` : p[2];
+                    return;
+                }
+            }
+            document.getElementById('kigo-display').innerText = "季語未登録";
+        } catch (e) {
+            document.getElementById('kigo-display').innerText = "読み込みエラー";
+        }
+    }
+
     function calculateEto() {
-        const today = new Date();
+        const today = getJST();
+        today.setHours(0,0,0,0);
         const base = new Date("2026/01/26");
-        const diff = Math.floor((today.setHours(0,0,0,0) - base.setHours(0,0,0,0)) / 86400000);
+        base.setHours(0,0,0,0);
+        const diff = Math.round((today.getTime() - base.getTime()) / 86400000);
         let idx = diff % 12; if(idx < 0) idx += 12;
         const info = etoInfo[idx];
         document.getElementById('eto-today-label').innerText = `今日は ${info.name} の日`;
@@ -135,33 +161,11 @@
         p.style.top = `${(size/2) + (size/2-15) * Math.sin(rad)}px`;
     }
 
-    async function fetchKigo() {
-        try {
-            const res = await fetch(`https://raw.githubusercontent.com/miu-fukada/kotoba-biyori/main/kigo.csv?t=${Date.now()}`);
-            const csv = await res.text();
-            const now = new Date();
-            const key = `${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`;
-            for (let line of csv.split(/\r?\n/)) {
-                const p = line.split('\t');
-                if (p[0] === key) {
-                    currentKigo = p[1].trim();
-                    document.getElementById('kigo-display').innerText = currentKigo;
-                    document.getElementById('kigo-desc-area').innerHTML = p[3] ? `読み方：${p[3]}<br><br>${p[2]}` : p[2];
-                    return;
-                }
-            }
-        } catch (e) {}
-        document.getElementById('kigo-display').innerText = currentKigo;
-    }
-
     async function loadPosts() {
         const { data } = await supabaseClient.from('posts').select('*').order('created_at', { ascending: false });
-        renderPosts(data, 'posts-list', true);
-    }
-    function renderPosts(posts, targetId, showSaveIcon) {
-        const list = document.getElementById(targetId); if(!list) return;
+        const list = document.getElementById('posts-list'); if(!list) return;
         list.innerHTML = '';
-        posts?.forEach(post => {
+        data?.forEach(post => {
             list.innerHTML += `<div class="card"><div class="card-inner">
                 <div style="display:flex; justify-content:space-between; align-items:baseline;"><span class="pen-name">${post.pen_name}</span><span class="post-date">${new Date(post.created_at).toLocaleDateString()}</span></div>
                 <div class="card-content">${post.content.split(post.kigo).join(`<strong>${post.kigo}</strong>`)}</div>
@@ -182,7 +186,7 @@
     document.getElementById('btn-save').onclick = async () => {
         const content = document.getElementById('post-content').value;
         if (!content.includes(currentKigo)) { document.getElementById('error-msg').innerText = `「${currentKigo}」を入れてください。`; return; }
-        await supabaseClient.from('posts').insert([{ content, kigo: currentKigo, pen_name: document.getElementById('pen-name').value || '私', biyori_message: "読み解いています..." }]);
+        await supabaseClient.from('posts').insert([{ content, kigo: currentKigo, pen_name: document.getElementById('pen-name').value || '私' }]);
         location.reload();
     };
 
