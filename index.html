@@ -64,7 +64,7 @@
     <div id="timeline-view" class="active">
         <section class="kigo-section">
             <div class="kigo-label">今日の季語</div>
-            <div id="kigo-display" class="kigo-word">...</div>
+            <div id="kigo-display" class="kigo-word">読み込み中...</div>
             <div id="kigo-desc-area"></div>
             <button id="audio-toggle" class="audio-control-btn"><span id="audio-icon" class="material-symbols-outlined" style="font-size: 1rem;">volume_off</span><span id="audio-text">静寂の中</span></button>
             <button id="toggle-editor" class="btn-write"><span class="material-symbols-outlined">edit_note</span>綴る</button>
@@ -105,7 +105,6 @@
     const bgm = document.getElementById('bgm');
     bgm.volume = 0.3;
 
-    // 音声の停止制御
     document.addEventListener("visibilitychange", () => {
         if (document.visibilityState === "hidden") { bgm.pause(); updateAudioUI(false); }
         else if (sessionStorage.getItem('kigo_muted') === 'false') { bgm.play().catch(() => {}); updateAudioUI(true); }
@@ -128,11 +127,12 @@
 
     function calculateEto() {
         const now = new Date();
-        const jstNow = new Date(now.toLocaleString("en-US", {timeZone: "Asia/Tokyo"}));
-        jstNow.setHours(0,0,0,0);
-        // 基準日: 2026年1月26日(月) = 子(0)
-        const baseDate = new Date("2026-01-26T00:00:00+09:00");
-        const diffDays = Math.floor((jstNow - baseDate) / (1000 * 60 * 60 * 24));
+        const jstTime = now.getTime() + (now.getTimezoneOffset() + 540) * 60000;
+        const today = new Date(jstTime);
+        today.setHours(0,0,0,0);
+        // 1/26(月)が子(0)になるよう調整
+        const baseDate = new Date(2026, 0, 26);
+        const diffDays = Math.round((today - baseDate) / 86400000);
         let idx = diffDays % 12; if(idx < 0) idx += 12;
         const info = etoInfo[idx];
         document.getElementById('eto-today-label').innerText = `今日は ${info.name} の日`;
@@ -149,10 +149,10 @@
             const res = await fetch(`https://raw.githubusercontent.com/miu-fukada/kotoba-biyori/main/kigo.csv?t=${Date.now()}`);
             const csv = await res.text();
             const now = new Date();
-            const jstNow = new Date(now.toLocaleString("en-US", {timeZone: "Asia/Tokyo"}));
-            const key = `${String(jstNow.getMonth()+1).padStart(2,'0')}-${String(jstNow.getDate()).padStart(2,'0')}`;
-            const lines = csv.split(/\r?\n/);
-            for (let line of lines) {
+            const jstTime = now.getTime() + (now.getTimezoneOffset() + 540) * 60000;
+            const today = new Date(jstTime);
+            const key = `${String(today.getMonth()+1).padStart(2,'0')}-${String(today.getDate()).padStart(2,'0')}`;
+            for (let line of csv.split(/\r?\n/)) {
                 const p = line.split('\t');
                 if (p[0] === key) {
                     currentKigo = p[1].trim();
