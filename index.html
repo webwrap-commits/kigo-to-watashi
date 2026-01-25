@@ -145,23 +145,26 @@
         const descArea = document.getElementById('kigo-desc-area');
         try {
             const res = await fetch(`https://raw.githubusercontent.com/miu-fukada/kotoba-biyori/main/kigo.csv?t=${Date.now()}`);
-            if (!res.ok) throw new Error();
             const csv = await res.text();
             const nowJST = getJSTDate();
             const todayKey = `${String(nowJST.getMonth() + 1).padStart(2, '0')}-${String(nowJST.getDate()).padStart(2, '0')}`;
             const lines = csv.split(/\r?\n/);
-            let found = false;
             for (let line of lines) {
-                if (line.startsWith(todayKey)) {
-                    const parts = line.split('\t');
+                const parts = line.split('\t');
+                if (parts[0] === todayKey) {
                     currentKigo = parts[1].trim();
+                    const kigoDesc = parts[2] ? parts[2].trim() : "";
+                    const kigoYomi = parts[3] ? parts[3].trim() : "";
                     if(display) display.innerText = currentKigo;
-                    if(descArea) descArea.innerHTML = (parts[3] ? `読み方：${parts[3].trim()}<br><br>` : '') + parts[2].trim();
-                    found = true; break;
+                    if(descArea) descArea.innerHTML = kigoYomi ? `読み方：${kigoYomi}<br><br>${kigoDesc}` : kigoDesc;
+                    return;
                 }
             }
-            if(!found && display) display.innerText = currentKigo;
-        } catch (e) { if(display) display.innerText = currentKigo; }
+            throw new Error();
+        } catch (e) { 
+            if(display) display.innerText = "鷽替え";
+            if(descArea) descArea.innerHTML = "天神様の縁日で、前年の嘘を誠に替えるという木彫りの鳥。幸せを願う神事です。";
+        }
     }
     function updateClock() {
         const dateString = getJSTDate().toLocaleDateString();
