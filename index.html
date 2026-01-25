@@ -142,27 +142,31 @@
         try {
             const res = await fetch(`https://raw.githubusercontent.com/miu-fukada/kotoba-biyori/main/kigo.csv?t=${Date.now()}`);
             const csv = await res.text();
+            
             const now = new Date();
             const jst = new Intl.DateTimeFormat('ja-JP', { timeZone: 'Asia/Tokyo', month: '2-digit', day: '2-digit' }).formatToParts(now);
             const todayKey = `${jst.find(p => p.type === 'month').value}-${jst.find(p => p.type === 'day').value}`;
             
-            const found = csv.split(/\r?\n/).find(l => l.startsWith(todayKey));
+            const lines = csv.split(/\r?\n/);
+            const found = lines.find(l => l.startsWith(todayKey));
+            
             if (found) {
                 const parts = found.split('\t');
-                currentKigo = parts[1]?.trim() || "鷽替え";
-                currentDesc = parts[2]?.trim() || "";
+                currentKigo = parts[1] ? parts[1].trim() : "鷽替え";
+                currentDesc = parts[2] ? parts[2].trim() : "（説明文を取得できませんでした）";
+                
                 document.getElementById('kigo-display').innerText = currentKigo;
+                document.getElementById('kigo-desc-area').innerText = currentDesc;
                 localStorage.setItem('last-kigo-date', todayKey);
             }
-        } catch (e) { document.getElementById('kigo-display').innerText = "鷽替え"; }
+        } catch (e) { 
+            document.getElementById('kigo-display').innerText = "鷽替え"; 
+        }
     }
 
     document.getElementById('kigo-display').addEventListener('click', () => {
         const area = document.getElementById('kigo-desc-area');
-        if (currentDesc) {
-            area.innerText = currentDesc;
-            area.style.display = (area.style.display === 'block') ? 'none' : 'block';
-        }
+        area.style.display = (area.style.display === 'block') ? 'none' : 'block';
     });
 
     function closeEditor() {
