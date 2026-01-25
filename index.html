@@ -36,7 +36,6 @@
             word-break: break-all; font-family: var(--font-sans);
         }
 
-        /* 干支時計を大きく調整 */
         .eto-card { background: white; border: 1px solid var(--border); border-radius: var(--radius-xl); padding: 2rem 1.5rem; margin-bottom: 2rem; width: 100%; max-width: 36rem; box-sizing: border-box; }
         .eto-title { font-family: var(--font-serif); font-size: 1.4rem; margin-bottom: 1.5rem; text-align: center; }
         .eto-container { position: relative; width: 280px; height: 280px; margin: 0 auto 2rem; }
@@ -53,7 +52,6 @@
         .tab-btn.active { color: var(--foreground); font-weight: 600; }
         .tab-btn.active::after { content: ""; position: absolute; bottom: -1px; left: 0; width: 100%; height: 2px; background: var(--foreground); }
 
-        /* 綴るボタンの青文字防止 */
         .btn-write {
             display: inline-flex !important; align-items: center !important; justify-content: center !important; 
             gap: 0.8rem; margin-top: 1rem; border: 1px solid var(--foreground) !important;
@@ -70,14 +68,13 @@
 
         #posts-list, #mypage-posts-list { width: 100%; max-width: 42rem; padding: 0 1.5rem 5rem; box-sizing: border-box; }
         .card { background-color: var(--card); border: 1px solid var(--border); border-radius: var(--radius-xl); margin-bottom: 2rem; overflow: hidden; position: relative; }
-        .card-inner { padding: 1.5rem 1.5rem 3rem 1.5rem; } /* 下側に余白を作って保存ボタンを配置 */
+        .card-inner { padding: 1.5rem 1.5rem 3.5rem 1.5rem; }
         .pen-name { font-family: var(--font-serif); font-weight: 600; font-size: 0.85rem; }
         .post-date { font-size: 0.65rem; color: var(--muted-foreground); }
         .card-content { font-family: var(--font-sans); font-size: 0.9rem; line-height: 2; white-space: pre-wrap; color: #333; margin-top: 1rem; }
         
-        /* 保存ボタンを右下に配置（日付と被らない） */
-        .btn-save-post { position: absolute; bottom: 1rem; right: 1.2rem; color: var(--muted-foreground); cursor: pointer; font-size: 1.3rem; transition: color 0.3s; }
-        .btn-save-post:hover { color: var(--foreground); }
+        .btn-save-post { position: absolute; bottom: 1.2rem; right: 1.2rem; color: var(--muted-foreground); cursor: pointer; font-size: 1.4rem; transition: color 0.3s; padding: 0.5rem; }
+        .btn-save-post.saved { color: #d4af37; } /* 保存済みは金色 */
         
         .ai-footer { background-color: #fafafa; padding: 1rem 1.5rem; border-top: 1px solid #f0f0f0; }
         .ai-box { font-family: var(--font-sans); font-size: 0.8rem; color: #666; line-height: 1.7; }
@@ -120,15 +117,9 @@
             <div class="kigo-label">今日の季語</div>
             <div id="kigo-display" class="kigo-word">鷽替え</div>
             <div id="kigo-desc-area"></div>
-            
-            <button id="audio-toggle" class="audio-control-btn">
-                <span id="audio-icon" class="material-symbols-outlined" style="font-size: 1rem;">volume_off</span>
-                <span id="audio-text">静寂の中</span>
-            </button>
-
+            <button id="audio-toggle" class="audio-control-btn"><span id="audio-icon" class="material-symbols-outlined" style="font-size: 1rem;">volume_off</span><span id="audio-text">静寂の中</span></button>
             <button id="toggle-editor" class="btn-write"><span class="material-symbols-outlined">edit_note</span>綴る</button>
         </section>
-
         <div id="editor-container">
             <div class="editor-box">
                 <input type="text" id="pen-name" placeholder="ペンネーム（私）">
@@ -138,13 +129,11 @@
                 <p id="error-msg" style="color:#ef4444; font-size:0.75rem; text-align:center;"></p>
             </div>
         </div>
-
         <div id="posts-list"></div>
     </div>
 
     <div id="mypage-view">
         <h2 style="font-family: var(--font-serif); font-weight: 200; letter-spacing: 0.2rem; margin: 2rem 0;">私の季節の移ろい録</h2>
-        
         <div class="eto-card">
             <div id="eto-today-label" class="eto-title">今日は〇の日</div>
             <div class="eto-container">
@@ -153,12 +142,10 @@
             </div>
             <div id="eto-description" class="eto-desc"></div>
         </div>
-
         <div class="tab-container">
-            <div class="tab-btn active" onclick="switchTab('my')">自分の投稿</div>
-            <div class="tab-btn" onclick="switchTab('saved')">保存した投稿</div>
+            <div id="tab-my" class="tab-btn active" onclick="switchTab('my')">自分の投稿</div>
+            <div id="tab-saved" class="tab-btn" onclick="switchTab('saved')">保存した投稿</div>
         </div>
-        
         <div id="mypage-posts-list"></div>
     </div>
 </main>
@@ -189,17 +176,18 @@
     ];
 
     function calculateEto() {
-        const baseDate = new Date('2024-01-01');
+        // 2026年1月25日を「亥」にするための基準調整
+        const baseDate = new Date('2026-01-25');
         const today = new Date();
         today.setHours(0,0,0,0);
         const diffDays = Math.floor((today - baseDate) / (24 * 60 * 60 * 1000));
-        const etoIndex = diffDays % 12;
+        let etoIndex = (11 + diffDays) % 12; // 11は亥のインデックス
+        if (etoIndex < 0) etoIndex += 12;
+        
         const info = etoInfo[etoIndex];
-
         document.getElementById('eto-today-label').innerText = `今日は ${info.name} の日`;
         document.getElementById('eto-description').innerText = info.desc;
 
-        // 印の位置（大きくしたので半径も調整）
         const containerSize = window.innerWidth <= 640 ? 240 : 280;
         const radius = (containerSize / 2) - 15;
         const rad = (info.angle - 90) * (Math.PI / 180);
@@ -211,7 +199,6 @@
         pointer.style.top = `${y}px`;
     }
 
-    // ヘッダーボタンの挙動切り替え
     function handleHeaderBtnClick() {
         if (isMypage) showTimeline();
         else showMypage();
@@ -237,13 +224,40 @@
     }
 
     function switchTab(type) {
-        const tabs = document.querySelectorAll('.tab-btn');
-        tabs.forEach(t => t.classList.remove('active'));
-        event.target.classList.add('active');
+        document.querySelectorAll('.tab-btn').forEach(t => t.classList.remove('active'));
+        document.getElementById('tab-' + type).classList.add('active');
         if(type === 'my') loadMyPosts();
-        else document.getElementById('mypage-posts-list').innerHTML = '<p style="text-align:center; font-size:0.8rem; color:gray; margin-top:3rem;">保存した投稿はありません</p>';
+        else loadSavedPosts();
     }
 
+    // --- 保存機能の実装 ---
+    function toggleSavePost(postId, postData) {
+        let saved = JSON.parse(localStorage.getItem('saved_posts') || '[]');
+        const index = saved.findIndex(p => p.id === postId);
+        
+        if (index > -1) {
+            saved.splice(index, 1); // 削除
+            alert('保存を解除しました');
+        } else {
+            saved.push(postData); // 追加
+            alert('物語を保存しました');
+        }
+        localStorage.setItem('saved_posts', JSON.stringify(saved));
+        loadPosts(); // タイムラインのアイコン表示更新
+    }
+
+    async function loadSavedPosts() {
+        const saved = JSON.parse(localStorage.getItem('saved_posts') || '[]');
+        const list = document.getElementById('mypage-posts-list');
+        list.innerHTML = '';
+        if (saved.length === 0) {
+            list.innerHTML = '<p style="text-align:center; font-size:0.8rem; color:gray; margin-top:3rem;">保存した投稿はありません</p>';
+            return;
+        }
+        renderPosts(saved, 'mypage-posts-list', true);
+    }
+
+    // --- 既存の通信・表示系 ---
     function updateAudioUI(isPlaying) {
         document.getElementById('audio-icon').innerText = isPlaying ? 'volume_up' : 'volume_off';
         document.getElementById('audio-text').innerText = isPlaying ? '音楽が流れています' : '静寂の中';
@@ -256,13 +270,6 @@
             bgm.pause(); updateAudioUI(false); sessionStorage.setItem('kigo_muted', 'true');
         }
     }
-
-    document.addEventListener("visibilitychange", () => {
-        if (document.hidden) bgm.pause();
-        else updateAudioUI(false);
-    });
-
-    document.getElementById('audio-toggle').onclick = () => toggleAudio();
 
     async function fetchKigo() {
         try {
@@ -313,10 +320,8 @@
             content, kigo: currentKigo, pen_name: penName, is_public: true, biyori_message: "ことば日和が読み解いています..."
         }]);
         if (!error) {
-            document.getElementById('post-content').value = "";
-            document.getElementById('pen-name').value = "";
-            closeEditor();
-            document.getElementById('btn-save').disabled = false;
+            document.getElementById('post-content').value = ""; document.getElementById('pen-name').value = "";
+            closeEditor(); document.getElementById('btn-save').disabled = false;
             loadPosts();
         }
     };
@@ -334,23 +339,29 @@
     function renderPosts(posts, targetId, showSaveIcon) {
         const list = document.getElementById(targetId);
         list.innerHTML = '';
+        const saved = JSON.parse(localStorage.getItem('saved_posts') || '[]');
+        
         posts?.forEach(post => {
+            const isSaved = saved.some(p => p.id === post.id);
             const card = document.createElement('div');
             card.className = 'card';
+            const postJSON = JSON.stringify(post).replace(/'/g, "\\'");
             card.innerHTML = `<div class="card-inner">
                 <div style="display:flex; justify-content:space-between; align-items:baseline;">
                     <span class="pen-name">${post.pen_name}</span>
                     <span class="post-date">${new Date(post.created_at).toLocaleDateString()}</span>
                 </div>
                 <div class="card-content">${post.content.split(post.kigo).join(`<strong>${post.kigo}</strong>`)}</div>
-                ${showSaveIcon ? '<span class="material-symbols-outlined btn-save-post">bookmark_add</span>' : ''}
+                ${showSaveIcon ? `<span class="material-symbols-outlined btn-save-post ${isSaved ? 'saved' : ''}" onclick='toggleSavePost("${post.id}", ${postJSON})'>${isSaved ? 'bookmark' : 'bookmark_add'}</span>` : ''}
             </div>
             <div class="ai-footer"><div class="ai-box">${post.biyori_message || '...'}</div></div>`;
             list.appendChild(card);
         });
     }
 
-    window.onload = () => { fetchKigo(); loadPosts(); updateAudioUI(false); };
+    window.onload = () => { fetchKigo(); loadPosts(); updateAudioUI(false); calculateEto(); };
+    document.addEventListener("visibilitychange", () => { if (document.hidden) bgm.pause(); else updateAudioUI(false); });
+    document.getElementById('audio-toggle').onclick = () => toggleAudio();
 </script>
 </body>
 </html>
