@@ -27,13 +27,9 @@
         .eto-image { width: 100%; height: 100%; object-fit: contain; }
         .eto-pointer { position: absolute; width: 16px; height: 16px; background: rgba(212, 175, 55, 0.7); border-radius: 50%; box-shadow: 0 0 12px rgba(212, 175, 55, 0.9); transform: translate(-50%, -50%); transition: all 0.5s ease; z-index: 10; }
         .eto-desc { font-size: 0.9rem; color: #555; line-height: 1.8; text-align: left; max-width: 28rem; margin: 0 auto; }
-        .tab-container { display: flex; gap: 2rem; margin-bottom: 2rem; border-bottom: 1px solid var(--border); width: 100%; max-width: 42rem; justify-content: center; }
-        .tab-btn { padding: 0.8rem 1rem; cursor: pointer; font-size: 0.85rem; color: var(--muted-foreground); position: relative; }
-        .tab-btn.active { color: var(--foreground); font-weight: 600; }
-        .tab-btn.active::after { content: ""; position: absolute; bottom: -1px; left: 0; width: 100%; height: 2px; background: var(--foreground); }
         .btn-write { display: inline-flex; align-items: center; justify-content: center; gap: 0.8rem; margin-top: 1rem; border: 1px solid var(--foreground); padding: 0.8rem 2.5rem; border-radius: 3rem; font-family: var(--font-serif); font-size: 0.95rem; letter-spacing: 0.2rem; cursor: pointer; background: white; color: var(--foreground); }
         .audio-control-btn { background: none; border: 1px solid var(--border); border-radius: 2rem; padding: 0.4rem 1rem; display: flex; align-items: center; gap: 0.5rem; font-size: 0.65rem; color: var(--muted-foreground); margin: 1.5rem auto; cursor: pointer; }
-        #posts-list, #mypage-posts-list { width: 100%; max-width: 42rem; padding: 0 1.5rem 5rem; box-sizing: border-box; }
+        #posts-list { width: 100%; max-width: 42rem; padding: 0 1.5rem 5rem; box-sizing: border-box; }
         .card { background-color: var(--card); border: 1px solid var(--border); border-radius: var(--radius-xl); margin-bottom: 2rem; overflow: hidden; position: relative; }
         .card-inner { padding: 1.5rem 1.5rem 3.5rem 1.5rem; }
         .pen-name { font-family: var(--font-serif); font-weight: 600; font-size: 0.85rem; }
@@ -88,10 +84,6 @@
             </div>
             <div id="eto-description" class="eto-desc"></div>
         </div>
-        <div class="tab-container">
-            <div id="tab-my" class="tab-btn active" onclick="switchTab('my')">自分の投稿</div>
-            <div id="tab-saved" class="tab-btn" onclick="switchTab('saved')">保存した投稿</div>
-        </div>
         <div id="mypage-posts-list"></div>
     </div>
 </main>
@@ -104,51 +96,50 @@
     bgm.volume = 0.3;
 
     const etoInfo = [
-        { name: "子", angle: 0, desc: "物事の始まりに良い日。お守りを作るのにも向いています。" },
+        { name: "子", angle: 0, desc: "物事の始まりに良い日。" },
         { name: "丑", angle: 30, desc: "粘り強く歩む牛のように、じっくり取り組むのに良い日。" },
         { name: "寅", angle: 60, desc: "勢いよく戻ってくる力があるため、旅立ちにも良い日です。" },
-        { name: "卯", angle: 90, desc: "物事がとんとん拍子に進む日。穏やかな明るさがあります。" },
-        { name: "辰", angle: 120, desc: "大きな夢を描いたり、新しい一歩を踏み出すのにぴったりです。" },
-        { name: "巳", angle: 150, desc: "お金や芸事の才能を育ててくれる日。再生の時です。" },
-        { name: "午", angle: 180, desc: "太陽のエネルギーが満ちる日。豊かな暮らしに感謝する日です。" },
-        { name: "未", angle: 210, desc: "家族や周りの人と手を取り合い、平和に過ごすのが良い日です。" },
-        { name: "申", angle: 240, desc: "「去る（さる）」にかけて、悩みや災いが去っていく日です。" },
-        { name: "酉", angle: 270, desc: "「とりこむ」という言葉から、福をかき集める日です。" },
+        { name: "卯", angle: 90, desc: "物事がとんとん拍子に進む日。" },
+        { name: "辰", angle: 120, desc: "新しい一歩を踏み出すのにぴったりです。" },
+        { name: "巳", angle: 150, desc: "お金や芸事の才能を育ててくれる日。" },
+        { name: "午", angle: 180, desc: "太陽のエネルギーが満ちる日。" },
+        { name: "未", angle: 210, desc: "周りの人と手を取り合い、平和に過ごすのが良い日です。" },
+        { name: "申", angle: 240, desc: "悩みや災いが去っていく日です。" },
+        { name: "酉", angle: 270, desc: "福をかき集める日です。" },
         { name: "戌", angle: 300, desc: "家族の絆を深めるのに良い日です。" },
-        { name: "亥", angle: 330, desc: "情熱を持って進む日。無病息災を願う日でもあります。" }
+        { name: "亥", angle: 330, desc: "情熱を持って進む日。" }
     ];
 
-    function getJST() {
-        return new Date(new Date().toLocaleString("en-US", {timeZone: "Asia/Tokyo"}));
-    }
+    function getJST() { return new Date(new Date().toLocaleString("en-US", {timeZone: "Asia/Tokyo"})); }
 
     async function fetchKigo() {
         try {
             const res = await fetch(`https://raw.githubusercontent.com/miu-fukada/kotoba-biyori/main/kigo.csv?t=${Date.now()}`);
             const csv = await res.text();
             const now = getJST();
-            const key = `${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`;
+            const m = now.getMonth() + 1;
+            const d = now.getDate();
+            // 01-26 または 1-26 の形式を正確に特定
+            const kigoKey = `${String(m).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+            
             const lines = csv.split(/\r?\n/);
             for (let line of lines) {
                 const p = line.split('\t');
-                if (p[0] === key) {
+                if (p[0].trim() === kigoKey) {
                     currentKigo = p[1].trim();
                     document.getElementById('kigo-display').innerText = currentKigo;
                     document.getElementById('kigo-desc-area').innerHTML = p[3] ? `読み方：${p[3]}<br><br>${p[2]}` : p[2];
                     return;
                 }
             }
-            document.getElementById('kigo-display').innerText = "季語未登録";
-        } catch (e) {
-            document.getElementById('kigo-display').innerText = "読み込みエラー";
-        }
+        } catch (e) { console.error(e); }
+        document.getElementById('kigo-display').innerText = "雪間"; // バックアップ
+        currentKigo = "雪間";
     }
 
     function calculateEto() {
-        const today = getJST();
-        today.setHours(0,0,0,0);
-        const base = new Date("2026/01/26");
-        base.setHours(0,0,0,0);
+        const today = getJST(); today.setHours(0,0,0,0);
+        const base = new Date("2026/01/26"); base.setHours(0,0,0,0);
         const diff = Math.round((today.getTime() - base.getTime()) / 86400000);
         let idx = diff % 12; if(idx < 0) idx += 12;
         const info = etoInfo[idx];
@@ -177,9 +168,9 @@
     function showMypage() { document.getElementById('timeline-view').classList.remove('active'); document.getElementById('mypage-view').classList.add('active'); document.getElementById('header-btn-text').innerText = 'もどる'; calculateEto(); }
     function handleHeaderBtnClick() { document.getElementById('timeline-view').classList.contains('active') ? showMypage() : showTimeline(); }
     function closeEditor() { document.getElementById('editor-container').style.display = 'none'; document.getElementById('toggle-editor').style.display = 'inline-flex'; }
-    function updateAudioUI(playing) { document.getElementById('audio-icon').innerText = playing ? 'volume_up' : 'volume_off'; document.getElementById('audio-text').innerText = playing ? '音楽が流れています' : '静寂の中'; }
-    function toggleAudio() { if (bgm.paused) { bgm.play().then(() => { updateAudioUI(true); sessionStorage.setItem('kigo_muted', 'false'); }).catch(() => {}); } else { bgm.pause(); updateAudioUI(false); sessionStorage.setItem('kigo_muted', 'true'); } }
-    
+    function toggleAudio() { if (bgm.paused) { bgm.play(); } else { bgm.pause(); } updateAudioUI(!bgm.paused); }
+    function updateAudioUI(p) { document.getElementById('audio-icon').innerText = p ? 'volume_up' : 'volume_off'; }
+
     document.getElementById('toggle-editor').onclick = () => { document.getElementById('editor-container').style.display = 'block'; document.getElementById('toggle-editor').style.display = 'none'; };
     document.getElementById('kigo-display').onclick = () => { const a = document.getElementById('kigo-desc-area'); a.style.display = a.style.display === 'block' ? 'none' : 'block'; };
     document.getElementById('audio-toggle').onclick = toggleAudio;
