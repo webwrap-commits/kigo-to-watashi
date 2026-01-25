@@ -45,7 +45,6 @@
             display: flex; align-items: center; gap: 0.5rem; font-size: 0.65rem; color: var(--muted-foreground) !important; margin: 1.5rem auto;
         }
 
-        /* 修正点：綴るボタンを絶対に一行で固定 */
         .btn-write {
             display: inline-flex !important; align-items: center !important; justify-content: center !important; 
             gap: 0.8rem; margin-top: 1rem; border: 1px solid var(--foreground) !important;
@@ -97,8 +96,8 @@
 <main>
     <section class="kigo-section">
         <div class="kigo-label">今日の季語</div>
-        <div id="kigo-display" class="kigo-word">読み込み中...</div>
-        <div id="kigo-desc-area">説明を読み込んでいます...</div>
+        <div id="kigo-display" class="kigo-word">鷽替え</div>
+        <div id="kigo-desc-area"></div>
         
         <button id="audio-toggle" class="audio-control-btn">
             <span id="audio-icon" class="material-symbols-outlined" style="font-size: 1rem;">volume_off</span>
@@ -128,7 +127,7 @@
     const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNpa2x5d2hxc3didWpzb2dxaXZhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njg5MzAyNzcsImV4cCI6MjA4NDUwNjI3N30._REwuc__qmpW1eQVhfm-RvsoMJCGYXjqtqBVn4w48Oc';
     const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-    let currentKigo = "";
+    let currentKigo = "鷽替え";
     const bgm = document.getElementById('bgm');
     bgm.volume = 0.3;
 
@@ -145,13 +144,11 @@
         }
     }
 
-    // 修正点：ブラウザ開閉時の音の扱い
     document.addEventListener("visibilitychange", () => {
         if (document.hidden) {
             bgm.pause();
         } else {
-            // 再開時は常に「静寂」から（音が必要ならユーザーがボタンを押す）
-            // ありがと地蔵の仕様：sessionStorageの状態に関わらず自動再生しない
+            // 再開時は静寂を保つ（ありがと地蔵仕様）
             updateAudioUI(false);
         }
     });
@@ -161,6 +158,7 @@
     async function fetchKigo() {
         try {
             const res = await fetch(`https://raw.githubusercontent.com/miu-fukada/kotoba-biyori/main/kigo.csv?t=${Date.now()}`);
+            if (!res.ok) throw new Error();
             const csv = await res.text();
             const now = new Date();
             const month = String(now.getMonth() + 1).padStart(2, '0');
@@ -168,7 +166,6 @@
             const todayKey = `${month}-${day}`;
             
             const lines = csv.split(/\r?\n/);
-            let found = false;
             for (let line of lines) {
                 if (line.startsWith(todayKey)) {
                     const parts = line.split('\t');
@@ -178,13 +175,15 @@
                         const yomi = (parts[3] && parts[3].trim() !== "") ? parts[3].trim() : "";
                         const description = parts[2].trim();
                         document.getElementById('kigo-desc-area').innerHTML = yomi ? `読み方：${yomi}<br><br>${description}` : description;
-                        found = true;
                     }
                     break;
                 }
             }
-            if (!found) { currentKigo = "鷽替え"; }
-        } catch (e) { currentKigo = "鷽替え"; }
+        } catch (e) {
+            // 失敗時はデフォルト表示
+            document.getElementById('kigo-display').innerText = "鷽替え";
+            document.getElementById('kigo-desc-area').innerHTML = "読み方：うそかえ<br><br>前年の災厄を嘘にして吉運に替える神事です。";
+        }
     }
 
     document.getElementById('kigo-display').onclick = () => {
@@ -224,26 +223,31 @@
     };
 
     async function loadPosts() {
-        const { data } = await supabaseClient.from('posts').select('*').order('created_at', { ascending: false });
-        const list = document.getElementById('posts-list');
-        list.innerHTML = '';
-        data?.forEach(post => {
-            const card = document.createElement('div');
-            card.className = 'card';
-            card.innerHTML = `<div class="card-inner">
-                <div style="display:flex; justify-content:space-between; align-items:baseline;">
-                    <span class="pen-name">${post.pen_name}</span>
-                    <span class="post-date">${new Date(post.created_at).toLocaleDateString()}</span>
+        try {
+            const { data } = await supabaseClient.from('posts').select('*').order('created_at', { ascending: false });
+            const list = document.getElementById('posts-list');
+            list.innerHTML = '';
+            data?.forEach(post => {
+                const card = document.createElement('div');
+                card.className = 'card';
+                card.innerHTML = `<div class="card-inner">
+                    <div style="display:flex; justify-content:space-between; align-items:baseline;">
+                        <span class="pen-name">${post.pen_name}</span>
+                        <span class="post-date">${new Date(post.created_at).toLocaleDateString()}</span>
+                    </div>
+                    <div class="card-content">${post.content.split(post.kigo).join(`<strong>${post.kigo}</strong>`)}</div>
                 </div>
-                <div class="card-content">${post.content.split(post.kigo).join(`<strong>${post.kigo}</strong>`)}</div>
-            </div>
-            <div class="ai-footer"><div class="ai-box">${post.biyori_message || '...'}</div></div>`;
-            list.appendChild(card);
-        });
+                <div class="ai-footer"><div class="ai-box">${post.biyori_message || '...'}</div></div>`;
+                list.appendChild(card);
+            });
+        } catch (e) {}
     }
 
-    // 読み込み時に音は鳴らさない設定（ありがと地蔵準拠）
-    window.onload = () => { fetchKigo(); loadPosts(); updateAudioUI(false); };
+    window.onload = () => {
+        fetchKigo();
+        loadPosts();
+        updateAudioUI(false);
+    };
 </script>
 </body>
 </html>
