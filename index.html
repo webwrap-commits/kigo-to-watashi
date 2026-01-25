@@ -62,11 +62,9 @@
         .ai-footer { background-color: #fafafa; padding: 1rem 1.5rem; border-top: 1px solid #f0f0f0; }
         .ai-box { font-family: var(--font-sans); font-size: 0.8rem; color: #666; line-height: 1.7; }
 
-        .btn-submit { background: var(--foreground) !important; color: white !important; padding: 0.8rem; border-radius: 3rem; font-family: var(--font-serif); font-size: 0.9rem; width: 100%; margin-top: 1rem; border: none !important; }
-
-        /* 以前の投稿フォームのデザイン設定 */
         #editor-container { display: none; width: 100%; max-width: 42rem; padding: 0 1.5rem 5rem; box-sizing: border-box; }
         .editor-box { background: white; border: 1px solid var(--border); border-radius: var(--radius-xl); padding: 1.5rem; }
+        .btn-submit { background: var(--foreground) !important; color: white !important; padding: 0.8rem; border-radius: 3rem; font-family: var(--font-serif); font-size: 0.9rem; width: 100%; margin-top: 1rem; border: none !important; }
 
         @media (max-width: 640px) {
             header { padding: 2.5rem 1.5rem 1rem; }
@@ -90,7 +88,7 @@
 <main>
     <section class="kigo-section">
         <div class="kigo-label">今日の季語</div>
-        <div id="kigo-display" class="kigo-word">読み込み中...</div>
+        <div id="kigo-display" class="kigo-word">鷽替え</div>
         <div id="kigo-desc-area"></div>
         
         <button id="audio-toggle" class="audio-control-btn">
@@ -119,7 +117,7 @@
     const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNpa2x5d2hxc3didWpzb2dxaXZhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njg5MzAyNzcsImV4cCI6MjA4NDUwNjI3N30._REwuc__qmpW1eQVhfm-RvsoMJCGYXjqtqBVn4w48Oc';
     const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-    let currentKigo = "";
+    let currentKigo = "鷽替え";
     let currentDesc = "";
     const bgm = document.getElementById('bgm');
     bgm.volume = 0.3;
@@ -137,17 +135,11 @@
         }
     }
 
-    // バックグラウンド移行時に即停止、復帰時に再生
-    const handleVisibilityChange = () => {
-        if (document.hidden) {
-            bgm.pause();
-        } else {
-            if (sessionStorage.getItem('kigo_muted') === 'false') {
-                bgm.play().catch(() => {});
-            }
-        }
-    };
-    document.addEventListener("visibilitychange", handleVisibilityChange);
+    // ブラウザを閉じたら停止する設定
+    document.addEventListener("visibilitychange", () => {
+        if (document.hidden) bgm.pause();
+        else if (sessionStorage.getItem('kigo_muted') === 'false') bgm.play().catch(() => {});
+    });
     window.addEventListener("pagehide", () => bgm.pause());
 
     document.getElementById('audio-toggle').onclick = () => toggleAudio();
@@ -156,12 +148,15 @@
         try {
             const res = await fetch(`https://raw.githubusercontent.com/miu-fukada/kotoba-biyori/main/kigo.csv?t=${Date.now()}`);
             const csv = await res.text();
+            
             const now = new Date();
-            const jst = new Intl.DateTimeFormat('ja-JP', { timeZone: 'Asia/Tokyo', month: '2-digit', day: '2-digit' }).formatToParts(now);
-            const todayKey = `${jst.find(p => p.type === 'month').value}-${jst.find(p => p.type === 'day').value}`;
+            const month = String(now.getMonth() + 1).padStart(2, '0');
+            const day = String(now.getDate()).padStart(2, '0');
+            const todayKey = `${month}-${day}`;
             
             const lines = csv.split(/\r?\n/);
             const found = lines.find(l => l.startsWith(todayKey));
+            
             if (found) {
                 const parts = found.split('\t');
                 currentKigo = parts[1]?.trim() || "鷽替え";
@@ -169,7 +164,9 @@
                 document.getElementById('kigo-display').innerText = currentKigo;
                 document.getElementById('kigo-desc-area').innerText = currentDesc;
             }
-        } catch (e) { document.getElementById('kigo-display').innerText = "鷽替え"; }
+        } catch (e) { 
+            console.error("Kigo fetch error");
+        }
     }
 
     document.getElementById('kigo-display').onclick = () => {
