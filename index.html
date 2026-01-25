@@ -8,14 +8,8 @@
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@200&family=Noto+Serif+JP:wght@200;600&family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,200,0,0&display=swap" rel="stylesheet">
     <style>
         :root {
-            --background: #fdfdfd;
-            --foreground: #1a1a1a;
-            --card: #ffffff;
-            --border: #e4e4e7;
-            --muted-foreground: #71717a;
-            --radius-xl: 0.75rem;
-            --font-serif: 'Noto Serif JP', serif;
-            --font-sans: 'Noto Sans JP', sans-serif;
+            --background: #fdfdfd; --foreground: #1a1a1a; --card: #ffffff; --border: #e4e4e7;
+            --muted-foreground: #71717a; --radius-xl: 0.75rem; --font-serif: 'Noto Serif JP', serif; --font-sans: 'Noto Sans JP', sans-serif;
         }
 
         body {
@@ -35,13 +29,12 @@
 
         .kigo-section { text-align: center; margin: 2rem 0 4rem; width: 100%; padding: 0 1.5rem; box-sizing: border-box; }
         .kigo-label { font-family: var(--font-serif); font-size: 0.8rem; color: var(--muted-foreground); margin-bottom: 1.5rem; letter-spacing: 0.3rem; }
-        .kigo-word { font-family: var(--font-serif); font-size: 3.5rem; font-weight: 200; letter-spacing: 1rem; margin: 0; text-indent: 1rem; cursor: pointer; position: relative; }
+        .kigo-word { font-family: var(--font-serif); font-size: 3.5rem; font-weight: 200; letter-spacing: 1rem; margin: 0; text-indent: 1rem; cursor: pointer; }
         
         .mute-wrapper { margin-top: 1.5rem; display: flex; justify-content: center; }
         .audio-control-btn {
             background: none; border: 1px solid var(--border); border-radius: 2rem; padding: 0.4rem 1.2rem;
             display: flex; align-items: center; gap: 0.5rem; font-size: 0.75rem; color: var(--muted-foreground); cursor: pointer;
-            -webkit-tap-highlight-color: transparent;
         }
 
         #kigo-desc-area { 
@@ -64,8 +57,6 @@
         .post-date { font-size: 0.75rem; color: var(--muted-foreground); }
         .card-content { font-family: var(--font-sans); font-size: 1.05rem; line-height: 2.4; white-space: pre-wrap; color: #2c2c2c; }
         .card-content strong { font-weight: 600; color: #000; border-bottom: 1px solid #eee; }
-        .ai-footer { background-color: #fcfcfc; padding: 1.5rem 2.5rem; border-top: 1px solid #f6f6f6; }
-        .ai-box { font-family: var(--font-sans); font-size: 0.95rem; color: #555; line-height: 2; }
 
         #editor-container { display: none; width: 100%; max-width: 42rem; margin-bottom: 5rem; padding: 0 1.5rem; box-sizing: border-box; }
         .editor-card { background: white; border: 1px solid var(--border); border-radius: var(--radius-xl); padding: 2.5rem; box-shadow: 0 30px 60px -20px rgba(0,0,0,0.12); }
@@ -73,15 +64,13 @@
         
         .editor-actions { display: flex; flex-direction: column; gap: 1rem; width: 100%; }
         .btn-submit { background: var(--foreground); color: white; border: none; padding: 1.2rem; border-radius: 3rem; cursor: pointer; font-family: var(--font-serif); font-size: 1.1rem; letter-spacing: 0.2rem; width: 100%; }
-        .btn-back { width: 100%; justify-content: center; padding: 1rem; border-radius: 3rem; border: 1px solid var(--border); background: white; font-size: 0.85rem; cursor: pointer; }
+        .btn-back { width: 100%; text-align: center; padding: 1rem; border-radius: 3rem; border: 1px solid var(--border); background: white; font-size: 0.85rem; cursor: pointer; box-sizing: border-box; }
 
         @media (max-width: 640px) {
             header { flex-direction: column; gap: 1.5rem; padding: 3rem 1.5rem 1.5rem; }
             .btn-mypage-header { width: auto; order: 2; }
             .kigo-word { font-size: 2.8rem; }
             .card-inner { padding: 1.5rem; }
-            .ai-footer { padding: 1.5rem; }
-            .timeline-title { font-size: 1.1rem; }
         }
     </style>
 </head>
@@ -99,17 +88,17 @@
 <main>
     <section class="kigo-section">
         <div class="kigo-label">今日の季語</div>
-        <div id="kigo-display" class="kigo-word">読み込み中...</div>
+        <div id="kigo-display" class="kigo-word" onclick="toggleKigoDesc()">読み込み中...</div>
         
         <div class="mute-wrapper">
-            <button id="audio-toggle" class="audio-control-btn">
+            <button id="audio-toggle" class="audio-control-btn" onclick="toggleAudio()">
                 <span id="audio-icon" class="material-symbols-outlined" style="font-size: 1.1rem;">volume_off</span>
                 <span id="audio-text">静寂の中</span>
             </button>
         </div>
 
         <div id="kigo-desc-area"></div>
-        <button id="toggle-editor" class="btn-write"><span class="material-symbols-outlined">edit_note</span>綴る</button>
+        <button id="toggle-editor" class="btn-write" onclick="openEditor()"><span class="material-symbols-outlined">edit_note</span>綴る</button>
     </section>
 
     <div id="editor-container">
@@ -121,8 +110,8 @@
             <div id="char-counter" style="text-align: right; font-size: 0.8rem; color: var(--muted-foreground); margin-bottom: 1.5rem;">0 / 300</div>
             
             <div class="editor-actions">
-                <button id="btn-save" class="btn-submit">物語を綴る</button>
-                <button class="btn-back" onclick="closeEditor()">戻る</button>
+                <button id="btn-save" class="btn-submit" onclick="submitPost()">物語を綴る</button>
+                <div class="btn-back" onclick="closeEditor()">戻る</div>
             </div>
             <p id="error-msg" style="color: #ef4444; font-size: 0.85rem; margin-top: 1.5rem; text-align: center; min-height: 1.2rem;"></p>
         </div>
@@ -146,84 +135,71 @@
         document.getElementById('audio-text').innerText = isPlaying ? '音楽が流れています' : '静寂の中';
     }
 
-    // --- 音声管理 (ありがと地蔵の挙動を再現) ---
-    function playBGM() {
-        bgm.play().then(() => {
-            updateAudioUI(true);
-            sessionStorage.setItem('is_playing', 'true');
-        }).catch(() => {});
-    }
-
-    document.getElementById('audio-toggle').addEventListener('click', () => {
+    function toggleAudio() {
         if (bgm.paused) {
-            playBGM();
+            bgm.play().then(() => {
+                updateAudioUI(true);
+                sessionStorage.setItem('bgm_active', 'true');
+            });
         } else {
             bgm.pause();
             updateAudioUI(false);
-            sessionStorage.removeItem('is_playing');
-        }
-    });
-
-    // 季語の読み込み
-    async function loadKigo() {
-        try {
-            const res = await fetch('https://raw.githubusercontent.com/miu-fukada/kotoba-biyori/main/kigo.csv');
-            const csv = await res.text();
-            const lines = csv.split('\n').filter(l => l.includes(','));
-            
-            const d = new Date();
-            const dayIdx = d.getDate() - 1; // 日付に合わせて行を選ぶ
-            const data = lines[dayIdx % lines.length].split(',');
-            
-            currentKigo = data[0].trim();
-            document.getElementById('kigo-display').innerText = currentKigo;
-            document.getElementById('kigo-desc-area').innerText = data[1] ? data[1].trim() : "（説明はありません）";
-            document.getElementById('content-label').innerText = `文章（「${currentKigo}」を添えて）`;
-        } catch (e) {
-            document.getElementById('kigo-display').innerText = "大寒";
+            sessionStorage.removeItem('bgm_active');
         }
     }
 
-    // 説明文の表示切り替え（確実な動作のためJSで制御）
-    document.getElementById('kigo-display').addEventListener('click', () => {
+    async function initKigo() {
+        try {
+            const res = await fetch('https://raw.githubusercontent.com/miu-fukada/kotoba-biyori/main/kigo.csv');
+            const csv = await res.text();
+            // CSVを1行ずつパースし、今日の日付(01-25)を探す
+            const lines = csv.split(/\r?\n/);
+            const todayStr = "01-25"; 
+            
+            let found = lines.find(l => l.startsWith(todayStr));
+            if (found) {
+                const parts = found.split('\t'); // タブ区切りを想定
+                currentKigo = parts[1]?.trim();
+                document.getElementById('kigo-display').innerText = currentKigo;
+                document.getElementById('kigo-desc-area').innerText = parts[2] ? parts[2].trim() : "（説明はありません）";
+                document.getElementById('content-label').innerText = `文章（「${currentKigo}」を添えて）`;
+            } else {
+                document.getElementById('kigo-display').innerText = "鷽替え";
+            }
+        } catch (e) {
+            document.getElementById('kigo-display').innerText = "鷽替え";
+        }
+    }
+
+    function toggleKigoDesc() {
         const desc = document.getElementById('kigo-desc-area');
         desc.style.display = (desc.style.display === 'block') ? 'none' : 'block';
-    });
+    }
+
+    function openEditor() {
+        document.getElementById('editor-container').style.display = 'block';
+        document.getElementById('toggle-editor').style.display = 'none';
+        // 綴るボタンを押した際、もし音楽フラグがあれば再生
+        if (bgm.paused && sessionStorage.getItem('bgm_active') === 'true') toggleAudio();
+    }
 
     function closeEditor() {
         document.getElementById('editor-container').style.display = 'none';
         document.getElementById('toggle-editor').style.display = 'inline-block';
     }
 
-    document.getElementById('toggle-editor').addEventListener('click', () => {
-        document.getElementById('editor-container').style.display = 'block';
-        document.getElementById('toggle-editor').style.display = 'none';
-        if (bgm.paused) playBGM();
-    });
-
-    const textarea = document.getElementById('post-content');
-    textarea.addEventListener('input', () => {
-        document.getElementById('char-counter').innerText = `${textarea.value.length} / 300`;
-    });
-
-    document.getElementById('btn-save').addEventListener('click', async () => {
-        const content = textarea.value;
+    async function submitPost() {
+        const content = document.getElementById('post-content').value;
         if (!content.includes(currentKigo)) {
             document.getElementById('error-msg').innerText = `文章の中に「${currentKigo}」を綴ってください。`;
             return;
         }
-        
         document.getElementById('error-msg').innerText = "物語を刻んでいます...";
         const { error } = await supabaseClient.from('posts').insert([{
-            content: content, kigo: currentKigo, pen_name: document.getElementById('pen-name').value || '私', is_public: true, biyori_message: "ことば日和が読み解いています..."
+            content: content, kigo: currentKigo, pen_name: document.getElementById('pen-name').value || '私', is_public: true
         }]);
-
-        if (error) {
-            document.getElementById('error-msg').innerText = "保存に失敗しました。";
-        } else {
-            location.reload(); // このリロード時、sessionStorageのフラグで音が再開します
-        }
-    });
+        if (error) { alert("保存に失敗しました。"); } else { location.reload(); }
+    }
 
     async function loadPosts() {
         const { data } = await supabaseClient.from('posts').select('*').order('created_at', { ascending: false });
@@ -231,3 +207,26 @@
         data?.forEach(post => {
             const date = new Date(post.created_at).toLocaleDateString('ja-JP');
             const card = document.createElement('div');
+            card.className = 'card';
+            card.innerHTML = `<div class="card-inner">
+                <div class="card-header"><span class="pen-name">${post.pen_name || '私'}</span><span class="post-date">${date}</span></div>
+                <div class="card-content">${post.content.split(post.kigo).join(`<strong>${post.kigo}</strong>`)}</div>
+            </div>`;
+            list.appendChild(card);
+        });
+    }
+
+    window.onload = () => {
+        initKigo();
+        loadPosts();
+        if (sessionStorage.getItem('bgm_active') === 'true') {
+            bgm.play().then(() => updateAudioUI(true)).catch(() => sessionStorage.removeItem('bgm_active'));
+        }
+    };
+
+    document.getElementById('post-content').oninput = function() {
+        document.getElementById('char-counter').innerText = `${this.value.length} / 300`;
+    };
+</script>
+</body>
+</html>
