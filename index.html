@@ -26,24 +26,25 @@
         header { width: 100%; max-width: 48rem; padding: 4rem 1.5rem 1rem; display: flex; justify-content: space-between; align-items: center; box-sizing: border-box; }
         h1 { font-family: var(--font-serif); font-size: 1.25rem; font-weight: 200; letter-spacing: 0.4rem; margin: 0; }
 
-        .btn-outline {
-            display: flex; align-items: center; gap: 0.5rem; border: 1px solid var(--border); background: white;
-            padding: 0.5rem 1.2rem; border-radius: 0.5rem; font-size: 0.8rem; cursor: pointer; font-family: var(--font-sans);
+        /* ミュートボタン（右下固定） */
+        .audio-control {
+            position: fixed; bottom: 2rem; right: 2rem; z-index: 1000;
+            background: white; border: 1px solid var(--border); width: 3rem; height: 3rem;
+            border-radius: 50%; display: flex; align-items: center; justify-content: center;
+            cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.05); color: var(--muted-foreground);
         }
 
         .kigo-section { text-align: center; margin: 3rem 0 6rem; width: 100%; padding: 0 1rem; box-sizing: border-box; }
         .kigo-label { font-family: var(--font-serif); font-size: 0.8rem; color: var(--muted-foreground); margin-bottom: 2rem; letter-spacing: 0.3rem; }
-        
         .kigo-word { font-family: var(--font-serif); font-size: 4rem; font-weight: 200; letter-spacing: 1.2rem; margin: 0; text-indent: 1.2rem; cursor: pointer; user-select: none; }
-        
-        /* 説明文：中身が入るまで少し余白を確保 */
-        .kigo-description { max-width: 28rem; margin: 2rem auto 0; font-size: 0.95rem; color: #444; line-height: 2.2; text-align: left; display: none; padding: 1rem; border-left: 1px solid #eee; min-height: 1em; }
+        .kigo-description { max-width: 28rem; margin: 2rem auto 0; font-size: 0.95rem; color: #444; line-height: 2.2; text-align: left; display: none; padding: 1rem; border-left: 1px solid #eee; }
         
         .btn-write {
             display: inline-flex; align-items: center; gap: 0.8rem; margin-top: 4rem; border: 1px solid var(--foreground);
             padding: 1.25rem 3.5rem; border-radius: 3rem; background: white; font-family: var(--font-serif); font-size: 1.1rem; letter-spacing: 0.3rem; cursor: pointer;
         }
 
+        /* 投稿カード */
         .card { background-color: var(--card); border: 1px solid var(--border); border-radius: var(--radius-xl); box-shadow: 0 12px 40px -12px rgba(0, 0, 0, 0.08); width: 100%; max-width: 42rem; margin-bottom: 3.5rem; overflow: hidden; }
         .card-inner { padding: 2.5rem; }
         .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; }
@@ -57,14 +58,19 @@
         .ai-label { display: flex; align-items: center; gap: 0.4rem; font-size: 0.75rem; color: var(--muted-foreground); margin-bottom: 1rem; font-family: var(--font-serif); }
         .ai-box { font-family: var(--font-sans); font-size: 0.95rem; color: #555; line-height: 2; }
 
+        /* エディタ */
         #editor-container { display: none; width: 100%; max-width: 42rem; margin-bottom: 5rem; }
-        .editor-card { background: white; border: 1px solid var(--border); border-radius: var(--radius-xl); padding: 3rem; box-shadow: 0 30px 60px -20px rgba(0,0,0,0.12); }
+        .editor-card { background: white; border: 1px solid var(--border); border-radius: var(--radius-xl); padding: 3rem; box-shadow: 0 30px 60px -20px rgba(0,0,0,0.12); position: relative; }
         .input-label { font-family: var(--font-serif); font-size: 0.85rem; margin-bottom: 0.8rem; display: block; }
         .input-minimal { width: 100%; border: 1px solid #eee; border-radius: 0.5rem; padding: 1rem; font-family: var(--font-sans); margin-bottom: 2rem; box-sizing: border-box; font-size: 1rem; outline: none; font-weight: 200; }
-        textarea.input-minimal { height: 250px; resize: none; }
-        .btn-submit { background: var(--foreground); color: white; border: none; padding: 1.1rem 3rem; border-radius: 3rem; cursor: pointer; font-family: var(--font-serif); font-size: 1rem; letter-spacing: 0.2rem; float: right; }
+        textarea.input-minimal { height: 250px; resize: none; margin-bottom: 0.5rem; }
+        
+        /* 文字数カウンター */
+        .char-count { text-align: right; font-size: 0.8rem; color: var(--muted-foreground); margin-bottom: 2rem; }
+        .char-count.limit { color: #ef4444; }
 
-        .material-symbols-outlined { vertical-align: middle; font-size: 1.2rem; }
+        .btn-submit { background: var(--foreground); color: white; border: none; padding: 1.1rem 3rem; border-radius: 3rem; cursor: pointer; font-family: var(--font-serif); font-size: 1rem; letter-spacing: 0.2rem; float: right; }
+        .material-symbols-outlined { vertical-align: middle; }
         main { width: 100%; display: flex; flex-direction: column; align-items: center; padding: 0 1.5rem; box-sizing: border-box; }
         .timeline-title { font-family: var(--font-serif); font-size: 0.9rem; margin: 6rem 0 4rem; color: var(--muted-foreground); letter-spacing: 0.5rem; }
     </style>
@@ -78,11 +84,17 @@
     </button>
 </header>
 
+<div id="audio-toggle" class="audio-control" onclick="toggleAudio()">
+    <span id="audio-icon" class="material-symbols-outlined">volume_off</span>
+</div>
+
+<audio id="bgm" loop src="https://res.cloudinary.com/dh6zibjr8/video/upload/v1769330871/kigo-bgm_t0r9ai.mp3"></audio>
+
 <main>
     <section class="kigo-section">
         <div class="kigo-label">今日の季語</div>
-        <div id="kigo-display" class="kigo-word" onclick="toggleKigoDescription()">読み込み中...</div>
-        <div id="kigo-desc-area" class="kigo-description">説明を読み込んでいます...</div>
+        <div id="kigo-display" class="kigo-word" onclick="toggleKigoDescription()">...</div>
+        <div id="kigo-desc-area" class="kigo-description"></div>
         <button id="toggle-editor" class="btn-write"><span class="material-symbols-outlined">edit_note</span>綴る</button>
     </section>
 
@@ -91,7 +103,8 @@
             <span class="input-label">ペンネーム</span>
             <input type="text" id="pen-name" class="input-minimal" placeholder="私">
             <span class="input-label" id="content-label">文章</span>
-            <textarea id="post-content" class="input-minimal" placeholder="物語を綴ってください..."></textarea>
+            <textarea id="post-content" class="input-minimal" maxlength="300" placeholder="物語を綴ってください..."></textarea>
+            <div id="char-counter" class="char-count">0 / 300</div>
             <div style="overflow: hidden; width: 100%;">
                 <button class="btn-outline" onclick="closeEditor()" style="float: left; padding: 1rem 2rem;">戻る</button>
                 <button id="btn-save" class="btn-submit">物語を綴る</button>
@@ -111,15 +124,23 @@
     const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
     let currentKigo = "";
+    const bgm = document.getElementById('bgm');
+    const audioIcon = document.getElementById('audio-icon');
 
-    // どのタイミングでも動くように、関数の定義を最優先
+    // 音楽再生・停止の切り替え
+    function toggleAudio() {
+        if (bgm.paused) {
+            bgm.play();
+            audioIcon.innerText = 'volume_up';
+        } else {
+            bgm.pause();
+            audioIcon.innerText = 'volume_off';
+        }
+    }
+
     function toggleKigoDescription() {
         const descArea = document.getElementById('kigo-desc-area');
-        if (descArea.style.display === 'block') {
-            descArea.style.display = 'none';
-        } else {
-            descArea.style.display = 'block';
-        }
+        descArea.style.display = (descArea.style.display === 'block') ? 'none' : 'block';
     }
 
     async function init() {
@@ -138,10 +159,19 @@
         } catch (e) {
             currentKigo = "大寒";
             document.getElementById('kigo-display').innerText = currentKigo;
-            document.getElementById('kigo-desc-area').innerText = "一年で最も寒い時期です。";
         }
         loadPosts();
     }
+
+    // 文字数カウンターの制御
+    const textarea = document.getElementById('post-content');
+    const counter = document.getElementById('char-counter');
+    textarea.addEventListener('input', () => {
+        const len = textarea.value.length;
+        counter.innerText = `${len} / 300`;
+        if (len >= 300) counter.classList.add('limit');
+        else counter.classList.remove('limit');
+    });
 
     function closeEditor() { 
         document.getElementById('editor-container').style.display = 'none'; 
@@ -152,11 +182,17 @@
         document.getElementById('editor-container').style.display = 'block'; 
         document.getElementById('toggle-editor').style.display = 'none'; 
         document.getElementById('editor-container').scrollIntoView({ behavior: 'smooth' }); 
+        
+        // 【地蔵仕様】綴るボタンを押したときに音楽を開始
+        if (bgm.paused) {
+            bgm.play();
+            audioIcon.innerText = 'volume_up';
+        }
     });
 
     document.getElementById('btn-save').addEventListener('click', async () => {
         const penName = document.getElementById('pen-name').value || '私';
-        const content = document.getElementById('post-content').value;
+        const content = textarea.value;
         const err = document.getElementById('error-msg');
 
         if (!content.includes(currentKigo)) { 
@@ -206,7 +242,6 @@
         });
     }
     
-    // 最後に初期化を実行
     init();
 </script>
 </body>
