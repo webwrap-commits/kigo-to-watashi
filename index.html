@@ -31,13 +31,17 @@
         .btn-outline { display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.5rem 1rem; border-radius: 0.5rem; font-size: 0.75rem; }
 
         .kigo-section { text-align: center; margin: 2rem 0 4rem; width: 100%; padding: 0 1.5rem; box-sizing: border-box; }
-        .kigo-label { font-family: var(--font-serif); font-size: 0.7rem; color: var(--muted-foreground); margin-bottom: 1rem; letter-spacing: 0.3rem; }
+        
+        /* 3. 「今日の季語」ラベルをタイムラインのAIメッセージと同じサイズ・フォントに */
+        .kigo-label { font-family: var(--font-sans); font-size: 0.8rem; color: var(--muted-foreground); margin-bottom: 1rem; letter-spacing: 0.2rem; }
+        
         .kigo-word { font-family: var(--font-serif); font-size: 2.8rem; font-weight: 200; letter-spacing: 0.8rem; margin: 0; cursor: pointer; display: inline-block; color: var(--foreground); }
         
+        /* 1. 季語の説明文を投稿文と同じサイズに */
         #kigo-desc-area { 
-            max-width: 24rem; margin: 1.5rem auto 0; font-size: 0.8rem; color: #555; line-height: 1.8; 
+            max-width: 24rem; margin: 1.5rem auto 0; font-size: 0.9rem; color: #555; line-height: 1.8; 
             text-align: left; display: none; padding: 1.2rem; border: 1px solid #eee; background: #fafafa; border-radius: 0.5rem;
-            word-break: break-all;
+            word-break: break-all; font-family: var(--font-sans);
         }
 
         .audio-control-btn {
@@ -45,10 +49,12 @@
             display: flex; align-items: center; gap: 0.5rem; font-size: 0.65rem; color: var(--muted-foreground) !important; margin: 1.5rem auto;
         }
 
+        /* 2. 綴るボタンのアイコンとテキストのズレを解消 */
         .btn-write {
-            display: inline-flex; align-items: center; gap: 0.8rem; margin-top: 1rem; border: 1px solid var(--foreground) !important;
+            display: inline-flex; align-items: center; justify-content: center; gap: 0.8rem; margin-top: 1rem; border: 1px solid var(--foreground) !important;
             padding: 0.8rem 2.5rem; border-radius: 3rem; font-family: var(--font-serif); font-size: 0.95rem; letter-spacing: 0.2rem;
         }
+        .btn-write span { vertical-align: middle; line-height: 1; }
 
         #posts-list { width: 100%; max-width: 42rem; padding: 0 1.5rem 5rem; box-sizing: border-box; }
         .card { background-color: var(--card); border: 1px solid var(--border); border-radius: var(--radius-xl); margin-bottom: 2rem; overflow: hidden; }
@@ -62,6 +68,16 @@
 
         #editor-container { display: none; width: 100%; max-width: 42rem; padding: 0 1.5rem 5rem; box-sizing: border-box; }
         .editor-box { background: white; border: 1px solid var(--border); border-radius: var(--radius-xl); padding: 1.5rem; }
+        
+        /* 4. 投稿フォームの入力エリア修正 */
+        #pen-name, #post-content {
+            width: 100%; padding: 0.8rem; border: 1px solid #eee; border-radius: 0.4rem; box-sizing: border-box;
+            font-family: var(--font-sans); font-size: 0.9rem; font-weight: 200; color: var(--foreground);
+        }
+        #pen-name::placeholder, #post-content::placeholder { font-weight: 200; color: var(--muted-foreground); }
+        #pen-name { margin-bottom: 1rem; }
+        #post-content { height: 180px; resize: none; } /* 高さを少し高く（120px→180px） */
+
         .btn-submit { background: var(--foreground) !important; color: white !important; padding: 0.8rem; border-radius: 3rem; font-family: var(--font-serif); font-size: 0.9rem; width: 100%; margin-top: 1rem; border: none !important; }
 
         @media (max-width: 640px) {
@@ -87,7 +103,7 @@
     <section class="kigo-section">
         <div class="kigo-label">今日の季語</div>
         <div id="kigo-display" class="kigo-word">鷽替え</div>
-        <div id="kigo-desc-area">鷽（うそ）という鳥を木彫りにしたものを掛け替え、前年の災厄を嘘（うそ）にして吉運に替えるという天満宮の神事です。</div>
+        <div id="kigo-desc-area"></div>
         
         <button id="audio-toggle" class="audio-control-btn">
             <span id="audio-icon" class="material-symbols-outlined" style="font-size: 1rem;">volume_off</span>
@@ -99,8 +115,8 @@
 
     <div id="editor-container">
         <div class="editor-box">
-            <input type="text" id="pen-name" style="width:100%; padding:0.8rem; margin-bottom:1rem; border:1px solid #eee; border-radius:0.4rem; box-sizing:border-box;" placeholder="ペンネーム（私）">
-            <textarea id="post-content" maxlength="300" style="width:100%; height:120px; padding:0.8rem; border:1px solid #eee; border-radius:0.4rem; box-sizing:border-box; resize:none;" placeholder="物語を綴ってください..."></textarea>
+            <input type="text" id="pen-name" placeholder="ペンネーム（私）">
+            <textarea id="post-content" maxlength="300" placeholder="物語を綴ってください..."></textarea>
             <button id="btn-save" class="btn-submit">物語を綴る</button>
             <div onclick="closeEditor()" style="text-align:center; padding:1rem; font-size:0.8rem; color:var(--muted-foreground); cursor:pointer;">戻る</div>
             <p id="error-msg" style="color:#ef4444; font-size:0.75rem; text-align:center;"></p>
@@ -156,8 +172,12 @@
                     const parts = line.split('\t');
                     if (parts.length >= 3) {
                         currentKigo = parts[1].trim();
+                        const yomi = parts[3] ? parts[3].trim() : ""; // CSVの4列目に読みがあると仮定
                         document.getElementById('kigo-display').innerText = currentKigo;
-                        document.getElementById('kigo-desc-area').innerText = parts[2].trim();
+                        // 5. 読み方の表示設定
+                        let descHtml = parts[2].trim();
+                        if(yomi) descHtml = `読み方：${yomi}<br><br>${descHtml}`;
+                        document.getElementById('kigo-desc-area').innerHTML = descHtml;
                     }
                     break;
                 }
@@ -181,36 +201,28 @@
         toggleAudio(true);
     };
 
-    // 物語を綴るボタンの修正：音楽を止めないためにリロードを廃止
     document.getElementById('btn-save').onclick = async () => {
         const content = document.getElementById('post-content').value;
         const penName = document.getElementById('pen-name').value || '私';
-        
         if (!content.includes(currentKigo)) {
             document.getElementById('error-msg').innerText = `「${currentKigo}」を入れてください。`;
             return;
         }
-
         document.getElementById('btn-save').disabled = true;
         document.getElementById('btn-save').innerText = "綴っています...";
-
         const { error } = await supabaseClient.from('posts').insert([{
             content, kigo: currentKigo, pen_name: penName, is_public: true, biyori_message: "ことば日和が読み解いています..."
         }]);
-
         if (!error) {
-            // 入力欄をクリアしてエディタを閉じる
             document.getElementById('post-content').value = "";
             document.getElementById('pen-name').value = "";
             closeEditor();
             document.getElementById('btn-save').disabled = false;
             document.getElementById('btn-save').innerText = "物語を綴る";
-            // タイムラインだけを更新（音楽はそのまま）
             loadPosts();
         } else {
             document.getElementById('error-msg').innerText = "通信に失敗しました。";
             document.getElementById('btn-save').disabled = false;
-            document.getElementById('btn-save').innerText = "物語を綴る";
         }
     };
 
