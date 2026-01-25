@@ -105,11 +105,6 @@
     const bgm = document.getElementById('bgm');
     bgm.volume = 0.3;
 
-    document.addEventListener("visibilitychange", () => {
-        if (document.visibilityState === "hidden") { bgm.pause(); updateAudioUI(false); }
-        else if (sessionStorage.getItem('kigo_muted') === 'false') { bgm.play().catch(() => {}); updateAudioUI(true); }
-    });
-
     const etoInfo = [
         { name: "子", angle: 0, desc: "子だくさんのネズミのように、子孫繁栄や物事の始まりに良い日。お守りを作るのにも向いています。" },
         { name: "丑", angle: 30, desc: "粘り強く歩む牛のように、じっくり取り組むのに良い日。天神様の使いともされ、学問や誠実さを象徴します。" },
@@ -125,15 +120,18 @@
         { name: "亥", angle: 330, desc: "猪突猛進するイノシシのように、情熱を持って進む日。また火の用心を心がけ、無病息災を願う日でもあります。" }
     ];
 
+    function getNowJST() {
+        return new Date(new Date().toLocaleString("en-US", {timeZone: "Asia/Tokyo"}));
+    }
+
     function calculateEto() {
-        const now = new Date();
-        const jstTime = now.getTime() + (now.getTimezoneOffset() + 540) * 60000;
-        const today = new Date(jstTime);
-        today.setHours(0,0,0,0);
-        // 1/26(月)が子(0)になるよう調整
-        const baseDate = new Date(2026, 0, 26);
-        const diffDays = Math.round((today - baseDate) / 86400000);
-        let idx = diffDays % 12; if(idx < 0) idx += 12;
+        const now = getNowJST();
+        now.setHours(0,0,0,0);
+        const base = new Date("2026/01/26");
+        base.setHours(0,0,0,0);
+        // 1/26を 0（子）とするための直接計算
+        const diff = Math.floor((now.getTime() - base.getTime()) / 86400000);
+        let idx = diff % 12; if(idx < 0) idx += 12;
         const info = etoInfo[idx];
         document.getElementById('eto-today-label').innerText = `今日は ${info.name} の日`;
         document.getElementById('eto-description').innerText = info.desc;
@@ -148,11 +146,10 @@
         try {
             const res = await fetch(`https://raw.githubusercontent.com/miu-fukada/kotoba-biyori/main/kigo.csv?t=${Date.now()}`);
             const csv = await res.text();
-            const now = new Date();
-            const jstTime = now.getTime() + (now.getTimezoneOffset() + 540) * 60000;
-            const today = new Date(jstTime);
-            const key = `${String(today.getMonth()+1).padStart(2,'0')}-${String(today.getDate()).padStart(2,'0')}`;
-            for (let line of csv.split(/\r?\n/)) {
+            const now = getNowJST();
+            const key = `${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`;
+            const lines = csv.split(/\r?\n/);
+            for (let line of lines) {
                 const p = line.split('\t');
                 if (p[0] === key) {
                     currentKigo = p[1].trim();
@@ -161,6 +158,7 @@
                     return;
                 }
             }
+            document.getElementById('kigo-display').innerText = "初天神"; // フォールバック
         } catch (e) { document.getElementById('kigo-display').innerText = "初天神"; }
     }
 
