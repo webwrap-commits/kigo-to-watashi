@@ -53,7 +53,7 @@
 </head>
 <body>
 <header>
-    <h1 onclick="showTimeline()">季語と私の綴りごと</h1>
+    <h1 onclick="location.reload()">季語と私の綴りごと</h1>
     <button id="header-btn" class="btn-outline" onclick="handleHeaderBtnClick()">
         <span id="header-btn-icon" class="material-symbols-outlined" style="font-size: 1rem;">person</span>
         <span id="header-btn-text">マイページ</span>
@@ -64,7 +64,7 @@
     <div id="timeline-view" class="active">
         <section class="kigo-section">
             <div class="kigo-label">今日の季語</div>
-            <div id="kigo-display" class="kigo-word">読み込み中...</div>
+            <div id="kigo-display" class="kigo-word">...</div>
             <div id="kigo-desc-area"></div>
             <button id="audio-toggle" class="audio-control-btn"><span id="audio-icon" class="material-symbols-outlined" style="font-size: 1rem;">volume_off</span><span id="audio-text">静寂の中</span></button>
             <button id="toggle-editor" class="btn-write"><span class="material-symbols-outlined">edit_note</span>綴る</button>
@@ -102,20 +102,13 @@
     const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNpa2x5d2hxc3didWpzb2dxaXZhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njg5MzAyNzcsImV4cCI6MjA4NDUwNjI3N30._REwuc__qmpW1eQVhfm-RvsoMJCGYXjqtqBVn4w48Oc';
     const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
     let currentKigo = "";
-    let lastDateString = "";
-    let isMypage = false;
     const bgm = document.getElementById('bgm');
     bgm.volume = 0.3;
 
-    // 音楽停止制御
+    // 音声の停止制御
     document.addEventListener("visibilitychange", () => {
-        if (document.visibilityState === "hidden") {
-            bgm.pause();
-            updateAudioUI(false);
-        } else if (sessionStorage.getItem('kigo_muted') === 'false') {
-            bgm.play().catch(() => {});
-            updateAudioUI(true);
-        }
+        if (document.visibilityState === "hidden") { bgm.pause(); updateAudioUI(false); }
+        else if (sessionStorage.getItem('kigo_muted') === 'false') { bgm.play().catch(() => {}); updateAudioUI(true); }
     });
 
     const etoInfo = [
@@ -133,81 +126,44 @@
         { name: "亥", angle: 330, desc: "猪突猛進するイノシシのように、情熱を持って進む日。また火の用心を心がけ、無病息災を願う日でもあります。" }
     ];
 
-    function getJSTDate() { const now = new Date(); return new Date(now.getTime() + (now.getTimezoneOffset() + 540) * 60000); }
-
     function calculateEto() {
-        const nowJST = getJSTDate(); nowJST.setHours(0, 0, 0, 0);
-        // 1/26(月)が「子(0)」になるように調整。2026/01/26を基準。
-        const baseDate = new Date('2026/01/26'); baseDate.setHours(0, 0, 0, 0);
-        const diffDays = Math.round((nowJST.getTime() - baseDate.getTime()) / 86400000);
-        let etoIndex = (0 + diffDays) % 12; if (etoIndex < 0) etoIndex += 12;
-        const info = etoInfo[etoIndex];
-        const label = document.getElementById('eto-today-label');
-        const desc = document.getElementById('eto-description');
-        const pointer = document.getElementById('eto-pointer');
-        if(label) label.innerText = `今日は ${info.name} の日`;
-        if(desc) desc.innerText = info.desc;
-        if(pointer) {
-            const size = window.innerWidth <= 640 ? 240 : 280;
-            const radius = (size / 2) - 15;
-            const rad = (info.angle - 90) * (Math.PI / 180);
-            pointer.style.left = `${(size / 2) + radius * Math.cos(rad)}px`;
-            pointer.style.top = `${(size / 2) + radius * Math.sin(rad)}px`;
-        }
+        const now = new Date();
+        const jstNow = new Date(now.toLocaleString("en-US", {timeZone: "Asia/Tokyo"}));
+        jstNow.setHours(0,0,0,0);
+        // 基準日: 2026年1月26日(月) = 子(0)
+        const baseDate = new Date("2026-01-26T00:00:00+09:00");
+        const diffDays = Math.floor((jstNow - baseDate) / (1000 * 60 * 60 * 24));
+        let idx = diffDays % 12; if(idx < 0) idx += 12;
+        const info = etoInfo[idx];
+        document.getElementById('eto-today-label').innerText = `今日は ${info.name} の日`;
+        document.getElementById('eto-description').innerText = info.desc;
+        const size = window.innerWidth <= 640 ? 240 : 280;
+        const rad = (info.angle - 90) * (Math.PI / 180);
+        const p = document.getElementById('eto-pointer');
+        p.style.left = `${(size/2) + (size/2-15) * Math.cos(rad)}px`;
+        p.style.top = `${(size/2) + (size/2-15) * Math.sin(rad)}px`;
     }
 
     async function fetchKigo() {
-        const display = document.getElementById('kigo-display');
-        const descArea = document.getElementById('kigo-desc-area');
         try {
             const res = await fetch(`https://raw.githubusercontent.com/miu-fukada/kotoba-biyori/main/kigo.csv?t=${Date.now()}`);
             const csv = await res.text();
-            const nowJST = getJSTDate();
-            const todayKey = `${String(nowJST.getMonth() + 1).padStart(2, '0')}-${String(nowJST.getDate()).padStart(2, '0')}`;
+            const now = new Date();
+            const jstNow = new Date(now.toLocaleString("en-US", {timeZone: "Asia/Tokyo"}));
+            const key = `${String(jstNow.getMonth()+1).padStart(2,'0')}-${String(jstNow.getDate()).padStart(2,'0')}`;
             const lines = csv.split(/\r?\n/);
             for (let line of lines) {
-                const parts = line.split('\t');
-                if (parts[0] === todayKey) {
-                    currentKigo = parts[1].trim();
-                    const kigoDesc = parts[2] ? parts[2].trim() : "";
-                    const kigoYomi = parts[3] ? parts[3].trim() : "";
-                    if(display) display.innerText = currentKigo;
-                    if(descArea) descArea.innerHTML = kigoYomi ? `読み方：${kigoYomi}<br><br>${kigoDesc}` : kigoDesc;
+                const p = line.split('\t');
+                if (p[0] === key) {
+                    currentKigo = p[1].trim();
+                    document.getElementById('kigo-display').innerText = currentKigo;
+                    document.getElementById('kigo-desc-area').innerHTML = p[3] ? `読み方：${p[3]}<br><br>${p[2]}` : p[2];
                     return;
                 }
             }
-        } catch (e) { console.error(e); }
+        } catch (e) { document.getElementById('kigo-display').innerText = "初天神"; }
     }
 
-    function updateClock() {
-        const dateString = getJSTDate().toLocaleDateString();
-        // 日付文字列が変わったら強制リロードして情報を刷新
-        if (lastDateString !== "" && dateString !== lastDateString) {
-            location.reload(); 
-        }
-        lastDateString = dateString;
-    }
-
-    function handleHeaderBtnClick() { isMypage ? showTimeline() : showMypage(); }
-    function showTimeline() {
-        isMypage = false; document.getElementById('timeline-view').classList.add('active');
-        document.getElementById('mypage-view').classList.remove('active');
-        document.getElementById('header-btn-icon').innerText = 'person';
-        document.getElementById('header-btn-text').innerText = 'マイページ';
-        loadPosts();
-    }
-    function showMypage() {
-        isMypage = true; document.getElementById('timeline-view').classList.remove('active');
-        document.getElementById('mypage-view').classList.add('active');
-        document.getElementById('header-btn-icon').innerText = 'arrow_back';
-        document.getElementById('header-btn-text').innerText = 'もどる';
-        calculateEto(); loadMyPosts();
-    }
-    function switchTab(type) {
-        document.querySelectorAll('.tab-btn').forEach(t => t.classList.remove('active'));
-        document.getElementById('tab-' + type).classList.add('active');
-        type === 'my' ? loadMyPosts() : loadSavedPosts();
-    }
     async function loadPosts() {
         const { data } = await supabaseClient.from('posts').select('*').order('created_at', { ascending: false });
         renderPosts(data, 'posts-list', true);
@@ -221,49 +177,32 @@
         list.innerHTML = ''; const saved = JSON.parse(localStorage.getItem('saved_posts') || '[]');
         posts?.forEach(post => {
             const isSaved = saved.some(p => p.id === post.id);
-            const card = document.createElement('div'); card.className = 'card';
-            card.innerHTML = `<div class="card-inner">
+            list.innerHTML += `<div class="card"><div class="card-inner">
                 <div style="display:flex; justify-content:space-between; align-items:baseline;"><span class="pen-name">${post.pen_name}</span><span class="post-date">${new Date(post.created_at).toLocaleDateString()}</span></div>
                 <div class="card-content">${post.content.split(post.kigo).join(`<strong>${post.kigo}</strong>`)}</div>
                 ${showSaveIcon ? `<span class="material-symbols-outlined btn-save-post ${isSaved ? 'saved' : ''}" onclick='toggleSavePost("${post.id}", ${JSON.stringify(post).replace(/'/g, "\\'")})'>${isSaved ? 'bookmark' : 'bookmark_add'}</span>` : ''}
-            </div><div class="ai-footer"><div class="ai-box">${post.biyori_message || '...'}</div></div>`;
-            list.appendChild(card);
+            </div><div class="ai-footer"><div class="ai-box">${post.biyori_message || '...'}</div></div></div>`;
         });
     }
-    function toggleSavePost(postId, postData) {
-        let saved = JSON.parse(localStorage.getItem('saved_posts') || '[]');
-        const idx = saved.findIndex(p => p.id === postId);
-        if (idx > -1) { saved.splice(idx, 1); alert('解除しました'); } else { saved.push(postData); alert('保存しました'); }
-        localStorage.setItem('saved_posts', JSON.stringify(saved)); loadPosts();
-    }
-    async function loadSavedPosts() {
-        const saved = JSON.parse(localStorage.getItem('saved_posts') || '[]');
-        const list = document.getElementById('mypage-posts-list'); list.innerHTML = '';
-        if (saved.length === 0) { list.innerHTML = '<p style="text-align:center; font-size:0.8rem; color:gray; margin-top:3rem;">保存した投稿はありません</p>'; return; }
-        renderPosts(saved, 'mypage-posts-list', true);
-    }
-    function toggleAudio(force = false) {
-        if (force || (bgm.paused && sessionStorage.getItem('kigo_muted') !== 'true')) {
-            bgm.play().then(() => { updateAudioUI(true); sessionStorage.setItem('kigo_muted', 'false'); }).catch(() => {});
-        } else { bgm.pause(); updateAudioUI(false); sessionStorage.setItem('kigo_muted', 'true'); }
-    }
-    function updateAudioUI(playing) { document.getElementById('audio-icon').innerText = playing ? 'volume_up' : 'volume_off'; document.getElementById('audio-text').innerText = playing ? '音楽が流れています' : '静寂の中'; }
+
+    function showTimeline() { document.getElementById('timeline-view').classList.add('active'); document.getElementById('mypage-view').classList.remove('active'); document.getElementById('header-btn-text').innerText = 'マイページ'; loadPosts(); }
+    function showMypage() { document.getElementById('timeline-view').classList.remove('active'); document.getElementById('mypage-view').classList.add('active'); document.getElementById('header-btn-text').innerText = 'もどる'; calculateEto(); loadMyPosts(); }
+    function handleHeaderBtnClick() { document.getElementById('timeline-view').classList.contains('active') ? showMypage() : showTimeline(); }
     function closeEditor() { document.getElementById('editor-container').style.display = 'none'; document.getElementById('toggle-editor').style.display = 'inline-flex'; }
-    document.getElementById('toggle-editor').onclick = () => { document.getElementById('editor-container').style.display = 'block'; document.getElementById('toggle-editor').style.display = 'none'; toggleAudio(true); };
+    function updateAudioUI(playing) { document.getElementById('audio-icon').innerText = playing ? 'volume_up' : 'volume_off'; document.getElementById('audio-text').innerText = playing ? '音楽が流れています' : '静寂の中'; }
+    function toggleAudio() { if (bgm.paused) { bgm.play().then(() => { updateAudioUI(true); sessionStorage.setItem('kigo_muted', 'false'); }).catch(() => {}); } else { bgm.pause(); updateAudioUI(false); sessionStorage.setItem('kigo_muted', 'true'); } }
+    
+    document.getElementById('toggle-editor').onclick = () => { document.getElementById('editor-container').style.display = 'block'; document.getElementById('toggle-editor').style.display = 'none'; };
     document.getElementById('kigo-display').onclick = () => { const a = document.getElementById('kigo-desc-area'); a.style.display = a.style.display === 'block' ? 'none' : 'block'; };
+    document.getElementById('audio-toggle').onclick = toggleAudio;
     document.getElementById('btn-save').onclick = async () => {
-        const content = document.getElementById('post-content').value; const pen = document.getElementById('pen-name').value || '私';
+        const content = document.getElementById('post-content').value;
         if (!content.includes(currentKigo)) { document.getElementById('error-msg').innerText = `「${currentKigo}」を入れてください。`; return; }
-        document.getElementById('btn-save').disabled = true;
-        const { error } = await supabaseClient.from('posts').insert([{ content, kigo: currentKigo, pen_name: pen, is_public: true, biyori_message: "ことば日和が読み解いています..." }]);
-        if (!error) { document.getElementById('post-content').value = ""; document.getElementById('pen-name').value = ""; closeEditor(); document.getElementById('btn-save').disabled = false; loadPosts(); }
+        await supabaseClient.from('posts').insert([{ content, kigo: currentKigo, pen_name: document.getElementById('pen-name').value || '私', biyori_message: "読み解いています..." }]);
+        location.reload();
     };
-    window.onload = () => { 
-        lastDateString = getJSTDate().toLocaleDateString(); 
-        fetchKigo(); calculateEto(); loadPosts(); 
-        setInterval(updateClock, 30000); 
-    };
-    document.getElementById('audio-toggle').onclick = () => toggleAudio();
+
+    window.onload = () => { fetchKigo(); calculateEto(); loadPosts(); };
 </script>
 </body>
 </html>
