@@ -74,7 +74,7 @@
         .card-content { font-family: var(--font-sans); font-size: 0.9rem; line-height: 2; white-space: pre-wrap; color: #333; margin-top: 1rem; }
         
         .btn-save-post { position: absolute; bottom: 1.2rem; right: 1.2rem; color: var(--muted-foreground); cursor: pointer; font-size: 1.4rem; transition: color 0.3s; padding: 0.5rem; }
-        .btn-save-post.saved { color: #d4af37; } /* 保存済みは金色 */
+        .btn-save-post.saved { color: #d4af37; }
         
         .ai-footer { background-color: #fafafa; padding: 1rem 1.5rem; border-top: 1px solid #f0f0f0; }
         .ai-box { font-family: var(--font-sans); font-size: 0.8rem; color: #666; line-height: 1.7; }
@@ -176,12 +176,16 @@
     ];
 
     function calculateEto() {
-        // 2026年1月25日を「亥」にするための基準調整
+        // 2026年1月25日（己亥）を確実に「亥(index 11)」にするためのロジック
         const baseDate = new Date('2026-01-25');
         const today = new Date();
         today.setHours(0,0,0,0);
-        const diffDays = Math.floor((today - baseDate) / (24 * 60 * 60 * 1000));
-        let etoIndex = (11 + diffDays) % 12; // 11は亥のインデックス
+        
+        // 差分の日数
+        const diffDays = Math.floor((today.getTime() - baseDate.getTime()) / (24 * 60 * 60 * 1000));
+        
+        // 25日が「亥(11)」なので、(11 + 差分) を 12で割った余り
+        let etoIndex = (11 + diffDays) % 12;
         if (etoIndex < 0) etoIndex += 12;
         
         const info = etoInfo[etoIndex];
@@ -230,20 +234,19 @@
         else loadSavedPosts();
     }
 
-    // --- 保存機能の実装 ---
     function toggleSavePost(postId, postData) {
         let saved = JSON.parse(localStorage.getItem('saved_posts') || '[]');
         const index = saved.findIndex(p => p.id === postId);
         
         if (index > -1) {
-            saved.splice(index, 1); // 削除
+            saved.splice(index, 1);
             alert('保存を解除しました');
         } else {
-            saved.push(postData); // 追加
+            saved.push(postData);
             alert('物語を保存しました');
         }
         localStorage.setItem('saved_posts', JSON.stringify(saved));
-        loadPosts(); // タイムラインのアイコン表示更新
+        loadPosts();
     }
 
     async function loadSavedPosts() {
@@ -257,7 +260,6 @@
         renderPosts(saved, 'mypage-posts-list', true);
     }
 
-    // --- 既存の通信・表示系 ---
     function updateAudioUI(isPlaying) {
         document.getElementById('audio-icon').innerText = isPlaying ? 'volume_up' : 'volume_off';
         document.getElementById('audio-text').innerText = isPlaying ? '音楽が流れています' : '静寂の中';
