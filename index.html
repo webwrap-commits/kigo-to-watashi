@@ -25,16 +25,14 @@
             color: var(--foreground) !important;
             -webkit-tap-highlight-color: transparent;
             text-decoration: none !important; outline: none; border: 1px solid var(--border);
+            background: white; cursor: pointer;
         }
 
-        .btn-outline {
-            display: inline-flex; align-items: center; gap: 0.5rem; background: white;
-            padding: 0.5rem 1rem; border-radius: 0.5rem; font-size: 0.75rem; cursor: pointer;
-        }
+        .btn-outline { display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.5rem 1rem; border-radius: 0.5rem; font-size: 0.75rem; }
 
         .kigo-section { text-align: center; margin: 2rem 0 4rem; width: 100%; padding: 0 1.5rem; box-sizing: border-box; }
         .kigo-label { font-family: var(--font-serif); font-size: 0.7rem; color: var(--muted-foreground); margin-bottom: 1rem; letter-spacing: 0.3rem; }
-        .kigo-word { font-family: var(--font-serif); font-size: 2.8rem; font-weight: 200; letter-spacing: 0.8rem; margin: 0; cursor: pointer; display: inline-block; color: var(--foreground); }
+        .kigo-word { font-family: var(--font-serif); font-size: 2.8rem; font-weight: 200; letter-spacing: 0.8rem; margin: 0; display: inline-block; color: var(--foreground); }
         
         #kigo-desc-area { 
             max-width: 24rem; margin: 1.5rem auto 0; font-size: 0.8rem; color: #555; line-height: 1.8; 
@@ -44,12 +42,12 @@
 
         .audio-control-btn {
             background: none !important; border: 1px solid var(--border) !important; border-radius: 2rem; padding: 0.4rem 1rem;
-            display: flex; align-items: center; gap: 0.5rem; font-size: 0.65rem; color: var(--muted-foreground) !important; cursor: pointer; margin: 1.5rem auto;
+            display: flex; align-items: center; gap: 0.5rem; font-size: 0.65rem; color: var(--muted-foreground) !important; margin: 1.5rem auto;
         }
 
         .btn-write {
             display: inline-flex; align-items: center; gap: 0.8rem; margin-top: 1rem; border: 1px solid var(--foreground) !important;
-            padding: 0.8rem 2.5rem; border-radius: 3rem; background: white; font-family: var(--font-serif); font-size: 0.95rem; letter-spacing: 0.2rem; cursor: pointer;
+            padding: 0.8rem 2.5rem; border-radius: 3rem; font-family: var(--font-serif); font-size: 0.95rem; letter-spacing: 0.2rem;
         }
 
         #posts-list { width: 100%; max-width: 42rem; padding: 0 1.5rem 5rem; box-sizing: border-box; }
@@ -62,6 +60,7 @@
         .ai-footer { background-color: #fafafa; padding: 1rem 1.5rem; border-top: 1px solid #f0f0f0; }
         .ai-box { font-family: var(--font-sans); font-size: 0.8rem; color: #666; line-height: 1.7; }
 
+        /* 投稿フォーム：少し前の使い勝手の良いデザイン */
         #editor-container { display: none; width: 100%; max-width: 42rem; padding: 0 1.5rem 5rem; box-sizing: border-box; }
         .editor-box { background: white; border: 1px solid var(--border); border-radius: var(--radius-xl); padding: 1.5rem; }
         .btn-submit { background: var(--foreground) !important; color: white !important; padding: 0.8rem; border-radius: 3rem; font-family: var(--font-serif); font-size: 0.9rem; width: 100%; margin-top: 1rem; border: none !important; }
@@ -135,7 +134,7 @@
         }
     }
 
-    // ブラウザを閉じたら停止する設定
+    // 音の停止：正常に動いていた頃の設定
     document.addEventListener("visibilitychange", () => {
         if (document.hidden) bgm.pause();
         else if (sessionStorage.getItem('kigo_muted') === 'false') bgm.play().catch(() => {});
@@ -163,9 +162,10 @@
                 currentDesc = parts[2]?.trim() || "";
                 document.getElementById('kigo-display').innerText = currentKigo;
                 document.getElementById('kigo-desc-area').innerText = currentDesc;
+                // 最初から説明文をセット（表示・非表示の切り替えのみに）
             }
         } catch (e) { 
-            console.error("Kigo fetch error");
+            document.getElementById('kigo-display').innerText = "鷽替え";
         }
     }
 
