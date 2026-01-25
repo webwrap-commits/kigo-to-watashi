@@ -101,14 +101,26 @@
     const SUPABASE_URL = 'https://ciklywhqswbujsogqiva.supabase.co';
     const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNpa2x5d2hxc3didWpzb2dxaXZhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njg5MzAyNzcsImV4cCI6MjA4NDUwNjI3N30._REwuc__qmpW1eQVhfm-RvsoMJCGYXjqtqBVn4w48Oc';
     const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-    let currentKigo = "鷽替え";
+    let currentKigo = "";
     let lastDateString = "";
     let isMypage = false;
     const bgm = document.getElementById('bgm');
     bgm.volume = 0.3;
+
+    // 音楽停止制御
+    document.addEventListener("visibilitychange", () => {
+        if (document.visibilityState === "hidden") {
+            bgm.pause();
+            updateAudioUI(false);
+        } else if (sessionStorage.getItem('kigo_muted') === 'false') {
+            bgm.play().catch(() => {});
+            updateAudioUI(true);
+        }
+    });
+
     const etoInfo = [
         { name: "子", angle: 0, desc: "子だくさんのネズミのように、子孫繁栄や物事の始まりに良い日。お守りを作るのにも向いています。" },
-        { name: "丑", angle: 30, desc: "粘り強く歩む牛のように、じっくり取り組むのに良い日。夏の土用には「う」のつくもので元気を蓄えます。" },
+        { name: "丑", angle: 30, desc: "粘り強く歩む牛のように、じっくり取り組むのに良い日。天神様の使いともされ、学問や誠実さを象徴します。" },
         { name: "寅", angle: 60, desc: "黄金色の毛並みから、金運を呼び寄せる日。また、勢いよく戻ってくる力があるため、旅立ちにも良い日です。" },
         { name: "卯", angle: 90, desc: "ぴょんぴょん跳ねるウサギのように、物事がとんとん拍子に進む日。穏やかで、植物が芽吹くような明るさがあります。" },
         { name: "辰", angle: 120, desc: "力強い龍のエネルギーが溢れる日。大きな夢を描いたり、新しい一歩を力強く踏み出すのにぴったりです。" },
@@ -120,12 +132,15 @@
         { name: "戌", angle: 300, desc: "お産が軽く多産な犬にあやかり、安産や子供の健やかな成長を祈る日。家族の絆を深めるのに良い日です。" },
         { name: "亥", angle: 330, desc: "猪突猛進するイノシシのように、情熱を持って進む日。また火の用心を心がけ、無病息災を願う日でもあります。" }
     ];
+
     function getJSTDate() { const now = new Date(); return new Date(now.getTime() + (now.getTimezoneOffset() + 540) * 60000); }
+
     function calculateEto() {
         const nowJST = getJSTDate(); nowJST.setHours(0, 0, 0, 0);
-        const baseDate = new Date('2026/01/25'); baseDate.setHours(0, 0, 0, 0);
+        // 1/26(月)が「子(0)」になるように調整。2026/01/26を基準。
+        const baseDate = new Date('2026/01/26'); baseDate.setHours(0, 0, 0, 0);
         const diffDays = Math.round((nowJST.getTime() - baseDate.getTime()) / 86400000);
-        let etoIndex = (11 + diffDays) % 12; if (etoIndex < 0) etoIndex += 12;
+        let etoIndex = (0 + diffDays) % 12; if (etoIndex < 0) etoIndex += 12;
         const info = etoInfo[etoIndex];
         const label = document.getElementById('eto-today-label');
         const desc = document.getElementById('eto-description');
@@ -140,6 +155,7 @@
             pointer.style.top = `${(size / 2) + radius * Math.sin(rad)}px`;
         }
     }
+
     async function fetchKigo() {
         const display = document.getElementById('kigo-display');
         const descArea = document.getElementById('kigo-desc-area');
@@ -160,16 +176,18 @@
                     return;
                 }
             }
-            throw new Error();
-        } catch (e) { 
-            if(display) display.innerText = "鷽替え";
-            if(descArea) descArea.innerHTML = "天神様の縁日で、前年の嘘を誠に替えるという木彫りの鳥。幸せを願う神事です。";
-        }
+        } catch (e) { console.error(e); }
     }
+
     function updateClock() {
         const dateString = getJSTDate().toLocaleDateString();
-        if (dateString !== lastDateString) { lastDateString = dateString; fetchKigo(); calculateEto(); }
+        // 日付文字列が変わったら強制リロードして情報を刷新
+        if (lastDateString !== "" && dateString !== lastDateString) {
+            location.reload(); 
+        }
+        lastDateString = dateString;
     }
+
     function handleHeaderBtnClick() { isMypage ? showTimeline() : showMypage(); }
     function showTimeline() {
         isMypage = false; document.getElementById('timeline-view').classList.add('active');
@@ -240,7 +258,11 @@
         const { error } = await supabaseClient.from('posts').insert([{ content, kigo: currentKigo, pen_name: pen, is_public: true, biyori_message: "ことば日和が読み解いています..." }]);
         if (!error) { document.getElementById('post-content').value = ""; document.getElementById('pen-name').value = ""; closeEditor(); document.getElementById('btn-save').disabled = false; loadPosts(); }
     };
-    window.onload = () => { lastDateString = getJSTDate().toLocaleDateString(); fetchKigo(); calculateEto(); loadPosts(); setInterval(updateClock, 60000); };
+    window.onload = () => { 
+        lastDateString = getJSTDate().toLocaleDateString(); 
+        fetchKigo(); calculateEto(); loadPosts(); 
+        setInterval(updateClock, 30000); 
+    };
     document.getElementById('audio-toggle').onclick = () => toggleAudio();
 </script>
 </body>
