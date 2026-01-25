@@ -19,16 +19,24 @@
         }
 
         header { width: 100%; max-width: 48rem; padding: 4rem 1.5rem 1rem; display: flex; justify-content: space-between; align-items: center; box-sizing: border-box; }
-        h1 { font-family: var(--font-serif); font-size: 1.2rem; font-weight: 200; letter-spacing: 0.3rem; margin: 0; }
+        h1 { font-family: var(--font-serif); font-size: 1.2rem; font-weight: 200; letter-spacing: 0.3rem; margin: 0; color: var(--foreground); }
+
+        /* ボタンの青文字化を防ぐ設定 */
+        button, .btn-outline, .btn-write, .btn-submit {
+            color: var(--foreground);
+            -webkit-tap-highlight-color: transparent;
+            text-decoration: none;
+            outline: none;
+        }
 
         .btn-outline {
             display: inline-flex; align-items: center; gap: 0.5rem; border: 1px solid var(--border); background: white;
-            padding: 0.5rem 1rem; border-radius: 0.5rem; font-size: 0.8rem; cursor: pointer; color: var(--foreground);
+            padding: 0.5rem 1rem; border-radius: 0.5rem; font-size: 0.8rem; cursor: pointer;
         }
 
         .kigo-section { text-align: center; margin: 2rem 0 4rem; width: 100%; padding: 0 1.5rem; box-sizing: border-box; }
         .kigo-label { font-family: var(--font-serif); font-size: 0.75rem; color: var(--muted-foreground); margin-bottom: 1rem; letter-spacing: 0.3rem; }
-        .kigo-word { font-family: var(--font-serif); font-size: 3rem; font-weight: 200; letter-spacing: 0.8rem; margin: 0; cursor: pointer; display: inline-block; }
+        .kigo-word { font-family: var(--font-serif); font-size: 3rem; font-weight: 200; letter-spacing: 0.8rem; margin: 0; cursor: pointer; display: inline-block; color: var(--foreground); }
         
         #kigo-desc-area { 
             max-width: 28rem; margin: 1.5rem auto 0; font-size: 0.85rem; color: #555; line-height: 2; 
@@ -48,7 +56,7 @@
         .timeline-title { font-family: var(--font-serif); font-size: 1rem; margin: 5rem 0 3rem; color: var(--muted-foreground); letter-spacing: 0.4rem; text-align: center; }
         #posts-list { width: 100%; max-width: 42rem; padding: 0 1.5rem 5rem; box-sizing: border-box; }
 
-        .card { background-color: var(--card); border: 1px solid var(--border); border-radius: var(--radius-xl); margin-bottom: 2.5rem; overflow: hidden; box-shadow: 0 4px 20px -10px rgba(0,0,0,0.05); }
+        .card { background-color: var(--card); border: 1px solid var(--border); border-radius: var(--radius-xl); margin-bottom: 2.5rem; overflow: hidden; }
         .card-inner { padding: 1.8rem; }
         .card-header { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 1.2rem; }
         .pen-name { font-family: var(--font-serif); font-weight: 600; font-size: 0.9rem; }
@@ -61,9 +69,9 @@
 
         #editor-container { display: none; width: 100%; max-width: 42rem; margin-bottom: 5rem; padding: 0 1.5rem; box-sizing: border-box; }
         .editor-card { background: white; border: 1px solid var(--border); border-radius: var(--radius-xl); padding: 2rem; }
-        .input-minimal { width: 100%; border: 1px solid #eee; border-radius: 0.4rem; padding: 0.8rem; font-family: var(--font-sans); margin-bottom: 1.2rem; box-sizing: border-box; font-size: 0.9rem; outline: none; }
+        .input-minimal { width: 100%; border: 1px solid #eee; border-radius: 0.4rem; padding: 0.8rem; font-family: var(--font-sans); margin-bottom: 1.2rem; box-sizing: border-box; font-size: 0.9rem; outline: none; color: var(--foreground); }
         
-        .btn-submit { background: var(--foreground); color: white; border: none; padding: 1rem; border-radius: 3rem; cursor: pointer; font-family: var(--font-serif); font-size: 1rem; width: 100%; margin-top: 1rem; }
+        .btn-submit { background: var(--foreground); color: white !important; border: none; padding: 1rem; border-radius: 3rem; cursor: pointer; font-family: var(--font-serif); font-size: 1rem; width: 100%; margin-top: 1rem; }
         .btn-back { width: 100%; text-align: center; padding: 0.8rem; font-size: 0.8rem; cursor: pointer; color: var(--muted-foreground); margin-top: 1rem; }
 
         @media (max-width: 640px) {
@@ -125,7 +133,6 @@
     const bgm = document.getElementById('bgm');
     bgm.volume = 0.3;
 
-    // --- 音声制御 (地蔵 App.tsx のロジック完全移植) ---
     function updateAudioUI(isPlaying) {
         document.getElementById('audio-icon').innerText = isPlaying ? 'volume_up' : 'volume_off';
         document.getElementById('audio-text').innerText = isPlaying ? '音楽が流れています' : '静寂の中';
@@ -133,7 +140,7 @@
 
     function toggleAudio(forcePlay = false) {
         const isMuted = sessionStorage.getItem('kigo_muted') === 'true';
-        if ((bgm.paused || forcePlay) && !(!forcePlay && !bgm.paused)) {
+        if ((bgm.paused || forcePlay) && sessionStorage.getItem('kigo_muted') !== 'true' || forcePlay) {
             bgm.play().then(() => {
                 updateAudioUI(true);
                 sessionStorage.setItem('kigo_muted', 'false');
@@ -145,44 +152,54 @@
         }
     }
 
-    // 地蔵の visibilitychange ロジック
     document.addEventListener("visibilitychange", () => {
-        const isMuted = sessionStorage.getItem('kigo_muted') === 'true';
         if (document.hidden) {
             bgm.pause();
-        } else if (!isMuted) {
+        } else if (sessionStorage.getItem('kigo_muted') === 'false') {
             bgm.play().catch(() => {});
         }
     });
 
     document.getElementById('audio-toggle').addEventListener('click', () => toggleAudio());
 
-    // --- 季語読み込み (manus Home.tsx の 0:00更新ロジック移植) ---
+    // --- 季語読み込み (日付形式をCSVに完全一致させる) ---
     async function fetchKigo() {
         try {
             const res = await fetch(`https://raw.githubusercontent.com/miu-fukada/kotoba-biyori/main/kigo.csv?t=${Date.now()}`);
             const csv = await res.text();
-            const now = new Date();
-            const todayStr = now.toLocaleDateString('ja-JP', {month:'2-digit', day:'2-digit'}).replace(/\//g, '-');
             
-            const found = csv.split(/\r?\n/).find(l => l.startsWith(todayStr));
+            // 日本時間での月・日を取得し、必ず2桁(MM-DD)にする
+            const now = new Date();
+            const jstOptions = { timeZone: 'Asia/Tokyo', month: '2-digit', day: '2-digit' };
+            const formatter = new Intl.DateTimeFormat('ja-JP', jstOptions);
+            const [{ value: month }, , { value: day }] = formatter.formatToParts(now);
+            const todayKey = `${month}-${day}`;
+            
+            const lines = csv.split(/\r?\n/);
+            const found = lines.find(l => l.startsWith(todayKey));
+            
             if (found) {
-                const [date, word, desc] = found.split('\t');
-                currentKigo = word.trim();
+                const parts = found.split('\t');
+                currentKigo = parts[1].trim();
                 document.getElementById('kigo-display').innerText = currentKigo;
-                document.getElementById('kigo-desc-area').innerText = desc ? desc.trim() : "（説明はありません）";
-                localStorage.setItem('last-kigo-date', todayStr);
+                document.getElementById('kigo-desc-area').innerText = parts[2] ? parts[2].trim() : "（説明はありません）";
+                localStorage.setItem('last-kigo-date', todayKey);
+            } else {
+                document.getElementById('kigo-display').innerText = "鷽替え";
             }
         } catch (e) {
             document.getElementById('kigo-display').innerText = "鷽替え";
         }
     }
 
-    // manus の 10秒チェック
     setInterval(() => {
         const now = new Date();
-        const currentDate = now.toLocaleDateString('ja-JP', {month:'2-digit', day:'2-digit'}).replace(/\//g, '-');
-        if (localStorage.getItem('last-kigo-date') !== currentDate) {
+        const jstDate = new Date(now.toLocaleString('ja-JP', { timeZone: 'Asia/Tokyo' }));
+        const currentMonth = String(jstDate.getMonth() + 1).padStart(2, '0');
+        const currentDate = String(jstDate.getDate()).padStart(2, '0');
+        const todayKey = `${currentMonth}-${currentDate}`;
+        
+        if (localStorage.getItem('last-kigo-date') !== todayKey) {
             fetchKigo();
         }
     }, 10000);
@@ -192,7 +209,6 @@
         desc.style.display = (desc.style.display === 'block') ? 'none' : 'block';
     });
 
-    // --- エディタ & 投稿 ---
     function closeEditor() {
         document.getElementById('editor-container').style.display = 'none';
         document.getElementById('toggle-editor').style.display = 'inline-block';
@@ -201,7 +217,7 @@
     document.getElementById('toggle-editor').addEventListener('click', () => {
         document.getElementById('editor-container').style.display = 'block';
         document.getElementById('toggle-editor').style.display = 'none';
-        toggleAudio(true); // 綴るボタンで音楽開始
+        toggleAudio(true);
     });
 
     document.getElementById('btn-save').addEventListener('click', async () => {
@@ -212,7 +228,7 @@
         }
         document.getElementById('btn-save').disabled = true;
         const { error } = await supabaseClient.from('posts').insert([{
-            content: content, kigo: currentKigo, pen_name: document.getElementById('pen-name').value || '私', is_public: true, biyori_message: "ことば日和があなたの物語を読み解いています..."
+            content: content, kigo: currentKigo, pen_name: document.getElementById('pen-name').value || '私', is_public: true, biyori_message: "ことば日和が読み解いています..."
         }]);
         if (!error) location.reload();
     });
@@ -220,6 +236,7 @@
     async function loadPosts() {
         const { data } = await supabaseClient.from('posts').select('*').order('created_at', { ascending: false });
         const list = document.getElementById('posts-list');
+        list.innerHTML = '<h2 class="timeline-title">みんなの綴りごと</h2>';
         data?.forEach(post => {
             const card = document.createElement('div');
             card.className = 'card';
