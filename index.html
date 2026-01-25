@@ -140,7 +140,6 @@
 
     document.getElementById('audio-toggle').onclick = () => toggleAudio();
 
-    // 季語と説明を読み込む。失敗しても他を止めない。
     async function fetchKigo() {
         try {
             const res = await fetch(`https://raw.githubusercontent.com/miu-fukada/kotoba-biyori/main/kigo.csv?t=${Date.now()}`);
@@ -182,16 +181,37 @@
         toggleAudio(true);
     };
 
+    // 物語を綴るボタンの修正：音楽を止めないためにリロードを廃止
     document.getElementById('btn-save').onclick = async () => {
         const content = document.getElementById('post-content').value;
+        const penName = document.getElementById('pen-name').value || '私';
+        
         if (!content.includes(currentKigo)) {
             document.getElementById('error-msg').innerText = `「${currentKigo}」を入れてください。`;
             return;
         }
+
+        document.getElementById('btn-save').disabled = true;
+        document.getElementById('btn-save').innerText = "綴っています...";
+
         const { error } = await supabaseClient.from('posts').insert([{
-            content, kigo: currentKigo, pen_name: document.getElementById('pen-name').value || '私', is_public: true, biyori_message: "ことば日和が読み解いています..."
+            content, kigo: currentKigo, pen_name: penName, is_public: true, biyori_message: "ことば日和が読み解いています..."
         }]);
-        if (!error) location.reload();
+
+        if (!error) {
+            // 入力欄をクリアしてエディタを閉じる
+            document.getElementById('post-content').value = "";
+            document.getElementById('pen-name').value = "";
+            closeEditor();
+            document.getElementById('btn-save').disabled = false;
+            document.getElementById('btn-save').innerText = "物語を綴る";
+            // タイムラインだけを更新（音楽はそのまま）
+            loadPosts();
+        } else {
+            document.getElementById('error-msg').innerText = "通信に失敗しました。";
+            document.getElementById('btn-save').disabled = false;
+            document.getElementById('btn-save').innerText = "物語を綴る";
+        }
     };
 
     async function loadPosts() {
