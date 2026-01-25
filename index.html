@@ -21,9 +21,8 @@
         header { width: 100%; max-width: 48rem; padding: 4rem 1.5rem 1rem; display: flex; justify-content: space-between; align-items: center; box-sizing: border-box; }
         h1 { font-family: var(--font-serif); font-size: 1.1rem; font-weight: 200; letter-spacing: 0.3rem; margin: 0; color: var(--foreground); cursor: pointer; }
 
-        .btn-outline { display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.5rem 1rem; border-radius: 0.5rem; font-size: 0.75rem; border: 1px solid var(--border); background: white; cursor: pointer; color: var(--foreground); }
+        .btn-outline { display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.5rem 1rem; border-radius: 0.5rem; font-size: 0.75rem; border: 1px solid var(--border); background: white; cursor: pointer; color: var(--foreground) !important; text-decoration: none; }
 
-        /* メインコンテンツの切り替え制御 */
         #timeline-view, #mypage-view { width: 100%; display: none; flex-direction: column; align-items: center; }
         #timeline-view.active, #mypage-view.active { display: flex; }
 
@@ -37,32 +36,33 @@
             word-break: break-all; font-family: var(--font-sans);
         }
 
-        /* 干支時計のデザイン */
-        .eto-card { background: white; border: 1px solid var(--border); border-radius: var(--radius-xl); padding: 1.5rem; margin-bottom: 2rem; width: 100%; max-width: 32rem; box-sizing: border-box; }
-        .eto-title { font-family: var(--font-serif); font-size: 1.2rem; margin-bottom: 1rem; text-align: center; }
-        .eto-container { position: relative; width: 200px; height: 200px; margin: 0 auto 1.5rem; }
+        /* 干支時計を大きく調整 */
+        .eto-card { background: white; border: 1px solid var(--border); border-radius: var(--radius-xl); padding: 2rem 1.5rem; margin-bottom: 2rem; width: 100%; max-width: 36rem; box-sizing: border-box; }
+        .eto-title { font-family: var(--font-serif); font-size: 1.4rem; margin-bottom: 1.5rem; text-align: center; }
+        .eto-container { position: relative; width: 280px; height: 280px; margin: 0 auto 2rem; }
         .eto-image { width: 100%; height: 100%; object-fit: contain; }
         .eto-pointer { 
-            position: absolute; width: 12px; height: 12px; background: rgba(212, 175, 55, 0.6); 
-            border-radius: 50%; box-shadow: 0 0 10px rgba(212, 175, 55, 0.8);
-            transform: translate(-50%, -50%); transition: all 0.5s ease;
+            position: absolute; width: 16px; height: 16px; background: rgba(212, 175, 55, 0.7); 
+            border-radius: 50%; box-shadow: 0 0 12px rgba(212, 175, 55, 0.9);
+            transform: translate(-50%, -50%); transition: all 0.5s ease; z-index: 10;
         }
-        .eto-desc { font-size: 0.85rem; color: #555; line-height: 1.7; text-align: left; }
+        .eto-desc { font-size: 0.9rem; color: #555; line-height: 1.8; text-align: left; max-width: 28rem; margin: 0 auto; }
 
-        /* タブ切り替え */
         .tab-container { display: flex; gap: 2rem; margin-bottom: 2rem; border-bottom: 1px solid var(--border); width: 100%; max-width: 42rem; justify-content: center; }
         .tab-btn { padding: 0.8rem 1rem; cursor: pointer; font-size: 0.85rem; color: var(--muted-foreground); position: relative; }
         .tab-btn.active { color: var(--foreground); font-weight: 600; }
         .tab-btn.active::after { content: ""; position: absolute; bottom: -1px; left: 0; width: 100%; height: 2px; background: var(--foreground); }
 
-        /* ボタン・フォーム周り（前回の修正維持） */
+        /* 綴るボタンの青文字防止 */
         .btn-write {
             display: inline-flex !important; align-items: center !important; justify-content: center !important; 
             gap: 0.8rem; margin-top: 1rem; border: 1px solid var(--foreground) !important;
             padding: 0.8rem 2.5rem; border-radius: 3rem; font-family: var(--font-serif); font-size: 0.95rem; 
-            letter-spacing: 0.2rem; white-space: nowrap !important; width: auto; background: white; cursor: pointer;
+            letter-spacing: 0.2rem; white-space: nowrap !important; width: auto; background: white !important; 
+            cursor: pointer; color: var(--foreground) !important; text-decoration: none !important;
         }
-        .btn-write span { line-height: 1; display: flex; align-items: center; }
+        .btn-write span { line-height: 1; display: flex; align-items: center; color: var(--foreground) !important; }
+
         .audio-control-btn {
             background: none !important; border: 1px solid var(--border) !important; border-radius: 2rem; padding: 0.4rem 1rem;
             display: flex; align-items: center; gap: 0.5rem; font-size: 0.65rem; color: var(--muted-foreground) !important; margin: 1.5rem auto; cursor: pointer;
@@ -70,11 +70,14 @@
 
         #posts-list, #mypage-posts-list { width: 100%; max-width: 42rem; padding: 0 1.5rem 5rem; box-sizing: border-box; }
         .card { background-color: var(--card); border: 1px solid var(--border); border-radius: var(--radius-xl); margin-bottom: 2rem; overflow: hidden; position: relative; }
-        .card-inner { padding: 1.5rem; }
+        .card-inner { padding: 1.5rem 1.5rem 3rem 1.5rem; } /* 下側に余白を作って保存ボタンを配置 */
         .pen-name { font-family: var(--font-serif); font-weight: 600; font-size: 0.85rem; }
         .post-date { font-size: 0.65rem; color: var(--muted-foreground); }
         .card-content { font-family: var(--font-sans); font-size: 0.9rem; line-height: 2; white-space: pre-wrap; color: #333; margin-top: 1rem; }
-        .btn-save-post { position: absolute; top: 1.5rem; right: 1.5rem; color: var(--muted-foreground); cursor: pointer; font-size: 1.2rem; }
+        
+        /* 保存ボタンを右下に配置（日付と被らない） */
+        .btn-save-post { position: absolute; bottom: 1rem; right: 1.2rem; color: var(--muted-foreground); cursor: pointer; font-size: 1.3rem; transition: color 0.3s; }
+        .btn-save-post:hover { color: var(--foreground); }
         
         .ai-footer { background-color: #fafafa; padding: 1rem 1.5rem; border-top: 1px solid #f0f0f0; }
         .ai-box { font-family: var(--font-sans); font-size: 0.8rem; color: #666; line-height: 1.7; }
@@ -93,6 +96,7 @@
         @media (max-width: 640px) {
             header { padding: 2.5rem 1.5rem 1rem; }
             .kigo-word { font-size: 2.2rem; letter-spacing: 0.5rem; }
+            .eto-container { width: 240px; height: 240px; }
         }
     </style>
 </head>
@@ -100,8 +104,9 @@
 
 <header>
     <h1 onclick="showTimeline()">季語と私の綴りごと</h1>
-    <button class="btn-outline" onclick="showMypage()">
-        <span class="material-symbols-outlined" style="font-size: 1rem;">person</span>マイページ
+    <button id="header-btn" class="btn-outline" onclick="handleHeaderBtnClick()">
+        <span id="header-btn-icon" class="material-symbols-outlined" style="font-size: 1rem;">person</span>
+        <span id="header-btn-text">マイページ</span>
     </button>
 </header>
 
@@ -164,10 +169,10 @@
     const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
     let currentKigo = "鷽替え";
+    let isMypage = false;
     const bgm = document.getElementById('bgm');
     bgm.volume = 0.3;
 
-    // 十二支データ
     const etoInfo = [
         { name: "子", angle: 0, desc: "子だくさんのネズミのように、子孫繁栄や物事の始まりに良い日。お守りを作るのにも向いています。" },
         { name: "丑", angle: 30, desc: "粘り強く歩む牛のように、じっくり取り組むのに良い日。夏の土用には「う」のつくもので元気を蓄えます。" },
@@ -184,7 +189,6 @@
     ];
 
     function calculateEto() {
-        // 基準日 (2024-01-01 は「甲子」の日)
         const baseDate = new Date('2024-01-01');
         const today = new Date();
         today.setHours(0,0,0,0);
@@ -195,27 +199,39 @@
         document.getElementById('eto-today-label').innerText = `今日は ${info.name} の日`;
         document.getElementById('eto-description').innerText = info.desc;
 
-        // 印の位置計算（円形配置）半径85px
-        const radius = 85;
-        const rad = (info.angle - 90) * (Math.PI / 180); // 0度が真上のため-90度調整
-        const x = 100 + radius * Math.cos(rad);
-        const y = 100 + radius * Math.sin(rad);
+        // 印の位置（大きくしたので半径も調整）
+        const containerSize = window.innerWidth <= 640 ? 240 : 280;
+        const radius = (containerSize / 2) - 15;
+        const rad = (info.angle - 90) * (Math.PI / 180);
+        const x = (containerSize / 2) + radius * Math.cos(rad);
+        const y = (containerSize / 2) + radius * Math.sin(rad);
         
         const pointer = document.getElementById('eto-pointer');
         pointer.style.left = `${x}px`;
         pointer.style.top = `${y}px`;
     }
 
-    // 画面切り替え
+    // ヘッダーボタンの挙動切り替え
+    function handleHeaderBtnClick() {
+        if (isMypage) showTimeline();
+        else showMypage();
+    }
+
     function showTimeline() {
+        isMypage = false;
         document.getElementById('timeline-view').classList.add('active');
         document.getElementById('mypage-view').classList.remove('active');
+        document.getElementById('header-btn-icon').innerText = 'person';
+        document.getElementById('header-btn-text').innerText = 'マイページ';
         loadPosts();
     }
 
     function showMypage() {
+        isMypage = true;
         document.getElementById('timeline-view').classList.remove('active');
         document.getElementById('mypage-view').classList.add('active');
+        document.getElementById('header-btn-icon').innerText = 'arrow_back';
+        document.getElementById('header-btn-text').innerText = 'もどる';
         calculateEto();
         loadMyPosts();
     }
@@ -225,10 +241,9 @@
         tabs.forEach(t => t.classList.remove('active'));
         event.target.classList.add('active');
         if(type === 'my') loadMyPosts();
-        else document.getElementById('mypage-posts-list').innerHTML = '<p style="text-align:center; font-size:0.8rem; color:gray;">保存した投稿はありません</p>';
+        else document.getElementById('mypage-posts-list').innerHTML = '<p style="text-align:center; font-size:0.8rem; color:gray; margin-top:3rem;">保存した投稿はありません</p>';
     }
 
-    // 音声UI制御
     function updateAudioUI(isPlaying) {
         document.getElementById('audio-icon').innerText = isPlaying ? 'volume_up' : 'volume_off';
         document.getElementById('audio-text').innerText = isPlaying ? '音楽が流れています' : '静寂の中';
@@ -244,12 +259,11 @@
 
     document.addEventListener("visibilitychange", () => {
         if (document.hidden) bgm.pause();
-        else updateAudioUI(false); // 再開時は静寂（ありがと地蔵仕様）
+        else updateAudioUI(false);
     });
 
     document.getElementById('audio-toggle').onclick = () => toggleAudio();
 
-    // 季語取得
     async function fetchKigo() {
         try {
             const res = await fetch(`https://raw.githubusercontent.com/miu-fukada/kotoba-biyori/main/kigo.csv?t=${Date.now()}`);
@@ -287,7 +301,6 @@
         toggleAudio(true);
     };
 
-    // 投稿保存
     document.getElementById('btn-save').onclick = async () => {
         const content = document.getElementById('post-content').value;
         const penName = document.getElementById('pen-name').value || '私';
@@ -308,15 +321,13 @@
         }
     };
 
-    // 投稿リスト読み込み（タイムライン）
     async function loadPosts() {
         const { data } = await supabaseClient.from('posts').select('*').order('created_at', { ascending: false });
         renderPosts(data, 'posts-list', true);
     }
 
-    // 自分の投稿読み込み（マイページ）
     async function loadMyPosts() {
-        const { data } = await supabaseClient.from('posts').select('*').order('created_at', { ascending: false }).limit(10); // 仮
+        const { data } = await supabaseClient.from('posts').select('*').order('created_at', { ascending: false }).limit(20);
         renderPosts(data, 'mypage-posts-list', false);
     }
 
@@ -327,12 +338,12 @@
             const card = document.createElement('div');
             card.className = 'card';
             card.innerHTML = `<div class="card-inner">
-                ${showSaveIcon ? '<span class="material-symbols-outlined btn-save-post">bookmark_add</span>' : ''}
                 <div style="display:flex; justify-content:space-between; align-items:baseline;">
                     <span class="pen-name">${post.pen_name}</span>
                     <span class="post-date">${new Date(post.created_at).toLocaleDateString()}</span>
                 </div>
                 <div class="card-content">${post.content.split(post.kigo).join(`<strong>${post.kigo}</strong>`)}</div>
+                ${showSaveIcon ? '<span class="material-symbols-outlined btn-save-post">bookmark_add</span>' : ''}
             </div>
             <div class="ai-footer"><div class="ai-box">${post.biyori_message || '...'}</div></div>`;
             list.appendChild(card);
