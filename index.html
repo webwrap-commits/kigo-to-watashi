@@ -32,12 +32,12 @@
 
         .kigo-section { text-align: center; margin: 2rem 0 4rem; width: 100%; padding: 0 1.5rem; box-sizing: border-box; }
         
-        /* 3. 「今日の季語」ラベルをタイムラインのAIメッセージと同じサイズ・フォントに */
+        /* 今日の季語ラベル：タイムラインのAIメッセージと同じサイズ・フォント */
         .kigo-label { font-family: var(--font-sans); font-size: 0.8rem; color: var(--muted-foreground); margin-bottom: 1rem; letter-spacing: 0.2rem; }
         
         .kigo-word { font-family: var(--font-serif); font-size: 2.8rem; font-weight: 200; letter-spacing: 0.8rem; margin: 0; cursor: pointer; display: inline-block; color: var(--foreground); }
         
-        /* 1. 季語の説明文を投稿文と同じサイズに */
+        /* 季語の説明文：投稿文と同じサイズ */
         #kigo-desc-area { 
             max-width: 24rem; margin: 1.5rem auto 0; font-size: 0.9rem; color: #555; line-height: 1.8; 
             text-align: left; display: none; padding: 1.2rem; border: 1px solid #eee; background: #fafafa; border-radius: 0.5rem;
@@ -49,12 +49,12 @@
             display: flex; align-items: center; gap: 0.5rem; font-size: 0.65rem; color: var(--muted-foreground) !important; margin: 1.5rem auto;
         }
 
-        /* 2. 綴るボタンのアイコンとテキストのズレを解消 */
+        /* 綴るボタン：垂直中央揃え */
         .btn-write {
             display: inline-flex; align-items: center; justify-content: center; gap: 0.8rem; margin-top: 1rem; border: 1px solid var(--foreground) !important;
             padding: 0.8rem 2.5rem; border-radius: 3rem; font-family: var(--font-serif); font-size: 0.95rem; letter-spacing: 0.2rem;
         }
-        .btn-write span { vertical-align: middle; line-height: 1; }
+        .btn-write span { line-height: 1; display: flex; align-items: center; }
 
         #posts-list { width: 100%; max-width: 42rem; padding: 0 1.5rem 5rem; box-sizing: border-box; }
         .card { background-color: var(--card); border: 1px solid var(--border); border-radius: var(--radius-xl); margin-bottom: 2rem; overflow: hidden; }
@@ -69,14 +69,14 @@
         #editor-container { display: none; width: 100%; max-width: 42rem; padding: 0 1.5rem 5rem; box-sizing: border-box; }
         .editor-box { background: white; border: 1px solid var(--border); border-radius: var(--radius-xl); padding: 1.5rem; }
         
-        /* 4. 投稿フォームの入力エリア修正 */
+        /* 投稿フォーム：高さを180pxに、フォントを投稿文と統一 */
         #pen-name, #post-content {
             width: 100%; padding: 0.8rem; border: 1px solid #eee; border-radius: 0.4rem; box-sizing: border-box;
             font-family: var(--font-sans); font-size: 0.9rem; font-weight: 200; color: var(--foreground);
         }
         #pen-name::placeholder, #post-content::placeholder { font-weight: 200; color: var(--muted-foreground); }
         #pen-name { margin-bottom: 1rem; }
-        #post-content { height: 180px; resize: none; } /* 高さを少し高く（120px→180px） */
+        #post-content { height: 180px; resize: none; }
 
         .btn-submit { background: var(--foreground) !important; color: white !important; padding: 0.8rem; border-radius: 3rem; font-family: var(--font-serif); font-size: 0.9rem; width: 100%; margin-top: 1rem; border: none !important; }
 
@@ -102,15 +102,17 @@
 <main>
     <section class="kigo-section">
         <div class="kigo-label">今日の季語</div>
-        <div id="kigo-display" class="kigo-word">鷽替え</div>
-        <div id="kigo-desc-area"></div>
+        <div id="kigo-display" class="kigo-word">読み込み中...</div>
+        <div id="kigo-desc-area">説明を読み込んでいます...</div>
         
         <button id="audio-toggle" class="audio-control-btn">
             <span id="audio-icon" class="material-symbols-outlined" style="font-size: 1rem;">volume_off</span>
             <span id="audio-text">静寂の中</span>
         </button>
 
-        <button id="toggle-editor" class="btn-write"><span class="material-symbols-outlined">edit_note</span>綴る</button>
+        <button id="toggle-editor" class="btn-write">
+            <span class="material-symbols-outlined">edit_note</span>綴る
+        </button>
     </section>
 
     <div id="editor-container">
@@ -131,7 +133,7 @@
     const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNpa2x5d2hxc3didWpzb2dxaXZhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njg5MzAyNzcsImV4cCI6MjA4NDUwNjI3N30._REwuc__qmpW1eQVhfm-RvsoMJCGYXjqtqBVn4w48Oc';
     const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-    let currentKigo = "鷽替え";
+    let currentKigo = "";
     const bgm = document.getElementById('bgm');
     bgm.volume = 0.3;
 
@@ -159,7 +161,6 @@
     async function fetchKigo() {
         try {
             const res = await fetch(`https://raw.githubusercontent.com/miu-fukada/kotoba-biyori/main/kigo.csv?t=${Date.now()}`);
-            if (!res.ok) return;
             const csv = await res.text();
             const now = new Date();
             const month = String(now.getMonth() + 1).padStart(2, '0');
@@ -167,22 +168,34 @@
             const todayKey = `${month}-${day}`;
             
             const lines = csv.split(/\r?\n/);
+            let found = false;
             for (let line of lines) {
                 if (line.startsWith(todayKey)) {
                     const parts = line.split('\t');
                     if (parts.length >= 3) {
                         currentKigo = parts[1].trim();
-                        const yomi = parts[3] ? parts[3].trim() : ""; // CSVの4列目に読みがあると仮定
                         document.getElementById('kigo-display').innerText = currentKigo;
-                        // 5. 読み方の表示設定
-                        let descHtml = parts[2].trim();
-                        if(yomi) descHtml = `読み方：${yomi}<br><br>${descHtml}`;
+                        
+                        // 読み方（4列目）があれば追加、なければ説明文のみ
+                        const yomi = (parts[3] && parts[3].trim() !== "") ? parts[3].trim() : "";
+                        const description = parts[2].trim();
+                        const descHtml = yomi ? `読み方：${yomi}<br><br>${description}` : description;
+                        
                         document.getElementById('kigo-desc-area').innerHTML = descHtml;
+                        found = true;
                     }
                     break;
                 }
             }
-        } catch (e) { console.error("Kigo load skip"); }
+            if (!found) {
+                document.getElementById('kigo-display').innerText = "鷽替え";
+                document.getElementById('kigo-desc-area').innerHTML = "読み方：うそかえ<br><br>前年の災厄を嘘にして吉運に替える神事です。";
+                currentKigo = "鷽替え";
+            }
+        } catch (e) { 
+            document.getElementById('kigo-display').innerText = "鷽替え";
+            currentKigo = "鷽替え";
+        }
     }
 
     document.getElementById('kigo-display').onclick = () => {
