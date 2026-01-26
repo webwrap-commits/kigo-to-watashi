@@ -25,12 +25,6 @@
         .kigo-word { font-family: var(--font-serif); font-size: 2.8rem; font-weight: 200; letter-spacing: 0.8rem; margin: 0; cursor: pointer; display: inline-block; color: var(--foreground); min-height: 4rem; word-break: break-all; }
         #kigo-kana-area { font-size: 0.8rem; color: #888; margin-bottom: 1rem; letter-spacing: 0.1rem; }
         #kigo-desc-area { max-width: 28rem; margin: 1.5rem auto 0; font-size: 0.85rem; color: #555; line-height: 2; text-align: left; display: none; padding: 1.5rem; border: 1px solid #eee; background: #fafafa; border-radius: 0.5rem; word-break: break-all; }
-        .eto-card { background: white; border: 1px solid var(--border); border-radius: var(--radius-xl); padding: 2rem 1.5rem; margin-bottom: 2rem; width: 100%; max-width: 36rem; box-sizing: border-box; }
-        .eto-title { font-family: var(--font-serif); font-size: 1.4rem; margin-bottom: 1.5rem; text-align: center; }
-        .eto-container { position: relative; width: 280px; height: 280px; margin: 0 auto 2rem; }
-        .eto-image { width: 100%; height: 100%; object-fit: contain; }
-        .eto-pointer { position: absolute; top: 50%; left: 50%; width: 1px; height: 85px; background: #eb6101; transform-origin: bottom center; transform: translate(-50%, -100%) rotate(0deg); transition: transform 1s ease; z-index: 10; }
-        .eto-desc { font-size: 0.9rem; color: #555; line-height: 1.8; text-align: left; max-width: 28rem; margin: 0 auto; }
         .btn-write { display: inline-flex; align-items: center; justify-content: center; gap: 0.8rem; margin-top: 1rem; border: 1px solid var(--foreground); padding: 0.8rem 2.5rem; border-radius: 3rem; font-family: var(--font-serif); font-size: 0.95rem; letter-spacing: 0.2rem; cursor: pointer; background: white; color: var(--foreground); }
         .audio-control-btn { background: none; border: 1px solid var(--border); border-radius: 2rem; padding: 0.4rem 1rem; display: flex; align-items: center; gap: 0.5rem; font-size: 0.65rem; color: var(--muted-foreground); margin: 1.5rem auto; cursor: pointer; }
         #posts-list, #mypage-posts-list { width: 100%; max-width: 42rem; padding: 0 1.5rem 5rem; box-sizing: border-box; }
@@ -48,6 +42,12 @@
         #pen-name, #post-content { width: 100%; padding: 0.8rem; border: 1px solid #eee; border-radius: 0.4rem; box-sizing: border-box; font-family: var(--font-sans); font-size: 0.9rem; color: var(--foreground); margin-bottom: 1rem; }
         #post-content { height: 180px; resize: none; }
         .btn-submit { background: var(--foreground); color: white; padding: 0.8rem; border-radius: 3rem; font-family: var(--font-serif); font-size: 0.9rem; width: 100%; border: none; cursor: pointer; }
+        .eto-card { background: white; border: 1px solid var(--border); border-radius: var(--radius-xl); padding: 2rem 1.5rem; margin-bottom: 2rem; width: 100%; max-width: 36rem; box-sizing: border-box; }
+        .eto-title { font-family: var(--font-serif); font-size: 1.4rem; margin-bottom: 1.5rem; text-align: center; }
+        .eto-container { position: relative; width: 280px; height: 280px; margin: 0 auto 2rem; }
+        .eto-image { width: 100%; height: 100%; object-fit: contain; }
+        .eto-pointer { position: absolute; top: 50%; left: 50%; width: 1px; height: 85px; background: #eb6101; transform-origin: bottom center; transform: translate(-50%, -100%) rotate(0deg); transition: transform 1s ease; z-index: 10; }
+        .eto-desc { font-size: 0.9rem; color: #555; line-height: 1.8; text-align: left; max-width: 28rem; margin: 0 auto; }
         .mypage-tabs { display: flex; justify-content: center; gap: 2rem; margin-bottom: 2rem; border-bottom: 1px solid var(--border); width: 100%; max-width: 36rem; }
         .tab-btn { background: none; border: none; padding: 1rem; font-size: 0.85rem; color: var(--muted-foreground); cursor: pointer; font-family: var(--font-serif); }
         .tab-btn.active { color: var(--foreground); border-bottom: 2px solid var(--foreground); }
@@ -80,7 +80,7 @@
                     </div>
                 </div>
                 <div class="kigo-label">今日の季語</div>
-                <div id="kigo-display" class="kigo-word">疎通確認中...</div>
+                <div id="kigo-display" class="kigo-word"></div>
                 <div id="kigo-kana-area"></div>
                 <div id="kigo-desc-area"></div>
                 <button id="audio-toggle" class="audio-control-btn"><span id="audio-icon" class="material-symbols-outlined" style="font-size: 1rem;">volume_off</span><span id="audio-text">静寂の中</span></button>
@@ -108,32 +108,38 @@
 
     function getJST() { return new Date(new Date().toLocaleString("en-US", {timeZone: "Asia/Tokyo"})); }
 
-    // 【開通テスト】日付を無視して、とにかくテーブルの最初の1件を引っ張る
+    // 【最終形態】今日の日付に完全に合致する季語だけをDBから取得する
     async function fetchKigo() {
         const display = document.getElementById('kigo-display');
+        const kanaArea = document.getElementById('kigo-kana-area');
+        const descArea = document.getElementById('kigo-desc-area');
+        
         try {
+            const now = getJST();
+            const month = String(now.getMonth() + 1).padStart(2, '0');
+            const day = String(now.getDate()).padStart(2, '0');
+            const todayKey = `${month}-${day}`; // 例: "01-26"
+
+            // ilikeを使い、前後に余計な空白があっても取得できるようにします
             const { data, error } = await supabaseClient
                 .from('kigo_data')
                 .select('kigo, kana, origin')
-                .limit(1)
+                .ilike('date', `%${todayKey}%`) 
                 .maybeSingle();
 
-            if (error) {
-                display.innerText = "通信失敗";
-                console.error(error);
-                return;
-            }
+            if (error) throw error;
 
             if (data) {
                 currentKigo = data.kigo;
                 display.innerText = currentKigo;
-                document.getElementById('kigo-kana-area').innerText = data.kana ? `（${data.kana}）` : "";
-                document.getElementById('kigo-desc-area').innerHTML = data.origin || "";
+                kanaArea.innerText = data.kana ? `（${data.kana}）` : "";
+                descArea.innerHTML = data.origin || "";
             } else {
-                display.innerText = "DB空っぽ";
+                display.innerText = "季節の言葉";
             }
         } catch (e) {
-            display.innerText = "致命的エラー";
+            console.error(e);
+            display.innerText = "季節の移ろい";
         }
     }
 
