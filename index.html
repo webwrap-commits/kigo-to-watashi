@@ -9,9 +9,7 @@
         :root {
             --bg-color: #f8f5f0;
             --main-text: #333;
-            --accent-color: #d4a373;
         }
-
         body {
             font-family: "Helvetica Neue", Arial, "Hiragino Kaku Gothic ProN", "Hiragino Sans", Meiryo, sans-serif;
             background-color: var(--bg-color);
@@ -22,21 +20,13 @@
             margin: 0;
             padding: 20px;
         }
-
-        h1 {
-            font-size: 1.5rem;
-            margin-bottom: 20px;
-            color: #5d5d5d;
-        }
-
-        /* 干支時計のエリア */
+        h1 { font-size: 1.5rem; margin-bottom: 20px; color: #5d5d5d; }
         .eto-container {
             position: relative;
             width: 300px;
             height: 300px;
             margin-bottom: 30px;
         }
-
         .eto-board {
             width: 100%;
             height: 100%;
@@ -46,7 +36,6 @@
             box-shadow: 0 4px 15px rgba(0,0,0,0.1);
             border: 8px solid #fff;
         }
-
         .eto-pointer {
             position: absolute;
             top: 50%;
@@ -60,7 +49,6 @@
             transition: transform 1s cubic-bezier(0.4, 2.08, 0.55, 0.44);
             z-index: 10;
         }
-
         .eto-center {
             position: absolute;
             top: 50%;
@@ -72,8 +60,6 @@
             transform: translate(-50%, -50%);
             z-index: 11;
         }
-
-        /* 季語表示エリア */
         .kigo-card {
             background: #fff;
             padding: 20px;
@@ -83,28 +69,9 @@
             box-shadow: 0 2px 10px rgba(0,0,0,0.05);
             text-align: center;
         }
-
-        #kigo-display {
-            font-size: 2rem;
-            font-weight: bold;
-            margin: 0;
-            color: #2c3e50;
-        }
-
-        #kigo-kana-area {
-            font-size: 0.9rem;
-            color: #888;
-            margin: 5px 0 15px 0;
-        }
-
-        #kigo-desc-area {
-            font-size: 1rem;
-            line-height: 1.6;
-            color: #555;
-            text-align: left;
-            border-top: 1px dashed #eee;
-            padding-top: 15px;
-        }
+        #kigo-display { font-size: 2rem; font-weight: bold; margin: 0; color: #2c3e50; }
+        #kigo-kana-area { font-size: 0.9rem; color: #888; margin: 5px 0 15px 0; }
+        #kigo-desc-area { font-size: 1rem; line-height: 1.6; color: #555; text-align: left; border-top: 1px dashed #eee; padding-top: 15px; }
     </style>
 </head>
 <body>
@@ -124,21 +91,17 @@
     </div>
 
     <script>
-        // --- 設定：Supabaseの接続情報 ---
-        // ここにあなたのURLとKeyを入れてください
-        const SUPABASE_URL = 'YOUR_SUPABASE_URL';
-        const SUPABASE_KEY = 'YOUR_SUPABASE_ANON_KEY';
-        const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        // 今送っていただいた正しい情報を反映しました
+        const SUPABASE_URL = 'https://ciklywhqswbujsogqiva.supabase.co';
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNpa2x5d2hxc3didWpzb2dxaXZhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njg5MzAyNzcsImV4cCI6MjA4NDUwNjI3N30._REwuc__qmpW1eQVhfm-RvsoMJCGYXjqtqBVn4w48Oc';
 
-        // --- 設定：新しい干支イラストのURL ---
+        const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
         const ETO_IMAGE_URL = 'https://res.cloudinary.com/dh6zibjr8/image/upload/v1769359321/eto2_p5uqwq.png';
 
-        // 日本標準時(JST)を取得する
         function getJST() {
             return new Date(new Date().toLocaleString("en-US", {timeZone: "Asia/Tokyo"}));
         }
 
-        // 季語をSupabaseから取得
         async function fetchKigo() {
             const kigoElement = document.getElementById('kigo-display');
             const kanaElement = document.getElementById('kigo-kana-area');
@@ -165,37 +128,30 @@
                 } else {
                     kigoElement.innerText = "本日の季語";
                     kanaElement.innerText = "";
-                    descElement.innerText = todayKey + " の季語はまだ登録されていません。";
+                    descElement.innerText = todayKey + " のデータが見つかりません。テーブル名が kigo_data であるか、データが入っているか確認してください。";
                 }
             } catch (err) {
-                console.error("取得エラー:", err);
-                kigoElement.innerText = "エラーが発生しました";
+                console.error("Error:", err);
+                kigoElement.innerText = "通信エラー";
             }
         }
 
-        // 干支ポインターを回転させる
         function updateEtoPointer() {
             const now = getJST();
             const hour = now.getHours();
-            
-            // 24時間を12分割。0時(子)から時計回りに30度ずつ回転
             const etoIndex = Math.floor(hour / 2); 
             const degrees = etoIndex * 30;
-
             const pointer = document.getElementById('eto-pointer');
             if (pointer) {
                 pointer.style.transform = "translate(-50%, -100%) rotate(" + degrees + "deg)";
             }
         }
 
-        // アプリ起動
         async function initApp() {
-            // 背景画像をセット
             const etoBoard = document.getElementById('eto-board');
             if (etoBoard) {
                 etoBoard.style.backgroundImage = "url('" + ETO_IMAGE_URL + "')";
             }
-
             await fetchKigo();
             updateEtoPointer();
         }
