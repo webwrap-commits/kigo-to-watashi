@@ -26,17 +26,19 @@
         .eto-title { font-family: var(--font-serif); font-size: 1.4rem; margin-bottom: 1.5rem; text-align: center; }
         .eto-container { position: relative; width: 280px; height: 280px; margin: 0 auto 2rem; }
         .eto-image { width: 100%; height: 100%; object-fit: contain; }
-        .eto-pointer { position: absolute; top: 50%; left: 50%; width: 1.2px; height: 115px; background: #eb6101; transform-origin: bottom center; transform: translate(-50%, -100%) rotate(0deg); transition: transform 1s ease; z-index: 10; }
-        .eto-center { position: absolute; top: 50%; left: 50%; width: 6px; height: 6px; background: #eb6101; border-radius: 50%; transform: translate(-50%, -50%); z-index: 11; }
+        .eto-pointer { position: absolute; top: 50%; left: 50%; width: 1px; height: 115px; background: #eb6101; transform-origin: bottom center; transform: translate(-50%, -100%) rotate(0deg); transition: transform 1s ease; z-index: 10; }
+        .eto-center { position: absolute; top: 50%; left: 50%; width: 5px; height: 5px; background: #eb6101; border-radius: 50%; transform: translate(-50%, -50%); z-index: 11; }
         .eto-desc { font-size: 0.9rem; color: #555; line-height: 1.8; text-align: left; max-width: 28rem; margin: 0 auto; }
         .btn-write { display: inline-flex; align-items: center; justify-content: center; gap: 0.8rem; margin-top: 1rem; border: 1px solid var(--foreground); padding: 0.8rem 2.5rem; border-radius: 3rem; font-family: var(--font-serif); font-size: 0.95rem; letter-spacing: 0.2rem; cursor: pointer; background: white; color: var(--foreground); }
         .audio-control-btn { background: none; border: 1px solid var(--border); border-radius: 2rem; padding: 0.4rem 1rem; display: flex; align-items: center; gap: 0.5rem; font-size: 0.65rem; color: var(--muted-foreground); margin: 1.5rem auto; cursor: pointer; }
-        #posts-list { width: 100%; max-width: 42rem; padding: 0 1.5rem 5rem; box-sizing: border-box; }
+        #posts-list, #mypage-posts-list { width: 100%; max-width: 42rem; padding: 0 1.5rem 5rem; box-sizing: border-box; }
         .card { background-color: var(--card); border: 1px solid var(--border); border-radius: var(--radius-xl); margin-bottom: 2rem; overflow: hidden; position: relative; }
         .card-inner { padding: 1.5rem 1.5rem 3.5rem 1.5rem; }
         .pen-name { font-family: var(--font-serif); font-weight: 600; font-size: 0.85rem; }
         .post-date { font-size: 0.65rem; color: var(--muted-foreground); }
         .card-content { font-family: var(--font-sans); font-size: 0.9rem; line-height: 2; white-space: pre-wrap; color: #333; margin-top: 1rem; }
+        .save-btn { position: absolute; bottom: 1.2rem; right: 1.5rem; background: none; border: none; cursor: pointer; color: var(--muted-foreground); transition: color 0.3s; }
+        .save-btn.active { color: #d4af37; font-variation-settings: 'FILL' 1; }
         .ai-footer { background-color: #fafafa; padding: 1rem 1.5rem; border-top: 1px solid #f0f0f0; }
         .ai-box { font-family: var(--font-sans); font-size: 0.8rem; color: #666; line-height: 1.7; }
         #editor-container { display: none; width: 100%; max-width: 42rem; padding: 0 1.5rem 5rem; box-sizing: border-box; }
@@ -44,6 +46,9 @@
         #pen-name, #post-content { width: 100%; padding: 0.8rem; border: 1px solid #eee; border-radius: 0.4rem; box-sizing: border-box; font-family: var(--font-sans); font-size: 0.9rem; color: var(--foreground); margin-bottom: 1rem; }
         #post-content { height: 180px; resize: none; }
         .btn-submit { background: var(--foreground); color: white; padding: 0.8rem; border-radius: 3rem; font-family: var(--font-serif); font-size: 0.9rem; width: 100%; border: none; cursor: pointer; }
+        .mypage-tabs { display: flex; justify-content: center; gap: 2rem; margin-bottom: 2rem; border-bottom: 1px solid var(--border); width: 100%; max-width: 36rem; }
+        .tab-btn { background: none; border: none; padding: 1rem; font-size: 0.85rem; color: var(--muted-foreground); cursor: pointer; font-family: var(--font-serif); }
+        .tab-btn.active { color: var(--foreground); border-bottom: 2px solid var(--foreground); }
         @media (max-width: 640px) { header { padding: 2.5rem 1.5rem 1rem; } .kigo-word { font-size: 2.2rem; letter-spacing: 0.5rem; } .eto-container { width: 240px; height: 240px; } }
     </style>
 </head>
@@ -88,6 +93,10 @@
             </div>
             <div id="eto-description" class="eto-desc"></div>
         </div>
+        <div class="mypage-tabs">
+            <button id="tab-my" class="tab-btn active" onclick="switchTab('my')">私の綴り</button>
+            <button id="tab-save" class="tab-btn" onclick="switchTab('save')">心に留めた綴り</button>
+        </div>
         <div id="mypage-posts-list"></div>
     </div>
 </main>
@@ -96,6 +105,7 @@
     const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNpa2x5d2hxc3didWpzb2dxaXZhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njg5MzAyNzcsImV4cCI6MjA4NDUwNjI3N30._REwuc__qmpW1eQVhfm-RvsoMJCGYXjqtqBVn4w48Oc';
     const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
     let currentKigo = "";
+    let myTab = 'my';
     const bgm = document.getElementById('bgm');
     bgm.volume = 0.3;
 
@@ -109,7 +119,6 @@
             const now = getJST();
             const todayKey = `${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`;
             const { data, error } = await supabaseClient.from('kigo_data').select('kigo, kana, origin').eq('date', todayKey).maybeSingle();
-            if (error) throw error;
             if (data) {
                 currentKigo = data.kigo;
                 display.innerText = currentKigo;
@@ -119,54 +128,78 @@
         } catch (e) { display.innerText = "通信エラー"; }
     }
 
-    const etoInfo = [
-        { name: "子", angle: 0, desc: "子だくさんのネズミのように、子孫繁栄や物事の始まりに良い日。" },
-        { name: "丑", angle: 30, desc: "粘り強く歩む牛のように、じっくり取り組むのに良い日。" },
-        { name: "寅", angle: 60, desc: "金運を呼び寄せる日。勢いよく戻る力から旅立ちにも良い日。" },
-        { name: "卯", angle: 90, desc: "物事がとんとん拍子に進む日。穏やかで明るい予感があります。" },
-        { name: "辰", angle: 120, desc: "力強い龍のエネルギーが溢れる日。新しい一歩にぴったりです。" },
-        { name: "巳", angle: 150, desc: "お金や芸事の才能を育ててくれる日。新しい自分に生まれ変わる時です。" },
-        { name: "午", angle: 180, desc: "太陽のエネルギーが満ちる日。豊かな暮らしに感謝を伝える日です。" },
-        { name: "未", angle: 210, desc: "群れで仲良く暮らす羊のように、平和に過ごすのが良いとされる日。" },
-        { name: "申", angle: 240, desc: "悩みや災いが去っていく日。お天気の神様に無事を祈る日です。" },
-        { name: "酉", angle: 270, desc: "福や商売の運をかき集める日。賑やかな活気の中で豊かさを願う日。" },
-        { name: "戌", angle: 300, desc: "安産や子供の健やかな成長を祈る日。家族の絆を深めるのに良い日。" },
-        { name: "亥", angle: 330, desc: "猪突猛進するイノシシのように、情熱を持って進む日。" }
-    ];
+    const etoInfo = [{name:"子"},{name:"丑"},{name:"寅"},{name:"卯"},{name:"辰"},{name:"巳"},{name:"午"},{name:"未"},{name:"申"},{name:"酉"},{name:"戌"},{name:"亥"}];
+    const etoDescs = ["始まりの刻。","粘り強く進む刻。","勢いづく刻。","跳躍の刻。","変化の刻。","情熱を育てる刻。","陽気が満ちる刻。","和を重んじる刻。","災いを去る刻。","福を呼ぶ刻。","絆を深める刻。","誠実に進む刻。"];
 
     function calculateEto() {
         const now = getJST();
         const hour = now.getHours();
         const idx = Math.floor(hour / 2);
-        const info = etoInfo[idx];
-        document.getElementById('eto-today-label').innerText = `今は ${info.name} の刻`;
-        document.getElementById('eto-description').innerText = info.desc;
-        const degrees = idx * 30;
-        document.getElementById('eto-pointer').style.transform = `translate(-50%, -100%) rotate(${degrees}deg)`;
+        document.getElementById('eto-today-label').innerText = `今は ${etoInfo[idx].name} の刻`;
+        document.getElementById('eto-description').innerText = etoDescs[idx];
+        document.getElementById('eto-pointer').style.transform = `translate(-50%, -100%) rotate(${idx * 30}deg)`;
     }
 
     async function loadPosts() {
         const { data } = await supabaseClient.from('posts').select('*').order('created_at', { ascending: false });
-        const list = document.getElementById('posts-list'); if(!list) return;
-        list.innerHTML = '';
+        renderList(data, document.getElementById('posts-list'));
+    }
+
+    function renderList(data, listElement) {
+        if(!listElement) return;
+        listElement.innerHTML = '';
+        const savedIds = JSON.parse(localStorage.getItem('saved_kigo_posts') || '[]');
         data?.forEach(post => {
-            list.innerHTML += `<div class="card"><div class="card-inner">
+            const isSaved = savedIds.includes(String(post.id));
+            listElement.innerHTML += `<div class="card"><div class="card-inner">
                 <div style="display:flex; justify-content:space-between; align-items:baseline;"><span class="pen-name">${post.pen_name}</span><span class="post-date">${new Date(post.created_at).toLocaleDateString()}</span></div>
                 <div class="card-content">${post.content.split(post.kigo).join(`<strong>${post.kigo}</strong>`)}</div>
+                <button class="save-btn ${isSaved ? 'active' : ''}" onclick="toggleSave('${post.id}')"><span class="material-symbols-outlined">bookmark</span></button>
             </div><div class="ai-footer"><div class="ai-box">${post.biyori_message || '...'}</div></div></div>`;
         });
     }
 
-    function showTimeline() { document.getElementById('timeline-view').classList.add('active'); document.getElementById('mypage-view').classList.remove('active'); document.getElementById('header-btn-text').innerText = 'マイページ'; loadPosts(); }
-    function showMypage() { document.getElementById('timeline-view').classList.remove('active'); document.getElementById('mypage-view').classList.add('active'); document.getElementById('header-btn-text').innerText = 'もどる'; calculateEto(); }
-    function handleHeaderBtnClick() { document.getElementById('timeline-view').classList.contains('active') ? showMypage() : showTimeline(); }
-    function closeEditor() { document.getElementById('editor-container').style.display = 'none'; document.getElementById('toggle-editor').style.display = 'inline-flex'; }
-    function toggleAudio() { if (bgm.paused) { bgm.play(); } else { bgm.pause(); } updateAudioUI(!bgm.paused); }
-    function updateAudioUI(p) { document.getElementById('audio-icon').innerText = p ? 'volume_up' : 'volume_off'; }
+    function toggleSave(id) {
+        let saved = JSON.parse(localStorage.getItem('saved_kigo_posts') || '[]');
+        if(saved.includes(id)) { saved = saved.filter(i => i !== id); } else { saved.push(id); }
+        localStorage.setItem('saved_kigo_posts', JSON.stringify(saved));
+        location.reload();
+    }
 
+    async function switchTab(t) {
+        myTab = t;
+        document.getElementById('tab-my').classList.toggle('active', t === 'my');
+        document.getElementById('tab-save').classList.toggle('active', t === 'save');
+        const { data } = await supabaseClient.from('posts').select('*').order('created_at', { ascending: false });
+        const list = document.getElementById('mypage-posts-list');
+        if(t === 'save') {
+            const savedIds = JSON.parse(localStorage.getItem('saved_kigo_posts') || '[]');
+            renderList(data.filter(p => savedIds.includes(String(p.id))), list);
+        } else {
+            const myName = document.getElementById('pen-name').value || '私';
+            renderList(data.filter(p => p.pen_name === myName), list);
+        }
+    }
+
+    function handleHeaderBtnClick() {
+        const isTimeline = document.getElementById('timeline-view').classList.contains('active');
+        if (isTimeline) {
+            document.getElementById('timeline-view').classList.remove('active');
+            document.getElementById('mypage-view').classList.add('active');
+            document.getElementById('header-btn-text').innerText = 'もどる';
+            calculateEto(); switchTab('my');
+        } else {
+            document.getElementById('timeline-view').classList.add('active');
+            document.getElementById('mypage-view').classList.remove('active');
+            document.getElementById('header-btn-text').innerText = 'マイページ';
+            loadPosts();
+        }
+    }
+
+    function closeEditor() { document.getElementById('editor-container').style.display = 'none'; document.getElementById('toggle-editor').style.display = 'inline-flex'; }
     document.getElementById('toggle-editor').onclick = () => { document.getElementById('editor-container').style.display = 'block'; document.getElementById('toggle-editor').style.display = 'none'; };
+    document.getElementById('audio-toggle').onclick = () => { if (bgm.paused) { bgm.play(); } else { bgm.pause(); } document.getElementById('audio-icon').innerText = bgm.paused ? 'volume_off' : 'volume_up'; };
     document.getElementById('kigo-display').onclick = () => { const a = document.getElementById('kigo-desc-area'); a.style.display = a.style.display === 'block' ? 'none' : 'block'; };
-    document.getElementById('audio-toggle').onclick = toggleAudio;
     document.getElementById('btn-save').onclick = async () => {
         const content = document.getElementById('post-content').value;
         if (!currentKigo || !content.includes(currentKigo)) { document.getElementById('error-msg').innerText = `「${currentKigo || '季語'}」を入れてください。`; return; }
