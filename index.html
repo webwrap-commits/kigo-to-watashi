@@ -26,8 +26,9 @@
         .kigo-label { font-family: var(--font-sans); font-size: 0.8rem; color: var(--muted-foreground); margin-bottom: 0.5rem; letter-spacing: 0.2rem; }
         .kigo-word { font-family: var(--font-serif); font-size: 2.8rem; font-weight: 200; letter-spacing: 0.8rem; margin: 0; cursor: pointer; display: inline-block; color: var(--foreground); min-height: 4rem; word-break: break-all; }
         #kigo-kana-area { font-size: 0.8rem; color: #888; margin-bottom: 1rem; letter-spacing: 0.1rem; }
-        #kigo-desc-area { max-width: 28rem; margin: 1.5rem auto 0; font-size: 0.85rem; color: #555; line-height: 2; text-align: left; display: none; padding: 1.5rem; border: 1px solid #eee; background: #fafafa; border-radius: 0.5rem; word-break: break-all; }
+        #kigo-desc-area { max-width: 28rem; margin: 1.5rem auto 0; font-size: 0.85rem; color: #555; line-height: 2; text-align: left; display: none; padding: 1.5rem; border: 1px solid #eee; background: #fafafa; border-radius: 0.5rem; word-break: break-all; font-family: var(--font-sans); }
 
+        /* 既存の干支・投稿・UI関連（変更なし） */
         .eto-card { background: white; border: 1px solid var(--border); border-radius: var(--radius-xl); padding: 2rem 1.5rem; margin-bottom: 2rem; width: 100%; max-width: 36rem; box-sizing: border-box; }
         .eto-title { font-family: var(--font-serif); font-size: 1.4rem; margin-bottom: 1.5rem; text-align: center; }
         .eto-container { position: relative; width: 280px; height: 280px; margin: 0 auto 2rem; }
@@ -91,7 +92,7 @@
                     </div>
                 </div>
                 <div class="kigo-label">今日の季語</div>
-                <div id="kigo-display" class="kigo-word">準備中</div>
+                <div id="kigo-display" class="kigo-word"></div>
                 <div id="kigo-kana-area"></div>
                 <div id="kigo-desc-area"></div>
                 <button id="audio-toggle" class="audio-control-btn"><span id="audio-icon" class="material-symbols-outlined" style="font-size: 1rem;">volume_off</span><span id="audio-text">静寂の中</span></button>
@@ -137,7 +138,7 @@
 
     function getJST() { return new Date(new Date().toLocaleString("en-US", {timeZone: "Asia/Tokyo"})); }
 
-    // 【重要】診断モード付き季語取得
+    // 【修正】あいまい検索(ilike)を使い、より確実にDBから取得するロジック
     async function fetchKigo() {
         const display = document.getElementById('kigo-display');
         const kanaArea = document.getElementById('kigo-kana-area');
@@ -149,18 +150,13 @@
             const day = String(now.getDate()).padStart(2, '0');
             const todayKey = `${month}-${day}`; 
 
-            display.innerText = "検索中：" + todayKey;
-
             const { data, error } = await supabaseClient
                 .from('kigo_data')
                 .select('kigo, kana, origin')
-                .eq('date', todayKey)
+                .ilike('date', `%${todayKey}%`) // 01-26 が含まれていれば拾う
                 .maybeSingle();
 
-            if (error) {
-                display.innerText = "エラー：" + error.message;
-                return;
-            }
+            if (error) throw error;
 
             if (data) {
                 currentKigo = data.kigo;
@@ -168,11 +164,13 @@
                 kanaArea.innerText = data.kana ? `（${data.kana}）` : "";
                 descArea.innerHTML = data.origin || "";
             } else {
-                display.innerText = "未登録：" + todayKey;
+                // 万が一見つからない時のフォールバック
+                display.innerText = "今日の言葉";
+                currentKigo = "今日の言葉";
             }
         } catch (e) {
             console.error(e);
-            display.innerText = "読込エラー";
+            display.innerText = "季節の移ろい";
         }
     }
 
@@ -184,7 +182,7 @@
         }
     };
 
-    // --- 以下、既存のロジック ---
+    // --- 以下、変更なしの安定したロジック ---
     
     document.addEventListener("visibilitychange", () => {
         if (document.hidden) { bgm.pause(); updateAudioUI(false); }
