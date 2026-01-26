@@ -19,9 +19,9 @@
         #timeline-view.active, #mypage-view.active { display: flex; }
         .kigo-section { text-align: center; margin: 2rem 0 4rem; width: 100%; padding: 0 1.5rem; box-sizing: border-box; }
         
-        /* 導入文のカード（台紙） */
+        /* 導入文カード：投稿テキストにスタイルを合わせる */
         .intro-card { background: white; border: 1px solid var(--border); border-radius: var(--radius-xl); padding: 2.5rem 2rem; margin: 1rem auto 4rem; max-width: 36rem; text-align: left; box-sizing: border-box; }
-        .intro-text { font-family: var(--font-serif); font-size: 0.85rem; color: #555; line-height: 2.2; letter-spacing: 0.05rem; }
+        .intro-text { font-family: var(--font-sans); font-size: 0.9rem; color: #333; line-height: 2.5; letter-spacing: 0.05rem; }
 
         .kigo-label { font-family: var(--font-sans); font-size: 0.8rem; color: var(--muted-foreground); margin-bottom: 0.5rem; letter-spacing: 0.2rem; }
         .kigo-word { font-family: var(--font-serif); font-size: 2.8rem; font-weight: 200; letter-spacing: 0.8rem; margin: 0; cursor: pointer; display: inline-block; color: var(--foreground); min-height: 4rem; word-break: break-all; }
@@ -31,10 +31,7 @@
         .eto-title { font-family: var(--font-serif); font-size: 1.4rem; margin-bottom: 1.5rem; text-align: center; }
         .eto-container { position: relative; width: 280px; height: 280px; margin: 0 auto 2rem; }
         .eto-image { width: 100%; height: 100%; object-fit: contain; }
-        
-        /* 針の長さを短く調整 */
         .eto-pointer { position: absolute; top: 50%; left: 50%; width: 1px; height: 85px; background: #eb6101; transform-origin: bottom center; transform: translate(-50%, -100%) rotate(0deg); transition: transform 1s ease; z-index: 10; }
-        
         .eto-desc { font-size: 0.9rem; color: #555; line-height: 1.8; text-align: left; max-width: 28rem; margin: 0 auto; }
         .btn-write { display: inline-flex; align-items: center; justify-content: center; gap: 0.8rem; margin-top: 1rem; border: 1px solid var(--foreground); padding: 0.8rem 2.5rem; border-radius: 3rem; font-family: var(--font-serif); font-size: 0.95rem; letter-spacing: 0.2rem; cursor: pointer; background: white; color: var(--foreground); }
         .audio-control-btn { background: none; border: 1px solid var(--border); border-radius: 2rem; padding: 0.4rem 1rem; display: flex; align-items: center; gap: 0.5rem; font-size: 0.65rem; color: var(--muted-foreground); margin: 1.5rem auto; cursor: pointer; }
@@ -83,7 +80,6 @@
                         そこから始まる、今日の綴りごとです。
                     </div>
                 </div>
-                
                 <div class="kigo-label">今日の季語</div>
                 <div id="kigo-display" class="kigo-word">...</div>
                 <div id="kigo-kana-area"></div>
@@ -92,7 +88,6 @@
                 <button id="toggle-editor" class="btn-write"><span class="material-symbols-outlined">edit_note</span>綴る</button>
             </section>
         </div>
-
         <div id="editor-container">
             <div class="editor-box">
                 <input type="text" id="pen-name" placeholder="ペンネーム（私）">
@@ -104,7 +99,6 @@
         </div>
         <div id="posts-list"></div>
     </div>
-
     <div id="mypage-view">
         <h2 style="font-family: var(--font-serif); font-weight: 200; letter-spacing: 0.2rem; margin: 2rem 0;">私の季節の移ろい録</h2>
         <div class="eto-card">
