@@ -26,8 +26,7 @@
         .eto-title { font-family: var(--font-serif); font-size: 1.4rem; margin-bottom: 1.5rem; text-align: center; }
         .eto-container { position: relative; width: 280px; height: 280px; margin: 0 auto 2rem; }
         .eto-image { width: 100%; height: 100%; object-fit: contain; }
-        .eto-pointer { position: absolute; top: 50%; left: 50%; width: 1px; height: 115px; background: #eb6101; transform-origin: bottom center; transform: translate(-50%, -100%) rotate(0deg); transition: transform 1s ease; z-index: 10; }
-        .eto-center { position: absolute; top: 50%; left: 50%; width: 5px; height: 5px; background: #eb6101; border-radius: 50%; transform: translate(-50%, -50%); z-index: 11; }
+        .eto-pointer { position: absolute; top: 50%; left: 50%; width: 1px; height: 90px; background: #eb6101; transform-origin: bottom center; transform: translate(-50%, -100%) rotate(0deg); transition: transform 1s ease; z-index: 10; }
         .eto-desc { font-size: 0.9rem; color: #555; line-height: 1.8; text-align: left; max-width: 28rem; margin: 0 auto; }
         .btn-write { display: inline-flex; align-items: center; justify-content: center; gap: 0.8rem; margin-top: 1rem; border: 1px solid var(--foreground); padding: 0.8rem 2.5rem; border-radius: 3rem; font-family: var(--font-serif); font-size: 0.95rem; letter-spacing: 0.2rem; cursor: pointer; background: white; color: var(--foreground); }
         .audio-control-btn { background: none; border: 1px solid var(--border); border-radius: 2rem; padding: 0.4rem 1rem; display: flex; align-items: center; gap: 0.5rem; font-size: 0.65rem; color: var(--muted-foreground); margin: 1.5rem auto; cursor: pointer; }
@@ -89,7 +88,6 @@
             <div class="eto-container">
                 <img src="https://res.cloudinary.com/dh6zibjr8/image/upload/v1769359321/eto2_p5uqwq.png" class="eto-image">
                 <div id="eto-pointer" class="eto-pointer"></div>
-                <div class="eto-center"></div>
             </div>
             <div id="eto-description" class="eto-desc"></div>
         </div>
@@ -111,6 +109,10 @@
 
     function getJST() { return new Date(new Date().toLocaleString("en-US", {timeZone: "Asia/Tokyo"})); }
 
+    document.addEventListener("visibilitychange", () => {
+        if (document.hidden) { bgm.pause(); updateAudioUI(false); }
+    });
+
     async function fetchKigo() {
         const display = document.getElementById('kigo-display');
         const kanaArea = document.getElementById('kigo-kana-area');
@@ -129,20 +131,18 @@
     }
 
     const etoInfo = [{name:"子"},{name:"丑"},{name:"寅"},{name:"卯"},{name:"辰"},{name:"巳"},{name:"午"},{name:"未"},{name:"申"},{name:"酉"},{name:"戌"},{name:"亥"}];
-    const etoDescs = ["始まりの刻。","粘り強く進む刻。","勢いづく刻。","跳躍の刻。","変化の刻。","情熱を育てる刻。","陽気が満ちる刻。","和を重んじる刻。","災いを去る刻。","福を呼ぶ刻。","絆を深める刻。","誠実に進む刻。"];
+    const etoDescs = ["始まりの日。","粘り強く進む日。","勢いづく日。","跳躍の日。","変化の日。","情熱を育てる日。","陽気が満ちる日。","和を重んじる日。","災いを去る日。","福を呼ぶ日。","絆を深める日。","誠実に進む日。"];
 
     function calculateEto() {
         const now = getJST();
         if (now.getFullYear() !== 2026) return;
-        // 2026年1月1日は「丁亥（亥の日）」 index = 11
         const baseDate = new Date(2026, 0, 1);
         const diffDays = Math.floor((now - baseDate) / (1000 * 60 * 60 * 24));
         const dayEtoIndex = (11 + diffDays) % 12; 
-        const hourIdx = Math.floor(now.getHours() / 2);
-        const finalIdx = (dayEtoIndex + hourIdx) % 12;
-        document.getElementById('eto-today-label').innerText = `今は ${etoInfo[finalIdx].name} の刻`;
-        document.getElementById('eto-description').innerText = etoDescs[finalIdx];
-        document.getElementById('eto-pointer').style.transform = `translate(-50%, -100%) rotate(${finalIdx * 30}deg)`;
+        
+        document.getElementById('eto-today-label').innerText = `今日は ${etoInfo[dayEtoIndex].name} の日`;
+        document.getElementById('eto-description').innerText = etoDescs[dayEtoIndex];
+        document.getElementById('eto-pointer').style.transform = `translate(-50%, -100%) rotate(${dayEtoIndex * 30}deg)`;
     }
 
     async function loadPosts() {
