@@ -25,7 +25,8 @@
         .kigo-word { font-family: var(--font-serif); font-size: 2.8rem; font-weight: 200; letter-spacing: 0.8rem; margin: 0; cursor: pointer; display: inline-block; color: var(--foreground); min-height: 4rem; word-break: break-all; }
         #kigo-desc-area { max-width: 28rem; margin: 1.5rem auto 0; font-size: 0.85rem; color: #555; line-height: 2; text-align: left; display: none; padding: 1.5rem; border: 1px solid #eee; background: #fafafa; border-radius: 0.5rem; word-break: break-all; }
         .btn-write { display: inline-flex; align-items: center; justify-content: center; gap: 0.8rem; margin-top: 1rem; border: 1px solid var(--foreground); padding: 0.8rem 2.5rem; border-radius: 3rem; font-family: var(--font-serif); font-size: 0.95rem; letter-spacing: 0.2rem; cursor: pointer; background: white; color: var(--foreground); }
-        .audio-control-btn { background: none; border: 1px solid var(--border); border-radius: 2rem; padding: 0.4rem 1rem; display: flex; align-items: center; gap: 0.5rem; font-size: 0.65rem; color: var(--muted-foreground); margin: 1.5rem auto; cursor: pointer; }
+        /* 音量ボタンを常に浮かせて表示 */
+        .audio-control-btn { position: fixed; bottom: 1.5rem; left: 50%; transform: translateX(-50%); z-index: 100; background: rgba(255,255,255,0.8); backdrop-filter: blur(4px); border: 1px solid var(--border); border-radius: 2rem; padding: 0.4rem 1rem; display: flex; align-items: center; gap: 0.5rem; font-size: 0.65rem; color: var(--muted-foreground); cursor: pointer; }
         #posts-list, #mypage-posts-list { width: 100%; max-width: 42rem; padding: 0 1.5rem 5rem; box-sizing: border-box; }
         .card { background-color: var(--card); border: 1px solid var(--border); border-radius: var(--radius-xl); margin-bottom: 2rem; overflow: hidden; position: relative; }
         .card-inner { padding: 1.5rem 1.5rem 3.5rem 1.5rem; }
@@ -62,6 +63,7 @@
     </button>
 </header>
 <audio id="bgm" loop preload="auto"><source src="https://res.cloudinary.com/dh6zibjr8/video/upload/v1769330871/kigo-bgm_t0r9ai.mp3" type="audio/mpeg"></audio>
+<button id="audio-toggle" class="audio-control-btn"><span id="audio-icon" class="material-symbols-outlined" style="font-size: 1rem;">volume_off</span><span id="audio-text">静寂の中</span></button>
 <main style="width: 100%;">
     <div id="timeline-view" class="active">
         <div id="main-content-area">
@@ -81,8 +83,7 @@
                 <div class="kigo-label">今日の季語</div>
                 <div id="kigo-display" class="kigo-word"></div>
                 <div id="kigo-desc-area"></div>
-                <button id="audio-toggle" class="audio-control-btn"><span id="audio-icon" class="material-symbols-outlined" style="font-size: 1rem;">volume_off</span><span id="audio-text">静寂の中</span></button>
-                <button id="toggle-editor" class="btn-write"><span class="material-symbols-outlined">edit_note</span>綴る</button>
+                <button id="toggle-editor" class="btn-write" style="margin-top: 2rem;"><span class="material-symbols-outlined">edit_note</span>綴る</button>
             </section>
         </div>
         <div id="editor-container"><div class="editor-box"><input type="text" id="pen-name" placeholder="ペンネーム（私）"><textarea id="post-content" maxlength="300" placeholder="物語を綴ってください..."></textarea><button id="btn-save" class="btn-submit">物語を綴る</button><div onclick="closeEditor()" style="text-align:center; padding:1rem; font-size:0.8rem; color:var(--muted-foreground); cursor:pointer;">戻る</div><p id="error-msg" style="color:#ef4444; font-size:0.75rem; text-align:center;"></p></div></div>
@@ -208,13 +209,22 @@
     document.getElementById('audio-toggle').onclick = () => { if (bgm.paused) { bgm.play(); } else { bgm.pause(); } updateAudioUI(!bgm.paused); };
     function updateAudioUI(playing) { document.getElementById('audio-icon').innerText = playing ? 'volume_up' : 'volume_off'; document.getElementById('audio-text').innerText = playing ? '静寂を止める' : '静寂の中'; }
 
+    // ブラウザを閉じるときに音を止める
+    window.onbeforeunload = () => { bgm.pause(); };
+
     document.getElementById('btn-save').onclick = async () => {
         const content = document.getElementById('post-content').value;
         if (!currentKigo || !content.includes(currentKigo)) { document.getElementById('error-msg').innerText = `「${currentKigo || '季語'}」を入れてください。`; return; }
-        const { error } = await supabaseClient.from('posts').insert([{ content, kigo: currentKigo, pen_name: document.getElementById('pen-name').value || '私' }]);
+        const { error } = await supabaseClient.from('posts').insert([{ 
+            content, 
+            kigo: currentKigo, 
+            pen_name: document.getElementById('pen-name').value || '私',
+            biyori_message: 'ことば日和が、あなたの綴りごとを読み解いています……' 
+        }]);
         if(!error) {
             document.getElementById('post-content').value = '';
             closeEditor(); loadPosts();
+            window.scrollTo(0, 0);
         }
     };
 
