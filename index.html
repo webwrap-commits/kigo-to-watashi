@@ -2,188 +2,205 @@
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>季語と私の綴りごと</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>十二支と季語の暦</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@200&family=Noto+Serif+JP:wght@200;600&family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,200,0,0&display=swap" rel="stylesheet">
     <style>
         :root {
-            --background: #fdfdfd; --foreground: #1a1a1a; --card: #ffffff; --border: #e4e4e7;
-            --muted-foreground: #71717a; --radius-xl: 0.75rem; --font-serif: 'Noto Serif JP', serif; --font-sans: 'Noto Sans JP', sans-serif;
+            --bg-color: #f8f5f0;
+            --main-text: #333;
+            --accent-color: #d4a373;
         }
-        body { font-family: var(--font-sans); background-color: var(--background); color: var(--foreground); margin: 0; padding: 0; line-height: 1.8; display: flex; flex-direction: column; align-items: center; font-weight: 200; -webkit-text-size-adjust: 100%; }
-        header { width: 100%; max-width: 48rem; padding: 4rem 1.5rem 1rem; display: flex; justify-content: space-between; align-items: center; box-sizing: border-box; }
-        h1 { font-family: var(--font-serif); font-size: 1.1rem; font-weight: 200; letter-spacing: 0.3rem; margin: 0; color: var(--foreground); cursor: pointer; }
-        .btn-outline { display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.5rem 1rem; border-radius: 0.5rem; font-size: 0.75rem; border: 1px solid var(--border); background: white; cursor: pointer; color: var(--foreground) !important; text-decoration: none; }
-        #timeline-view, #mypage-view { width: 100%; display: none; flex-direction: column; align-items: center; }
-        #timeline-view.active, #mypage-view.active { display: flex; }
-        .kigo-section { text-align: center; margin: 2rem 0 4rem; width: 100%; padding: 0 1.5rem; box-sizing: border-box; }
-        .kigo-label { font-family: var(--font-sans); font-size: 0.8rem; color: var(--muted-foreground); margin-bottom: 1rem; letter-spacing: 0.2rem; }
-        .kigo-word { font-family: var(--font-serif); font-size: 2.8rem; font-weight: 200; letter-spacing: 0.8rem; margin: 0; cursor: pointer; display: inline-block; color: var(--foreground); min-height: 4rem; }
-        #kigo-desc-area { max-width: 24rem; margin: 1.5rem auto 0; font-size: 0.9rem; color: #555; line-height: 1.8; text-align: left; display: none; padding: 1.2rem; border: 1px solid #eee; background: #fafafa; border-radius: 0.5rem; word-break: break-all; }
-        .eto-card { background: white; border: 1px solid var(--border); border-radius: var(--radius-xl); padding: 2rem 1.5rem; margin-bottom: 2rem; width: 100%; max-width: 36rem; box-sizing: border-box; }
-        .eto-title { font-family: var(--font-serif); font-size: 1.4rem; margin-bottom: 1.5rem; text-align: center; }
-        .eto-container { position: relative; width: 280px; height: 280px; margin: 0 auto 2rem; }
-        .eto-image { width: 100%; height: 100%; object-fit: contain; }
-        .eto-pointer { position: absolute; width: 16px; height: 16px; background: rgba(212, 175, 55, 0.7); border-radius: 50%; box-shadow: 0 0 12px rgba(212, 175, 55, 0.9); transform: translate(-50%, -50%); transition: all 0.5s ease; z-index: 10; }
-        .eto-desc { font-size: 0.9rem; color: #555; line-height: 1.8; text-align: left; max-width: 28rem; margin: 0 auto; }
-        .btn-write { display: inline-flex; align-items: center; justify-content: center; gap: 0.8rem; margin-top: 1rem; border: 1px solid var(--foreground); padding: 0.8rem 2.5rem; border-radius: 3rem; font-family: var(--font-serif); font-size: 0.95rem; letter-spacing: 0.2rem; cursor: pointer; background: white; color: var(--foreground); }
-        .audio-control-btn { background: none; border: 1px solid var(--border); border-radius: 2rem; padding: 0.4rem 1rem; display: flex; align-items: center; gap: 0.5rem; font-size: 0.65rem; color: var(--muted-foreground); margin: 1.5rem auto; cursor: pointer; }
-        #posts-list { width: 100%; max-width: 42rem; padding: 0 1.5rem 5rem; box-sizing: border-box; }
-        .card { background-color: var(--card); border: 1px solid var(--border); border-radius: var(--radius-xl); margin-bottom: 2rem; overflow: hidden; position: relative; }
-        .card-inner { padding: 1.5rem 1.5rem 3.5rem 1.5rem; }
-        .pen-name { font-family: var(--font-serif); font-weight: 600; font-size: 0.85rem; }
-        .post-date { font-size: 0.65rem; color: var(--muted-foreground); }
-        .card-content { font-family: var(--font-sans); font-size: 0.9rem; line-height: 2; white-space: pre-wrap; color: #333; margin-top: 1rem; }
-        .ai-footer { background-color: #fafafa; padding: 1rem 1.5rem; border-top: 1px solid #f0f0f0; }
-        .ai-box { font-family: var(--font-sans); font-size: 0.8rem; color: #666; line-height: 1.7; }
-        #editor-container { display: none; width: 100%; max-width: 42rem; padding: 0 1.5rem 5rem; box-sizing: border-box; }
-        .editor-box { background: white; border: 1px solid var(--border); border-radius: var(--radius-xl); padding: 1.5rem; }
-        #pen-name, #post-content { width: 100%; padding: 0.8rem; border: 1px solid #eee; border-radius: 0.4rem; box-sizing: border-box; font-family: var(--font-sans); font-size: 0.9rem; color: var(--foreground); margin-bottom: 1rem; }
-        #post-content { height: 180px; resize: none; }
-        .btn-submit { background: var(--foreground); color: white; padding: 0.8rem; border-radius: 3rem; font-family: var(--font-serif); font-size: 0.9rem; width: 100%; border: none; cursor: pointer; }
-        @media (max-width: 640px) { header { padding: 2.5rem 1.5rem 1rem; } .kigo-word { font-size: 2.2rem; letter-spacing: 0.5rem; } .eto-container { width: 240px; height: 240px; } }
+
+        body {
+            font-family: "Helvetica Neue", Arial, "Hiragino Kaku Gothic ProN", "Hiragino Sans", Meiryo, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--main-text);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin: 0;
+            padding: 20px;
+        }
+
+        h1 {
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+            color: #5d5d5d;
+        }
+
+        /* 干支時計のエリア */
+        .eto-container {
+            position: relative;
+            width: 300px;
+            height: 300px;
+            margin-bottom: 30px;
+        }
+
+        .eto-board {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            background-size: cover;
+            background-position: center;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            border: 8px solid #fff;
+        }
+
+        .eto-pointer {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 4px;
+            height: 120px;
+            background-color: #e63946;
+            border-radius: 2px;
+            transform-origin: bottom center;
+            transform: translate(-50%, -100%) rotate(0deg);
+            transition: transform 1s cubic-bezier(0.4, 2.08, 0.55, 0.44);
+            z-index: 10;
+        }
+
+        .eto-center {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 12px;
+            height: 12px;
+            background-color: #e63946;
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 11;
+        }
+
+        /* 季語表示エリア */
+        .kigo-card {
+            background: #fff;
+            padding: 20px;
+            border-radius: 15px;
+            width: 90%;
+            max-width: 400px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            text-align: center;
+        }
+
+        #kigo-display {
+            font-size: 2rem;
+            font-weight: bold;
+            margin: 0;
+            color: #2c3e50;
+        }
+
+        #kigo-kana-area {
+            font-size: 0.9rem;
+            color: #888;
+            margin: 5px 0 15px 0;
+        }
+
+        #kigo-desc-area {
+            font-size: 1rem;
+            line-height: 1.6;
+            color: #555;
+            text-align: left;
+            border-top: 1px dashed #eee;
+            padding-top: 15px;
+        }
     </style>
 </head>
 <body>
-<header>
-    <h1 onclick="location.reload()">季語と私の綴りごと</h1>
-    <button id="header-btn" class="btn-outline" onclick="handleHeaderBtnClick()">
-        <span id="header-btn-icon" class="material-symbols-outlined" style="font-size: 1rem;">person</span>
-        <span id="header-btn-text">マイページ</span>
-    </button>
-</header>
-<audio id="bgm" loop preload="auto"><source src="https://res.cloudinary.com/dh6zibjr8/video/upload/v1769330871/kigo-bgm_t0r9ai.mp3" type="audio/mpeg"></audio>
-<main style="width: 100%;">
-    <div id="timeline-view" class="active">
-        <section class="kigo-section">
-            <div class="kigo-label">今日の季語</div>
-            <div id="kigo-display" class="kigo-word">...</div>
-            <div id="kigo-desc-area"></div>
-            <button id="audio-toggle" class="audio-control-btn"><span id="audio-icon" class="material-symbols-outlined" style="font-size: 1rem;">volume_off</span><span id="audio-text">静寂の中</span></button>
-            <button id="toggle-editor" class="btn-write"><span class="material-symbols-outlined">edit_note</span>綴る</button>
-        </section>
-        <div id="editor-container">
-            <div class="editor-box">
-                <input type="text" id="pen-name" placeholder="ペンネーム（私）">
-                <textarea id="post-content" maxlength="300" placeholder="物語を綴ってください..."></textarea>
-                <button id="btn-save" class="btn-submit">物語を綴る</button>
-                <div onclick="closeEditor()" style="text-align:center; padding:1rem; font-size:0.8rem; color:var(--muted-foreground); cursor:pointer;">戻る</div>
-                <p id="error-msg" style="color:#ef4444; font-size:0.75rem; text-align:center;"></p>
-            </div>
-        </div>
-        <div id="posts-list"></div>
+
+    <h1>今日の暦と季語</h1>
+
+    <div class="eto-container">
+        <div id="eto-board" class="eto-board"></div>
+        <div id="eto-pointer" class="eto-pointer"></div>
+        <div class="eto-center"></div>
     </div>
-    <div id="mypage-view">
-        <h2 style="font-family: var(--font-serif); font-weight: 200; letter-spacing: 0.2rem; margin: 2rem 0;">私の季節の移ろい録</h2>
-        <div class="eto-card">
-            <div id="eto-today-label" class="eto-title"></div>
-            <div class="eto-container">
-                <img src="https://res.cloudinary.com/dh6zibjr8/image/upload/v1769349838/eto_eepmqf.png" class="eto-image">
-                <div id="eto-pointer" class="eto-pointer"></div>
-            </div>
-            <div id="eto-description" class="eto-desc"></div>
-        </div>
-        <div id="mypage-posts-list"></div>
+
+    <div class="kigo-card">
+        <div id="kigo-display">読み込み中...</div>
+        <div id="kigo-kana-area"></div>
+        <div id="kigo-desc-area"></div>
     </div>
-</main>
-<script>
-    const SUPABASE_URL = 'https://ciklywhqswbujsogqiva.supabase.co';
-    const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNpa2x5d2hxc3didWpzb2dxaXZhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njg5MzAyNzcsImV4cCI6MjA4NDUwNjI3N30._REwuc__qmpW1eQVhfm-RvsoMJCGYXjqtqBVn4w48Oc';
-    const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-    let currentKigo = "";
-    const bgm = document.getElementById('bgm');
-    bgm.volume = 0.3;
 
-    const etoInfo = [
-        { name: "子", angle: 0, desc: "子だくさんのネズミのように、子孫繁栄や物事の始まりに良い日。お守りを作るのにも向いています。" },
-        { name: "丑", angle: 30, desc: "粘り強く歩む牛のように、じっくり取り組むのに良い日。天神様の使いともされ、学問や誠実さを象徴します。" },
-        { name: "寅", angle: 60, desc: "黄金色の毛並みから、金運を呼び寄せる日。旅立ちにも良い日です。" },
-        { name: "卯", angle: 90, desc: "ぴょんぴょん跳ねるウサギのように、物事がとんとん拍子に進む日。" },
-        { name: "辰", angle: 120, desc: "力強い龍のエネルギーが溢れる日。新しい一歩を力強く踏み出すのにぴったりです。" },
-        { name: "巳", angle: 150, desc: "弁財天様と縁が深く、お金や芸事の才能を育ててくれる日。" },
-        { name: "午", angle: 180, desc: "太陽のエネルギーが満ちる日。豊かな暮らしに感謝を伝えるのにふさわしい日です。" },
-        { name: "未", angle: 210, desc: "周りの人と手を取り合い、平和に過ごすのが良いとされる日です。" },
-        { name: "申", angle: 240, desc: "悩みや災いが去っていく日。お天気の神様に無事を祈るのにも向いています。" },
-        { name: "酉", angle: 270, desc: "「とりこむ」という言葉から、福や商売の運をかき集める日です。" },
-        { name: "戌", angle: 300, desc: "家族の絆を深めるのに良い日です。" },
-        { name: "亥", angle: 330, desc: "情熱を持って進む日。無病息災を願う日でもあります。" }
-    ];
+    <script>
+        // --- 設定：Supabaseの接続情報 ---
+        // ここにあなたのURLとKeyを入れてください
+        const SUPABASE_URL = 'YOUR_SUPABASE_URL';
+        const SUPABASE_KEY = 'YOUR_SUPABASE_ANON_KEY';
+        const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-    function getJST() { return new Date(new Date().toLocaleString("en-US", {timeZone: "Asia/Tokyo"})); }
+        // --- 設定：新しい干支イラストのURL ---
+        const ETO_IMAGE_URL = 'https://res.cloudinary.com/dh6zibjr8/image/upload/v1769359321/eto2_p5uqwq.png';
 
-    // Supabaseから直接今日の季語を読み取る関数
-    async function fetchKigo() {
-        const display = document.getElementById('kigo-display');
-        const descArea = document.getElementById('kigo-desc-area');
-        try {
-            const now = getJST();
-            const todayKey = `${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`;
-
-            // Supabaseのkigo_data.csvテーブルからdateが一致する行を取得
-            const { data, error } = await supabaseClient
-                .from('kigo_data.csv')
-                .select('kigo, origin')
-                .eq('date', todayKey)
-                .single();
-
-            if (error || !data) throw new Error();
-
-            currentKigo = data.kigo;
-            display.innerText = currentKigo;
-            descArea.innerHTML = data.origin || "説明はありません";
-            
-        } catch (e) {
-            display.innerText = "季語が取得できません";
-            console.error("Kigo Fetch Error:", e);
+        // 日本標準時(JST)を取得する
+        function getJST() {
+            return new Date(new Date().toLocaleString("en-US", {timeZone: "Asia/Tokyo"}));
         }
-    }
 
-    function calculateEto() {
-        const today = getJST(); today.setHours(0,0,0,0);
-        const base = new Date("2026/01/26"); base.setHours(0,0,0,0);
-        const diff = Math.round((today.getTime() - base.getTime()) / 86400000);
-        let idx = diff % 12; if(idx < 0) idx += 12;
-        const info = etoInfo[idx];
-        document.getElementById('eto-today-label').innerText = `今日は ${info.name} の日`;
-        document.getElementById('eto-description').innerText = info.desc;
-        const size = window.innerWidth <= 640 ? 240 : 280;
-        const rad = (info.angle - 90) * (Math.PI / 180);
-        const p = document.getElementById('eto-pointer');
-        p.style.left = `${(size/2) + (size/2-15) * Math.cos(rad)}px`;
-        p.style.top = `${(size/2) + (size/2-15) * Math.sin(rad)}px`;
-    }
+        // 季語をSupabaseから取得
+        async function fetchKigo() {
+            const kigoElement = document.getElementById('kigo-display');
+            const kanaElement = document.getElementById('kigo-kana-area');
+            const descElement = document.getElementById('kigo-desc-area');
 
-    async function loadPosts() {
-        const { data } = await supabaseClient.from('posts').select('*').order('created_at', { ascending: false });
-        const list = document.getElementById('posts-list'); if(!list) return;
-        list.innerHTML = '';
-        data?.forEach(post => {
-            list.innerHTML += `<div class="card"><div class="card-inner">
-                <div style="display:flex; justify-content:space-between; align-items:baseline;"><span class="pen-name">${post.pen_name}</span><span class="post-date">${new Date(post.created_at).toLocaleDateString()}</span></div>
-                <div class="card-content">${post.content.split(post.kigo).join(`<strong>${post.kigo}</strong>`)}</div>
-            </div><div class="ai-footer"><div class="ai-box">${post.biyori_message || '...'}</div></div></div>`;
-        });
-    }
+            try {
+                const now = getJST();
+                const month = String(now.getMonth() + 1).padStart(2, '0');
+                const day = String(now.getDate()).padStart(2, '0');
+                const todayKey = month + '-' + day;
 
-    function showTimeline() { document.getElementById('timeline-view').classList.add('active'); document.getElementById('mypage-view').classList.remove('active'); document.getElementById('header-btn-text').innerText = 'マイページ'; loadPosts(); }
-    function showMypage() { document.getElementById('timeline-view').classList.remove('active'); document.getElementById('mypage-view').classList.add('active'); document.getElementById('header-btn-text').innerText = 'もどる'; calculateEto(); }
-    function handleHeaderBtnClick() { document.getElementById('timeline-view').classList.contains('active') ? showMypage() : showTimeline(); }
-    function closeEditor() { document.getElementById('editor-container').style.display = 'none'; document.getElementById('toggle-editor').style.display = 'inline-flex'; }
-    function toggleAudio() { if (bgm.paused) { bgm.play(); } else { bgm.pause(); } updateAudioUI(!bgm.paused); }
-    function updateAudioUI(p) { document.getElementById('audio-icon').innerText = p ? 'volume_up' : 'volume_off'; }
+                const { data, error } = await supabaseClient
+                    .from('kigo_data')
+                    .select('kigo, kana, origin')
+                    .eq('date', todayKey)
+                    .maybeSingle();
 
-    document.getElementById('toggle-editor').onclick = () => { document.getElementById('editor-container').style.display = 'block'; document.getElementById('toggle-editor').style.display = 'none'; };
-    document.getElementById('kigo-display').onclick = () => { const a = document.getElementById('kigo-desc-area'); a.style.display = a.style.display === 'block' ? 'none' : 'block'; };
-    document.getElementById('audio-toggle').onclick = toggleAudio;
-    document.getElementById('btn-save').onclick = async () => {
-        const content = document.getElementById('post-content').value;
-        if (!currentKigo || !content.includes(currentKigo)) { document.getElementById('error-msg').innerText = `「${currentKigo || '季語'}」を入れてください。`; return; }
-        await supabaseClient.from('posts').insert([{ content, kigo: currentKigo, pen_name: document.getElementById('pen-name').value || '私' }]);
-        location.reload();
-    };
+                if (error) throw error;
 
-    window.onload = () => { fetchKigo(); calculateEto(); loadPosts(); };
-</script>
+                if (data) {
+                    kigoElement.innerText = data.kigo;
+                    kanaElement.innerText = data.kana ? "読み方：" + data.kana : "";
+                    descElement.innerText = data.origin || "";
+                } else {
+                    kigoElement.innerText = "本日の季語";
+                    kanaElement.innerText = "";
+                    descElement.innerText = todayKey + " の季語はまだ登録されていません。";
+                }
+            } catch (err) {
+                console.error("取得エラー:", err);
+                kigoElement.innerText = "エラーが発生しました";
+            }
+        }
+
+        // 干支ポインターを回転させる
+        function updateEtoPointer() {
+            const now = getJST();
+            const hour = now.getHours();
+            
+            // 24時間を12分割。0時(子)から時計回りに30度ずつ回転
+            const etoIndex = Math.floor(hour / 2); 
+            const degrees = etoIndex * 30;
+
+            const pointer = document.getElementById('eto-pointer');
+            if (pointer) {
+                pointer.style.transform = "translate(-50%, -100%) rotate(" + degrees + "deg)";
+            }
+        }
+
+        // アプリ起動
+        async function initApp() {
+            // 背景画像をセット
+            const etoBoard = document.getElementById('eto-board');
+            if (etoBoard) {
+                etoBoard.style.backgroundImage = "url('" + ETO_IMAGE_URL + "')";
+            }
+
+            await fetchKigo();
+            updateEtoPointer();
+        }
+
+        initApp();
+    </script>
 </body>
 </html>
