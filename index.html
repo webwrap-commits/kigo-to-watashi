@@ -118,14 +118,14 @@
         try {
             const now = getJST();
             const todayKey = `${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`;
-            const { data, error } = await supabaseClient.from('kigo_data').select('kigo, kana, origin').eq('date', todayKey).maybeSingle();
+            const { data } = await supabaseClient.from('kigo_data').select('kigo, kana, origin').eq('date', todayKey).maybeSingle();
             if (data) {
                 currentKigo = data.kigo;
                 display.innerText = currentKigo;
                 kanaArea.innerText = data.kana ? `読み方：${data.kana}` : "";
                 descArea.innerHTML = data.origin || "説明文はありません";
             } else { display.innerText = todayKey + " 未登録"; }
-        } catch (e) { display.innerText = "通信エラー"; }
+        } catch (e) { display.innerText = "読込中"; }
     }
 
     const etoInfo = [{name:"子"},{name:"丑"},{name:"寅"},{name:"卯"},{name:"辰"},{name:"巳"},{name:"午"},{name:"未"},{name:"申"},{name:"酉"},{name:"戌"},{name:"亥"}];
@@ -133,11 +133,16 @@
 
     function calculateEto() {
         const now = getJST();
-        const hour = now.getHours();
-        const idx = Math.floor(hour / 2);
-        document.getElementById('eto-today-label').innerText = `今は ${etoInfo[idx].name} の刻`;
-        document.getElementById('eto-description').innerText = etoDescs[idx];
-        document.getElementById('eto-pointer').style.transform = `translate(-50%, -100%) rotate(${idx * 30}deg)`;
+        if (now.getFullYear() !== 2026) return;
+        // 2026年1月1日は「丁亥（亥の日）」 index = 11
+        const baseDate = new Date(2026, 0, 1);
+        const diffDays = Math.floor((now - baseDate) / (1000 * 60 * 60 * 24));
+        const dayEtoIndex = (11 + diffDays) % 12; 
+        const hourIdx = Math.floor(now.getHours() / 2);
+        const finalIdx = (dayEtoIndex + hourIdx) % 12;
+        document.getElementById('eto-today-label').innerText = `今は ${etoInfo[finalIdx].name} の刻`;
+        document.getElementById('eto-description').innerText = etoDescs[finalIdx];
+        document.getElementById('eto-pointer').style.transform = `translate(-50%, -100%) rotate(${finalIdx * 30}deg)`;
     }
 
     async function loadPosts() {
@@ -163,7 +168,8 @@
         let saved = JSON.parse(localStorage.getItem('saved_kigo_posts') || '[]');
         if(saved.includes(id)) { saved = saved.filter(i => i !== id); } else { saved.push(id); }
         localStorage.setItem('saved_kigo_posts', JSON.stringify(saved));
-        location.reload();
+        loadPosts();
+        if(document.getElementById('mypage-view').classList.contains('active')) switchTab(myTab);
     }
 
     async function switchTab(t) {
@@ -182,8 +188,7 @@
     }
 
     function handleHeaderBtnClick() {
-        const isTimeline = document.getElementById('timeline-view').classList.contains('active');
-        if (isTimeline) {
+        if (document.getElementById('timeline-view').classList.contains('active')) {
             document.getElementById('timeline-view').classList.remove('active');
             document.getElementById('mypage-view').classList.add('active');
             document.getElementById('header-btn-text').innerText = 'もどる';
@@ -197,9 +202,28 @@
     }
 
     function closeEditor() { document.getElementById('editor-container').style.display = 'none'; document.getElementById('toggle-editor').style.display = 'inline-flex'; }
-    document.getElementById('toggle-editor').onclick = () => { document.getElementById('editor-container').style.display = 'block'; document.getElementById('toggle-editor').style.display = 'none'; };
-    document.getElementById('audio-toggle').onclick = () => { if (bgm.paused) { bgm.play(); } else { bgm.pause(); } document.getElementById('audio-icon').innerText = bgm.paused ? 'volume_off' : 'volume_up'; };
-    document.getElementById('kigo-display').onclick = () => { const a = document.getElementById('kigo-desc-area'); a.style.display = a.style.display === 'block' ? 'none' : 'block'; };
+    
+    document.getElementById('toggle-editor').onclick = () => {
+        document.getElementById('editor-container').style.display = 'block';
+        document.getElementById('toggle-editor').style.display = 'none';
+        if (bgm.paused) { bgm.play(); updateAudioUI(true); }
+    };
+
+    document.getElementById('audio-toggle').onclick = () => {
+        if (bgm.paused) { bgm.play(); } else { bgm.pause(); }
+        updateAudioUI(!bgm.paused);
+    };
+
+    function updateAudioUI(playing) {
+        document.getElementById('audio-icon').innerText = playing ? 'volume_up' : 'volume_off';
+        document.getElementById('audio-text').innerText = playing ? '静寂を止める' : '静寂の中';
+    }
+
+    document.getElementById('kigo-display').onclick = () => {
+        const a = document.getElementById('kigo-desc-area');
+        a.style.display = a.style.display === 'block' ? 'none' : 'block';
+    };
+
     document.getElementById('btn-save').onclick = async () => {
         const content = document.getElementById('post-content').value;
         if (!currentKigo || !content.includes(currentKigo)) { document.getElementById('error-msg').innerText = `「${currentKigo || '季語'}」を入れてください。`; return; }
