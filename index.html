@@ -180,17 +180,14 @@
                 await fetch(MAKE_WEBHOOK_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: data[0].id, text: content, kigo: currentKigo, pen_name: penName }) });
             }
             
-            let timer = 3;
-            btn.innerText = `3秒後に確認します...`;
-            const interval = setInterval(() => {
-                timer--;
-                if (timer > 0) {
-                    btn.innerText = `${timer}秒後に確認します...`;
-                } else {
-                    clearInterval(interval);
-                    location.reload(); 
-                }
-            }, 1000);
+            btn.innerText = `物語を預かりました`;
+            setTimeout(() => {
+                btn.disabled = false;
+                btn.style.backgroundColor = "#d4af37";
+                btn.style.color = "white";
+                btn.innerText = `ことば日和から手紙が届いています`;
+                btn.onclick = () => { location.reload(); };
+            }, 3000);
             
         } catch (err) { console.error(err); alert('失敗しました'); btn.disabled = false; btn.innerText = '物語を綴る'; }
     };
