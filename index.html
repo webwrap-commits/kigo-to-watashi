@@ -187,9 +187,10 @@
         const savedIds = JSON.parse(localStorage.getItem('saved_kigo_posts') || '[]');
         data?.forEach(post => {
             const isSaved = savedIds.includes(String(post.id));
+            const penNameDisp = post.pen_name || post.author_name || '私';
             listElement.innerHTML += `<div class="card"><div class="card-inner">
                 <div class="card-header">
-                    <span class="pen-name">${post.pen_name}</span>
+                    <span class="pen-name">${penNameDisp}</span>
                     <div class="header-right">
                         <span class="post-date">${new Date(post.created_at).toLocaleDateString()}</span>
                         <button class="save-btn ${isSaved ? 'active' : ''}" onclick="toggleSave('${post.id}')"><span class="material-symbols-outlined" style="font-size:1.2rem;">bookmark</span></button>
@@ -217,7 +218,7 @@
             renderList(data.filter(p => savedIds.includes(String(p.id))), list);
         } else {
             const myName = document.getElementById('pen-name').value || '私';
-            renderList(data.filter(p => p.pen_name === myName), list);
+            renderList(data.filter(p => (p.pen_name === myName || p.author_name === myName)), list);
         }
     }
 
@@ -264,25 +265,25 @@
             return;
         }
 
-        // 保存前にボタンを無効化（二重投稿防止）
         const btn = document.getElementById('btn-save');
         btn.disabled = true;
         btn.innerText = '物語を届けています...';
 
         try {
-            // 1. Supabaseに保存
             const { data, error } = await supabaseClient
                 .from('posts')
                 .insert([{ 
-                    content, kigo: currentKigo, pen_name: penName,
+                    content: content, 
+                    kigo: currentKigo, 
+                    pen_name: penName,
+                    author_name: '私', 
                     biyori_message: 'ことば日和が、あなたの綴りごとを読み解いています……' 
                 }])
-                .select(); // ここが重要：保存したデータを返してもらう
+                .select();
 
             if (error) throw error;
 
             if (data && data[0]) {
-                // 2. 成功したらそのIDを持ってMakeへ
                 await fetch(MAKE_WEBHOOK_URL, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -301,7 +302,7 @@
             document.getElementById('posts-list').scrollIntoView({ behavior: 'smooth' });
         } catch (err) {
             console.error('Error:', err);
-            alert('投稿に失敗しました。時間をおいてお試しください。');
+            alert('投稿に失敗しました。内容を確認してください。');
         } finally {
             btn.disabled = false;
             btn.innerText = '物語を綴る';
