@@ -63,12 +63,10 @@
         .tab-btn { background: none; border: none; padding: 1rem; font-size: 0.85rem; color: var(--muted-foreground); cursor: pointer; font-family: var(--font-serif); }
         .tab-btn.active { color: var(--foreground); border-bottom: 2px solid var(--foreground); }
 
-        /* スマホ版デザイン調整 */
         @media (max-width: 640px) { 
             header { padding: 2.5rem 1.5rem 1rem; } 
             .kigo-word { font-size: 2.2rem; letter-spacing: 0.5rem; } 
             .intro-card { padding: 1.5rem; margin-top: 1rem; margin-bottom: 2rem; } 
-            /* スマホ版の行間を詰める */
             .intro-text { line-height: 1.6; font-size: 0.85rem; }
             .pc-br { display: none; } 
         }
@@ -121,6 +119,7 @@
 <script>
     const SUPABASE_URL = 'https://ciklywhqswbujsogqiva.supabase.co';
     const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNpa2x5d2hxc3didWpzb2dxaXZhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njg5MzAyNzcsImV4cCI6MjA4NDUwNjI3N30._REwuc__qmpW1eQVhfm-RvsoMJCGYXjqtqBVn4w48Oc';
+    const MAKE_WEBHOOK_URL = 'https://hook.us2.make.com/asymhsxnkzkwk6wdktj3l2xspn4mx10h';
     const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
     let currentKigo = "";
     let myTab = 'my';
@@ -258,18 +257,28 @@
 
     document.getElementById('btn-save').onclick = async () => {
         const content = document.getElementById('post-content').value;
+        const penName = document.getElementById('pen-name').value || '私';
+        
         if (!currentKigo || !content.includes(currentKigo)) {
             document.getElementById('error-msg').innerText = `「${currentKigo || '季語'}」を入れてください。`;
             return;
         }
+
         const { error } = await supabaseClient.from('posts').insert([{ 
-            content, kigo: currentKigo, pen_name: document.getElementById('pen-name').value || '私',
+            content, kigo: currentKigo, pen_name: penName,
             biyori_message: 'ことば日和が、あなたの綴りごとを読み解いています……' 
         }]);
+
         if(!error) {
+            // Makeへデータを飛ばす（追加箇所）
+            fetch(MAKE_WEBHOOK_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ text: content, kigo: currentKigo, pen_name: penName })
+            }).catch(e => console.error('Make error:', e));
+
             document.getElementById('post-content').value = '';
             closeEditor(); 
-            // 投稿後、リストを読み込んでからタイムライン位置へスクロール
             await loadPosts();
             document.getElementById('posts-list').scrollIntoView({ behavior: 'smooth' });
         }
