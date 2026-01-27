@@ -36,6 +36,7 @@
         .ai-footer { background-color: #fafafa; padding: 1.5rem; border-top: 1px solid #f0f0f0; margin-top: 0.5rem; }
         .ai-label { font-size: 0.75rem; color: #999; margin-bottom: 0.8rem; display: block; }
         .ai-box { font-family: var(--font-sans); font-size: 0.95rem; color: #666; line-height: 1.8; white-space: pre-wrap; }
+        .reload-btn-container { margin-top: 1rem; }
         #editor-container { display: none; width: 100%; max-width: 42rem; padding: 0 1.5rem 5rem; box-sizing: border-box; }
         .editor-box { background: white; border: 1px solid var(--border); border-radius: var(--radius-xl); padding: 1.5rem; }
         #pen-name, #post-content { width: 100%; padding: 0.8rem; border: 1px solid #eee; border-radius: 0.4rem; box-sizing: border-box; font-family: var(--font-sans); font-size: 0.9rem; margin-bottom: 1rem; }
@@ -125,14 +126,23 @@
 
     function renderList(data, listElement) {
         if(!listElement) return; listElement.innerHTML = '';
-        data?.forEach(post => {
+        data?.forEach((post, index) => {
             const savedIds = JSON.parse(localStorage.getItem('saved_kigo_posts') || '[]');
             const isSaved = savedIds.includes(String(post.id));
             const cleanMessage = (post.biyori_message || '...').replace(/\\n/g, '\n');
+            
+            // 定型文かどうかの判定
+            const isDefaultMessage = (cleanMessage === 'ことば日和が、あなたの綴りごとを読み解いています……');
+            // 最新の投稿（index 0）かつ定型文の場合のみボタンを表示
+            const showReloadBtn = (index === 0 && isDefaultMessage);
+
             listElement.innerHTML += `<div class="card"><div class="card-inner">
                 <div class="card-header"><span class="pen-name">${post.pen_name || '私'}</span><div class="header-right"><span style="font-size:0.65rem; color:#999;">${new Date(post.created_at).toLocaleDateString()}</span><button class="save-btn ${isSaved ? 'active' : ''}" onclick="toggleSave('${post.id}')"><span class="material-symbols-outlined">bookmark</span></button></div></div>
                 <div class="card-content">${post.content}</div>
-                </div><div class="ai-footer"><span class="ai-label">ことば日和からあなたへ</span><div class="ai-box">${cleanMessage}</div></div></div>`;
+                </div><div class="ai-footer"><span class="ai-label">ことば日和からあなたへ</span>
+                <div class="ai-box">${cleanMessage}</div>
+                ${showReloadBtn ? `<div class="reload-btn-container"><button class="btn-outline" onclick="location.reload()"><span class="material-symbols-outlined" style="font-size:1rem;">mail</span>手紙が届いてないか覗いてみる</button></div>` : ''}
+                </div></div>`;
         });
     }
 
@@ -172,22 +182,15 @@
         const content = document.getElementById('post-content').value;
         const penName = document.getElementById('pen-name').value || '私';
         if (!content.includes(currentKigo)) { document.getElementById('error-msg').innerText = `「${currentKigo}」を入れてください。`; return; }
-        const btn = document.getElementById('btn-save'); btn.disabled = true;
+        const btn = document.getElementById('btn-save'); btn.disabled = true; btn.innerText = '物語を預かりました...';
         
         try {
             const { data, error } = await supabaseClient.from('posts').insert([{ content, kigo: currentKigo, pen_name: penName, biyori_message: 'ことば日和が、あなたの綴りごとを読み解いています……' }]).select();
             if (data && data[0]) {
                 await fetch(MAKE_WEBHOOK_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: data[0].id, text: content, kigo: currentKigo, pen_name: penName }) });
             }
-            
-            btn.innerText = `物語を預かりました`;
-            setTimeout(() => {
-                btn.disabled = false;
-                btn.style.backgroundColor = "#d4af37";
-                btn.style.color = "white";
-                btn.innerText = `ことば日和から手紙が届いています`;
-                btn.onclick = () => { location.reload(); };
-            }, 3000);
+            // 投稿後、即座にリロードして最新の投稿（ボタン付き）を表示させる
+            location.reload();
             
         } catch (err) { console.error(err); alert('失敗しました'); btn.disabled = false; btn.innerText = '物語を綴る'; }
     };
