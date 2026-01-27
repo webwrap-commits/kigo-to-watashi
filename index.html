@@ -32,21 +32,21 @@
         
         .btn-write { display: inline-flex; align-items: center; justify-content: center; gap: 0.8rem; margin-top: 2.5rem; border: 1px solid var(--foreground); padding: 0.8rem 2.5rem; border-radius: 3rem; font-family: var(--font-serif); font-size: 0.95rem; letter-spacing: 0.2rem; cursor: pointer; background: white; color: var(--foreground); }
 
-        /* 1. 音楽ボタンを右上に移動 */
-        .audio-control-btn { position: fixed; top: 1.5rem; right: 1.5rem; z-index: 100; background: rgba(255,255,255,0.8); backdrop-filter: blur(4px); border: 1px solid var(--border); border-radius: 2rem; padding: 0.4rem 1rem; display: flex; align-items: center; gap: 0.5rem; font-size: 0.65rem; color: var(--muted-foreground); cursor: pointer; }
+        /* 音楽ボタンの位置調整（マイページボタンの下へ） */
+        .audio-control-btn { position: fixed; top: 7.5rem; right: 1.5rem; z-index: 100; background: rgba(255,255,255,0.8); backdrop-filter: blur(4px); border: 1px solid var(--border); border-radius: 2rem; padding: 0.4rem 1rem; display: flex; align-items: center; gap: 0.5rem; font-size: 0.65rem; color: var(--muted-foreground); cursor: pointer; }
 
         #posts-list, #mypage-posts-list { width: 100%; max-width: 42rem; padding: 0 1.5rem 5rem; box-sizing: border-box; scroll-margin-top: 2rem; }
         .card { background-color: var(--card); border: 1px solid var(--border); border-radius: var(--radius-xl); margin-bottom: 2rem; overflow: hidden; position: relative; }
         .card-inner { padding: 1.5rem; }
         .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; }
         .header-right { display: flex; align-items: center; gap: 0.8rem; }
-        .pen-name { font-family: var(--font-serif); font-weight: 600; font-size: 0.95rem; } /* 4. 1段階アップ */
+        .pen-name { font-family: var(--font-serif); font-weight: 600; font-size: 0.95rem; } 
         .post-date { font-size: 0.65rem; color: var(--muted-foreground); }
-        .card-content { font-family: var(--font-sans); font-size: 1.05rem; line-height: 2; white-space: pre-wrap; color: #333; font-weight: normal !important; } /* 4. サイズアップ & 3. 太字廃止 */
+        .card-content { font-family: var(--font-sans); font-size: 1.05rem; line-height: 2; white-space: pre-wrap; color: #333; font-weight: normal !important; } 
         .save-btn { background: none; border: none; cursor: pointer; color: var(--muted-foreground); padding: 0; display: flex; align-items: center; }
         .save-btn.active { color: #d4af37; font-variation-settings: 'FILL' 1; }
         
-        /* 4. 返信エリアの調整 */
+        /* 返信エリアの調整 */
         .ai-footer { background-color: #fafafa; padding: 1.5rem; border-top: 1px solid #f0f0f0; margin-top: 0.5rem; }
         .ai-label { font-size: 0.75rem; color: #999; margin-bottom: 0.8rem; display: block; letter-spacing: 0.05rem; }
         .ai-box { font-family: var(--font-sans); font-size: 0.95rem; color: #666; line-height: 1.8; }
@@ -54,8 +54,8 @@
         #editor-container { display: none; width: 100%; max-width: 42rem; padding: 0 1.5rem 5rem; box-sizing: border-box; }
         .editor-box { background: white; border: 1px solid var(--border); border-radius: var(--radius-xl); padding: 1.5rem; }
         
-        /* 2. 投稿フォーム内の季語表示 */
-        .editor-kigo-hint { text-align: center; padding: 1rem; background: #fdfaf5; border: 1px solid #eee; border-radius: 0.5rem; margin-bottom: 1.5rem; cursor: pointer; }
+        /* 投稿フォーム内の季語表示（色の調整） */
+        .editor-kigo-hint { text-align: center; padding: 1rem; background: #fafafa; border: 1px solid #f0f0f0; border-radius: 0.5rem; margin-bottom: 1.5rem; cursor: default; }
         .editor-kigo-name { font-family: var(--font-serif); font-size: 1.2rem; color: var(--foreground); display: block; }
         
         #pen-name, #post-content { width: 100%; padding: 0.8rem; border: 1px solid #eee; border-radius: 0.4rem; box-sizing: border-box; font-family: var(--font-sans); font-size: 0.9rem; color: var(--foreground); margin-bottom: 1rem; }
@@ -117,10 +117,9 @@
         </div>
         <div id="editor-container">
             <div class="editor-box">
-                <div class="editor-kigo-hint" onclick="toggleKigoDescInEditor()">
+                <div class="editor-kigo-hint">
                     <span style="font-size:0.7rem; color:#999; letter-spacing:0.1rem;">今日の季語</span>
                     <span id="editor-kigo-name" class="editor-kigo-name"></span>
-                    <span style="font-size:0.6rem; color:#aaa;">タップで解説を確認</span>
                 </div>
                 <input type="text" id="pen-name" placeholder="ペンネーム（私）">
                 <textarea id="post-content" maxlength="200" placeholder="物語を綴ってください..." oninput="updateCharCount()"></textarea>
@@ -174,15 +173,7 @@
         const a = document.getElementById('kigo-desc-area');
         a.style.display = a.style.display === 'block' ? 'none' : 'block';
     };
-    
-    // 2. 投稿フォーム内でも解説を見れるように
-    function toggleKigoDescInEditor() {
-        const a = document.getElementById('kigo-desc-area');
-        a.style.display = 'block';
-        a.scrollIntoView({behavior: 'smooth'});
-    }
 
-    // 5. 文字数カウント
     function updateCharCount() {
         const len = document.getElementById('post-content').value.length;
         document.getElementById('char-count').innerText = len;
@@ -215,13 +206,10 @@
         }
     }
 
-    // 6. 20件制限ロジックを統合した読込
     async function loadPosts() {
         const { data } = await supabaseClient.from('posts').select('*').order('created_at', { ascending: false });
-        
         if (data && data.length > 20) {
-            const olderPosts = data.slice(20);
-            const olderIds = olderPosts.map(p => p.id);
+            const olderIds = data.slice(20).map(p => p.id);
             await supabaseClient.from('posts').delete().in('id', olderIds);
             renderList(data.slice(0, 20), document.getElementById('posts-list'));
         } else {
@@ -235,9 +223,6 @@
         data?.forEach(post => {
             const isSaved = savedIds.includes(String(post.id));
             const penNameDisp = post.pen_name || post.author_name || '私';
-            // 3. 太字を廃止したシンプルなコンテンツ表示
-            const cleanContent = post.content;
-
             listElement.innerHTML += `<div class="card"><div class="card-inner">
                 <div class="card-header">
                     <span class="pen-name">${penNameDisp}</span>
@@ -246,7 +231,7 @@
                         <button class="save-btn ${isSaved ? 'active' : ''}" onclick="toggleSave('${post.id}')"><span class="material-symbols-outlined" style="font-size:1.2rem;">bookmark</span></button>
                     </div>
                 </div>
-                <div class="card-content">${cleanContent}</div>
+                <div class="card-content">${post.content}</div>
             </div><div class="ai-footer">
                 <span class="ai-label">ことば日和からあなたへ</span>
                 <div class="ai-box">${post.biyori_message || '...'}</div>
@@ -288,7 +273,6 @@
         document.getElementById('editor-container').style.display = 'none';
         document.getElementById('toggle-editor').style.display = 'inline-flex';
         document.getElementById('main-content-area').style.display = 'block';
-        document.getElementById('kigo-desc-area').style.display = 'none';
         window.scrollTo(0, 0);
     }
 
@@ -314,54 +298,23 @@
     document.getElementById('btn-save').onclick = async () => {
         const content = document.getElementById('post-content').value;
         const penName = document.getElementById('pen-name').value || '私';
-        
         if (!currentKigo || !content.includes(currentKigo)) {
             document.getElementById('error-msg').innerText = `「${currentKigo || '季語'}」を入れてください。`;
             return;
         }
-
         const btn = document.getElementById('btn-save');
         btn.disabled = true;
         btn.innerText = '物語を届けています...';
-
         try {
-            const { data, error } = await supabaseClient
-                .from('posts')
-                .insert([{ 
-                    content: content, 
-                    kigo: currentKigo, 
-                    pen_name: penName,
-                    author_name: '私', 
-                    biyori_message: 'ことば日和が、あなたの綴りごとを読み解いています……' 
-                }])
-                .select();
-
+            const { data, error } = await supabaseClient.from('posts').insert([{ content, kigo: currentKigo, pen_name: penName, author_name: '私', biyori_message: 'ことば日和が、あなたの綴りごとを読み解いています……' }]).select();
             if (error) throw error;
-
             if (data && data[0]) {
-                await fetch(MAKE_WEBHOOK_URL, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ 
-                        id: data[0].id,
-                        text: content, 
-                        kigo: currentKigo, 
-                        pen_name: penName 
-                    })
-                });
+                await fetch(MAKE_WEBHOOK_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: data[0].id, text: content, kigo: currentKigo, pen_name: penName }) });
             }
-
             document.getElementById('post-content').value = '';
-            closeEditor(); 
-            await loadPosts();
+            closeEditor(); await loadPosts();
             document.getElementById('posts-list').scrollIntoView({ behavior: 'smooth' });
-        } catch (err) {
-            console.error('Error:', err);
-            alert('投稿に失敗しました。内容を確認してください。');
-        } finally {
-            btn.disabled = false;
-            btn.innerText = '物語を綴る';
-        }
+        } catch (err) { console.error('Error:', err); alert('投稿に失敗しました。'); } finally { btn.disabled = false; btn.innerText = '物語を綴る'; }
     };
 
     window.onload = () => { fetchKigo(); calculateEto(); loadPosts(); };
