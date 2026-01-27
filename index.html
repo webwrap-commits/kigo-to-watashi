@@ -94,7 +94,21 @@
     document.getElementById('kigo-display').onclick = () => { const a = document.getElementById('kigo-desc-area'); a.style.display = a.style.display === 'block' ? 'none' : 'block'; };
     function updateCharCount() { document.getElementById('char-count').innerText = document.getElementById('post-content').value.length; }
 
-    const etoData = [{ name: "子", desc: "物事の始まりに良い日。" }, { name: "丑", desc: "粘り強く歩む日。" }, { name: "寅", desc: "金運を呼び寄せる日。" }, { name: "卯", desc: "とんとん拍子に進む日。" }, { name: "辰", desc: "龍のエネルギー溢れる日。" }, { name: "巳", desc: "才能を育ててくれる日。" }, { name: "午", desc: "豊かな暮らしに感謝する日。" }, { name: "未", desc: "平和に過ごすのが良い日。" }, { name: "申", desc: "悩みや災いが去っていく日。" }, { name: "酉", desc: "運をかき集める日。" }, { name: "戌", desc: "絆を深める日。" }, { name: "亥", desc: "情熱を持って進む日。" }];
+    const etoData = [
+        { name: "子", desc: "子だくさんのネズミのように、子孫繁栄や物事の始まりに良い日。" },
+        { name: "丑", desc: "粘り強く歩む牛のように、じっくり取り組むのに良い日。" },
+        { name: "寅", desc: "黄金色の毛並みから、金運を呼び寄せる日。" },
+        { name: "卯", desc: "ぴょんぴょん跳ねるウサギのように、物事がとんとん拍子に進む日。" },
+        { name: "辰", desc: "力強い龍のエネルギーが溢れる日。" },
+        { name: "巳", desc: "弁財天様と縁が深く、お金や芸事の才能を育ててくれる日。" },
+        { name: "午", desc: "太陽のエネルギーが満ちる日。豊かな暮らしに感謝する日です。" },
+        { name: "未", desc: "群れで仲良く暮らす羊のように、平和に過ごすのが良い日。" },
+        { name: "申", desc: "「去る」にかけて、悩みや災いが去っていく日。" },
+        { name: "酉", desc: "「とりこむ」という言葉から、福や商売の運をかき集める日。" },
+        { name: "戌", desc: "安産や子供の健やかな成長を祈る、絆を深める日。" },
+        { name: "亥", desc: "猪突猛進するイノシシのように、情熱を持って進む日。" }
+    ];
+
     function calculateEto() {
         const now = getJST(); if (now.getFullYear() !== 2026) return;
         const diffDays = Math.floor((now - new Date(2026, 0, 1)) / (1000 * 60 * 60 * 24));
@@ -161,7 +175,7 @@
         const btn = document.getElementById('btn-save'); btn.disabled = true;
         
         try {
-            const { data, error } = await supabaseClient.from('posts').insert([{ content, kigo: currentKigo, pen_name: penName, biyori_message: 'ことば日和が、あなたの綴りごとを読み解いています……' }]).select();
+            const { data, error } = await supabaseClient.from('posts').insert([{ content, kigo: currentKigo, pen_name: penName, biyori_message: 'ことば日和が, あなたの綴りごとを読み解いています……' }]).select();
             if (data && data[0]) {
                 await fetch(MAKE_WEBHOOK_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: data[0].id, text: content, kigo: currentKigo, pen_name: penName }) });
             }
