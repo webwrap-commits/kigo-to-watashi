@@ -126,18 +126,20 @@
 
     function renderList(data, listElement) {
         if(!listElement) return; listElement.innerHTML = '';
+        const myPostIds = JSON.parse(localStorage.getItem('my_kigo_posts') || '[]');
+        const savedIds = JSON.parse(localStorage.getItem('saved_kigo_posts') || '[]');
+
         data?.forEach((post, index) => {
-            const savedIds = JSON.parse(localStorage.getItem('saved_kigo_posts') || '[]');
             const isSaved = savedIds.includes(String(post.id));
+            const isMyPost = myPostIds.includes(String(post.id)) || (post.author_name === '私'); // 過去の救済
             const cleanMessage = (post.biyori_message || '...').replace(/\\n/g, '\n');
-            
-            // 定型文かどうかの判定
             const isDefaultMessage = (cleanMessage === 'ことば日和が、あなたの綴りごとを読み解いています……');
-            // 最新の投稿（index 0）かつ定型文の場合のみボタンを表示
-            const showReloadBtn = (index === 0 && isDefaultMessage);
+            
+            // 自分の投稿かつ最新かつ定型文の場合のみ「覗いてみる」ボタン
+            const showReloadBtn = (isMyPost && index === 0 && isDefaultMessage);
 
             listElement.innerHTML += `<div class="card"><div class="card-inner">
-                <div class="card-header"><span class="pen-name">${post.pen_name || '私'}</span><div class="header-right"><span style="font-size:0.65rem; color:#999;">${new Date(post.created_at).toLocaleDateString()}</span><button class="save-btn ${isSaved ? 'active' : ''}" onclick="toggleSave('${post.id}')"><span class="material-symbols-outlined">bookmark</span></button></div></div>
+                <div class="card-header"><span class="pen-name">${post.pen_name || post.author_name || '私'}</span><div class="header-right"><span style="font-size:0.65rem; color:#999;">${new Date(post.created_at).toLocaleDateString()}</span><button class="save-btn ${isSaved ? 'active' : ''}" onclick="toggleSave('${post.id}')"><span class="material-symbols-outlined">bookmark</span></button></div></div>
                 <div class="card-content">${post.content}</div>
                 </div><div class="ai-footer"><span class="ai-label">ことば日和からあなたへ</span>
                 <div class="ai-box">${cleanMessage}</div>
@@ -157,12 +159,14 @@
         myTab = t; document.getElementById('tab-my').classList.toggle('active', t === 'my'); document.getElementById('tab-save').classList.toggle('active', t === 'save');
         const { data } = await supabaseClient.from('posts').select('*').order('created_at', { ascending: false });
         const list = document.getElementById('mypage-posts-list');
+        const myPostIds = JSON.parse(localStorage.getItem('my_kigo_posts') || '[]');
+        const savedIds = JSON.parse(localStorage.getItem('saved_kigo_posts') || '[]');
+
         if(t === 'save') {
-            const savedIds = JSON.parse(localStorage.getItem('saved_kigo_posts') || '[]');
             renderList(data.filter(p => savedIds.includes(String(p.id))), list);
         } else {
-            const myName = document.getElementById('pen-name').value || '私';
-            renderList(data.filter(p => p.pen_name === myName), list);
+            // 「自分の投稿ID」または「古い形式の私」を表示
+            renderList(data.filter(p => myPostIds.includes(String(p.id)) || p.author_name === '私'), list);
         }
     }
 
@@ -187,14 +191,26 @@
         try {
             const { data, error } = await supabaseClient.from('posts').insert([{ content, kigo: currentKigo, pen_name: penName, biyori_message: 'ことば日和が、あなたの綴りごとを読み解いています……' }]).select();
             if (data && data[0]) {
+                // 自分の投稿IDを保存（ありがと地蔵スタイル）
+                let myPosts = JSON.parse(localStorage.getItem('my_kigo_posts') || '[]');
+                myPosts.push(String(data[0].id));
+                localStorage.setItem('my_kigo_posts', JSON.stringify(myPosts));
+                // 名前を保存して次回から自動入力
+                localStorage.setItem('kigo_pen_name', penName);
+
                 await fetch(MAKE_WEBHOOK_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: data[0].id, text: content, kigo: currentKigo, pen_name: penName }) });
             }
-            // 投稿後、即座にリロードして最新の投稿（ボタン付き）を表示させる
             location.reload();
-            
         } catch (err) { console.error(err); alert('失敗しました'); btn.disabled = false; btn.innerText = '物語を綴る'; }
     };
-    window.onload = () => { fetchKigo(); calculateEto(); loadPosts(); };
+
+    window.onload = () => { 
+        // 保存された名前があれば入力欄にセット
+        const savedName = localStorage.getItem('kigo_pen_name');
+        if(savedName) document.getElementById('pen-name').value = savedName;
+        
+        fetchKigo(); calculateEto(); loadPosts(); 
+    };
 </script>
 </body>
 </html>
