@@ -114,7 +114,6 @@
         data?.forEach(post => {
             const savedIds = JSON.parse(localStorage.getItem('saved_kigo_posts') || '[]');
             const isSaved = savedIds.includes(String(post.id));
-            // 記号「\n」を文字として置換して消す処理
             const cleanMessage = (post.biyori_message || '...').replace(/\\n/g, '\n');
             listElement.innerHTML += `<div class="card"><div class="card-inner">
                 <div class="card-header"><span class="pen-name">${post.pen_name || '私'}</span><div class="header-right"><span style="font-size:0.65rem; color:#999;">${new Date(post.created_at).toLocaleDateString()}</span><button class="save-btn ${isSaved ? 'active' : ''}" onclick="toggleSave('${post.id}')"><span class="material-symbols-outlined">bookmark</span></button></div></div>
@@ -167,7 +166,6 @@
                 await fetch(MAKE_WEBHOOK_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: data[0].id, text: content, kigo: currentKigo, pen_name: penName }) });
             }
             
-            // 3秒間のカウントダウン
             let timer = 3;
             btn.innerText = `3秒後に確認します...`;
             const interval = setInterval(() => {
