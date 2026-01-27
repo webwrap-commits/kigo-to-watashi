@@ -14,7 +14,11 @@
         body { font-family: var(--font-sans); background-color: var(--background); color: var(--foreground); margin: 0; padding: 0; line-height: 1.8; display: flex; flex-direction: column; align-items: center; font-weight: 200; -webkit-text-size-adjust: 100%; }
         header { width: 100%; max-width: 48rem; padding: 4rem 1.5rem 1rem; display: flex; justify-content: space-between; align-items: center; box-sizing: border-box; }
         h1 { font-family: var(--font-serif); font-size: 1.1rem; font-weight: 200; letter-spacing: 0.3rem; margin: 0; color: var(--foreground); cursor: pointer; }
-        .btn-outline { display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.5rem 1rem; border-radius: 0.5rem; font-size: 0.75rem; border: 1px solid var(--border); background: white; cursor: pointer; color: var(--foreground) !important; text-decoration: none; }
+        
+        /* 青い文字対策 */
+        a, button { color: inherit; text-decoration: none; -webkit-tap-highlight-color: transparent; }
+        
+        .btn-outline { display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.5rem 1rem; border-radius: 0.5rem; font-size: 0.75rem; border: 1px solid var(--border); background: white; cursor: pointer; color: var(--foreground); }
         #timeline-view, #mypage-view { width: 100%; display: none; flex-direction: column; align-items: center; }
         #timeline-view.active, #mypage-view.active { display: flex; }
         .kigo-section { text-align: center; margin: 2rem 0 4rem; width: 100%; padding: 0 1.5rem; box-sizing: border-box; display: flex; flex-direction: column; align-items: center; }
@@ -25,7 +29,7 @@
         #kigo-desc-area { max-width: 28rem; margin: 2rem auto; font-size: 0.85rem; color: #555; line-height: 2; text-align: left; display: none; padding: 1.5rem; border: 1px solid #eee; background: #fafafa; border-radius: 0.5rem; }
         .btn-write { display: inline-flex; align-items: center; justify-content: center; gap: 0.8rem; margin-top: 2.5rem; border: 1px solid var(--foreground); padding: 0.8rem 2.5rem; border-radius: 3rem; font-family: var(--font-serif); font-size: 0.95rem; letter-spacing: 0.2rem; cursor: pointer; background: white; color: var(--foreground); }
         .audio-control-btn { position: fixed; top: 7.5rem; right: 1.5rem; z-index: 100; background: rgba(255,255,255,0.8); backdrop-filter: blur(4px); border: 1px solid var(--border); border-radius: 2rem; padding: 0.4rem 1rem; display: flex; align-items: center; gap: 0.5rem; font-size: 0.65rem; color: var(--muted-foreground); cursor: pointer; }
-        #posts-list, #mypage-posts-list { width: 100%; max-width: 42rem; padding: 0 1.5rem 5rem; box-sizing: border-box; scroll-margin-top: 2rem; }
+        #posts-list, #mypage-posts-list { width: 100%; max-width: 42rem; padding: 0 1.5rem 5rem; box-sizing: border-box; }
         .card { background-color: var(--card); border: 1px solid var(--border); border-radius: var(--radius-xl); margin-bottom: 2rem; overflow: hidden; position: relative; }
         .card-inner { padding: 1.5rem; }
         .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; }
@@ -36,12 +40,17 @@
         .ai-footer { background-color: #fafafa; padding: 1.5rem; border-top: 1px solid #f0f0f0; margin-top: 0.5rem; }
         .ai-label { font-size: 0.75rem; color: #999; margin-bottom: 0.8rem; display: block; }
         .ai-box { font-family: var(--font-sans); font-size: 0.95rem; color: #666; line-height: 1.8; white-space: pre-wrap; }
-        .reload-btn-container { margin-top: 1rem; }
+        
+        /* エディタ内の季語表示（グレーの台紙） */
+        .editor-kigo-hint { background: #f4f4f5; border-radius: 0.5rem; padding: 1.5rem; margin-bottom: 1.5rem; text-align: center; }
+        .editor-kigo-name { font-family: var(--font-serif); font-size: 1.8rem; letter-spacing: 0.5rem; color: var(--foreground); }
+
         #editor-container { display: none; width: 100%; max-width: 42rem; padding: 0 1.5rem 5rem; box-sizing: border-box; }
         .editor-box { background: white; border: 1px solid var(--border); border-radius: var(--radius-xl); padding: 1.5rem; }
         #pen-name, #post-content { width: 100%; padding: 0.8rem; border: 1px solid #eee; border-radius: 0.4rem; box-sizing: border-box; font-family: var(--font-sans); font-size: 0.9rem; margin-bottom: 1rem; }
         #post-content { height: 180px; resize: none; }
-        .btn-submit { background: var(--foreground); color: white; padding: 0.8rem; border-radius: 3rem; width: 100%; border: none; cursor: pointer; }
+        .btn-submit { background: var(--foreground); color: white; padding: 0.8rem; border-radius: 3rem; width: 100%; border: none; cursor: pointer; font-family: var(--font-serif); }
+        
         .eto-card { background: white; border: 1px solid var(--border); border-radius: var(--radius-xl); padding: 2rem 1.5rem; margin-bottom: 2rem; width: 100%; max-width: 36rem; box-sizing: border-box; }
         .eto-title { font-family: var(--font-serif); font-size: 1.4rem; margin-bottom: 1.5rem; text-align: center; }
         .eto-container { position: relative; width: 280px; height: 280px; margin: 0 auto 2rem; }
@@ -49,8 +58,9 @@
         .eto-pointer { position: absolute; top: 50%; left: 50%; width: 1px; height: 85px; background: #eb6101; transform-origin: bottom center; transform: translate(-50%, -100%) rotate(0deg); transition: transform 1s ease; z-index: 10; }
         .eto-desc { font-size: 0.9rem; color: #555; text-align: left; max-width: 28rem; margin: 0 auto; }
         .mypage-tabs { display: flex; justify-content: center; gap: 2rem; margin-bottom: 2rem; border-bottom: 1px solid var(--border); width: 100%; max-width: 36rem; }
-        .tab-btn { background: none; border: none; padding: 1rem; cursor: pointer; }
+        .tab-btn { background: none; border: none; padding: 1rem; cursor: pointer; font-size: 0.9rem; color: var(--muted-foreground); }
         .tab-btn.active { color: var(--foreground); border-bottom: 2px solid var(--foreground); }
+        
         @media (max-width: 640px) { header { padding: 2.5rem 1.5rem 1rem; } .kigo-word { font-size: 2.2rem; } .intro-card { padding: 1.5rem; } }
     </style>
 </head>
@@ -66,7 +76,17 @@
                 <div class="kigo-label">今日の季語</div><div id="kigo-display" class="kigo-word"></div><div id="kigo-desc-area"></div><button id="toggle-editor" class="btn-write"><span class="material-symbols-outlined">edit_note</span>綴る</button>
             </section>
         </div>
-        <div id="editor-container"><div class="editor-box"><div class="editor-kigo-hint"><span id="editor-kigo-name" class="editor-kigo-name"></span></div><input type="text" id="pen-name" placeholder="ペンネーム"><textarea id="post-content" maxlength="200" placeholder="物語を綴ってください..." oninput="updateCharCount()"></textarea><div class="char-counter"><span id="char-count">0</span> / 200</div><button id="btn-save" class="btn-submit">物語を綴る</button><div onclick="closeEditor()" style="text-align:center; padding:1rem; cursor:pointer; font-size:0.8rem;">戻る</div><p id="error-msg" style="color:#ef4444; font-size:0.75rem; text-align:center;"></p></div></div>
+        <div id="editor-container">
+            <div class="editor-box">
+                <div class="editor-kigo-hint"><span id="editor-kigo-name" class="editor-kigo-name"></span></div>
+                <input type="text" id="pen-name" placeholder="ペンネーム">
+                <textarea id="post-content" maxlength="200" placeholder="物語を綴ってください..." oninput="updateCharCount()"></textarea>
+                <div style="text-align:right; font-size:0.7rem; color:#999; margin-bottom:1rem;"><span id="char-count">0</span> / 200</div>
+                <button id="btn-save" class="btn-submit">物語を綴る</button>
+                <div onclick="closeEditor()" style="text-align:center; padding:1.5rem 1rem 0; cursor:pointer; font-size:0.8rem; color:var(--muted-foreground);">戻る</div>
+                <p id="error-msg" style="color:#ef4444; font-size:0.75rem; text-align:center;"></p>
+            </div>
+        </div>
         <div id="posts-list"></div>
     </div>
     <div id="mypage-view">
@@ -124,26 +144,28 @@
         renderList(data, document.getElementById('posts-list'));
     }
 
-    function renderList(data, listElement) {
+    function renderList(data, listElement, isMypageFilter = false) {
         if(!listElement) return; listElement.innerHTML = '';
         const myPostIds = JSON.parse(localStorage.getItem('my_kigo_posts') || '[]');
         const savedIds = JSON.parse(localStorage.getItem('saved_kigo_posts') || '[]');
 
         data?.forEach((post, index) => {
             const isSaved = savedIds.includes(String(post.id));
-            const isMyPost = myPostIds.includes(String(post.id)) || (post.author_name === '私'); // 過去の救済
+            const isMyPost = myPostIds.includes(String(post.id)) || (post.author_name === '私');
+            
+            // マイページタブ表示の時は、自分の投稿以外はスキップ
+            if(isMypageFilter && !isMyPost) return;
+
             const cleanMessage = (post.biyori_message || '...').replace(/\\n/g, '\n');
             const isDefaultMessage = (cleanMessage === 'ことば日和が、あなたの綴りごとを読み解いています……');
-            
-            // 自分の投稿かつ最新かつ定型文の場合のみ「覗いてみる」ボタン
             const showReloadBtn = (isMyPost && index === 0 && isDefaultMessage);
 
             listElement.innerHTML += `<div class="card"><div class="card-inner">
-                <div class="card-header"><span class="pen-name">${post.pen_name || post.author_name || '私'}</span><div class="header-right"><span style="font-size:0.65rem; color:#999;">${new Date(post.created_at).toLocaleDateString()}</span><button class="save-btn ${isSaved ? 'active' : ''}" onclick="toggleSave('${post.id}')"><span class="material-symbols-outlined">bookmark</span></button></div></div>
+                <div class="card-header"><span class="pen-name" style="color:var(--foreground);">${post.pen_name || post.author_name || '私'}</span><div class="header-right"><span style="font-size:0.65rem; color:#999;">${new Date(post.created_at).toLocaleDateString()}</span><button class="save-btn ${isSaved ? 'active' : ''}" onclick="toggleSave('${post.id}')"><span class="material-symbols-outlined">bookmark</span></button></div></div>
                 <div class="card-content">${post.content}</div>
                 </div><div class="ai-footer"><span class="ai-label">ことば日和からあなたへ</span>
                 <div class="ai-box">${cleanMessage}</div>
-                ${showReloadBtn ? `<div class="reload-btn-container"><button class="btn-outline" onclick="location.reload()"><span class="material-symbols-outlined" style="font-size:1rem;">mail</span>手紙が届いてないか覗いてみる</button></div>` : ''}
+                ${showReloadBtn ? `<div class="reload-btn-container" style="margin-top:1rem;"><button class="btn-outline" onclick="location.reload()"><span class="material-symbols-outlined" style="font-size:1rem;">mail</span>手紙が届いてないか覗いてみる</button></div>` : ''}
                 </div></div>`;
         });
     }
@@ -152,21 +174,21 @@
         let saved = JSON.parse(localStorage.getItem('saved_kigo_posts') || '[]');
         saved = saved.includes(id) ? saved.filter(i => i !== id) : [...saved, id];
         localStorage.setItem('saved_kigo_posts', JSON.stringify(saved));
-        loadPosts();
+        if(document.getElementById('mypage-view').classList.contains('active')) switchTab(myTab); else loadPosts();
     }
 
     async function switchTab(t) {
-        myTab = t; document.getElementById('tab-my').classList.toggle('active', t === 'my'); document.getElementById('tab-save').classList.toggle('active', t === 'save');
+        myTab = t; 
+        document.getElementById('tab-my').classList.toggle('active', t === 'my'); 
+        document.getElementById('tab-save').classList.toggle('active', t === 'save');
         const { data } = await supabaseClient.from('posts').select('*').order('created_at', { ascending: false });
         const list = document.getElementById('mypage-posts-list');
-        const myPostIds = JSON.parse(localStorage.getItem('my_kigo_posts') || '[]');
-        const savedIds = JSON.parse(localStorage.getItem('saved_kigo_posts') || '[]');
-
+        
         if(t === 'save') {
-            renderList(data.filter(p => savedIds.includes(String(p.id))), list);
+            const savedIds = JSON.parse(localStorage.getItem('saved_kigo_posts') || '[]');
+            renderList(data.filter(p => savedIds.includes(String(p.id))), list, false);
         } else {
-            // 「自分の投稿ID」または「古い形式の私」を表示
-            renderList(data.filter(p => myPostIds.includes(String(p.id)) || p.author_name === '私'), list);
+            renderList(data, list, true); // trueを渡して「自分の投稿」で絞り込む
         }
     }
 
@@ -180,24 +202,23 @@
 
     function closeEditor() { document.getElementById('editor-container').style.display = 'none'; document.getElementById('toggle-editor').style.display = 'inline-flex'; document.getElementById('main-content-area').style.display = 'block'; }
     document.getElementById('toggle-editor').onclick = () => { document.getElementById('editor-container').style.display = 'block'; document.getElementById('toggle-editor').style.display = 'none'; document.getElementById('main-content-area').style.display = 'none'; if (bgm.paused) bgm.play(); };
-    document.getElementById('audio-toggle').onclick = () => { if (bgm.paused) { bgm.play(); } else { bgm.pause(); } };
+    document.getElementById('audio-toggle').onclick = () => { if (bgm.paused) { bgm.play(); document.getElementById('audio-icon').innerText = 'volume_up'; document.getElementById('audio-text').innerText = '調べが流れる'; } else { bgm.pause(); document.getElementById('audio-icon').innerText = 'volume_off'; document.getElementById('audio-text').innerText = '静寂の中'; } };
+
+    // 音楽のブラウザ停止対策
+    document.addEventListener("visibilitychange", () => { if (document.hidden) { bgm.pause(); } else if (document.getElementById('audio-text').innerText === '調べが流れる') { bgm.play(); } });
 
     document.getElementById('btn-save').onclick = async () => {
         const content = document.getElementById('post-content').value;
         const penName = document.getElementById('pen-name').value || '私';
         if (!content.includes(currentKigo)) { document.getElementById('error-msg').innerText = `「${currentKigo}」を入れてください。`; return; }
         const btn = document.getElementById('btn-save'); btn.disabled = true; btn.innerText = '物語を預かりました...';
-        
         try {
-            const { data, error } = await supabaseClient.from('posts').insert([{ content, kigo: currentKigo, pen_name: penName, biyori_message: 'ことば日和が、あなたの綴りごとを読み解いています……' }]).select();
+            const { data } = await supabaseClient.from('posts').insert([{ content, kigo: currentKigo, pen_name: penName, biyori_message: 'ことば日和が、あなたの綴りごとを読み解いています……' }]).select();
             if (data && data[0]) {
-                // 自分の投稿IDを保存（ありがと地蔵スタイル）
                 let myPosts = JSON.parse(localStorage.getItem('my_kigo_posts') || '[]');
                 myPosts.push(String(data[0].id));
                 localStorage.setItem('my_kigo_posts', JSON.stringify(myPosts));
-                // 名前を保存して次回から自動入力
                 localStorage.setItem('kigo_pen_name', penName);
-
                 await fetch(MAKE_WEBHOOK_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: data[0].id, text: content, kigo: currentKigo, pen_name: penName }) });
             }
             location.reload();
@@ -205,10 +226,8 @@
     };
 
     window.onload = () => { 
-        // 保存された名前があれば入力欄にセット
         const savedName = localStorage.getItem('kigo_pen_name');
         if(savedName) document.getElementById('pen-name').value = savedName;
-        
         fetchKigo(); calculateEto(); loadPosts(); 
     };
 </script>
