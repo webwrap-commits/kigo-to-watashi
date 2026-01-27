@@ -264,19 +264,22 @@
             return;
         }
 
-        // 1. Supabaseに保存
-        const { data, error } = await supabaseClient.from('posts').insert([{ 
-            content, kigo: currentKigo, pen_name: penName,
-            biyori_message: 'ことば日和が、あなたの綴りごとを読み解いています……' 
-        }]).select(); // select()を追加して保存した行の情報を取得
+        // 1. Supabaseに保存し、結果を待つ
+        const { data, error } = await supabaseClient
+            .from('posts')
+            .insert([{ 
+                content, kigo: currentKigo, pen_name: penName,
+                biyori_message: 'ことば日和が、あなたの綴りごとを読み解いています……' 
+            }])
+            .select(); // 保存した直後のデータを取得する指示
 
-        if(!error && data && data[0]) {
-            // 2. Makeへデータを飛ばす (idを含めて送信)
-            fetch(MAKE_WEBHOOK_URL, {
+        if(!error && data && data.length > 0) {
+            // 2. 確実にIDを取得してからMakeへ送信
+            await fetch(MAKE_WEBHOOK_URL, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ 
-                    id: data[0].id, // 保存された行のIDを追加
+                    id: data[0].id, // ここで確実に数値が入ります
                     text: content, 
                     kigo: currentKigo, 
                     pen_name: penName 
@@ -287,8 +290,9 @@
             closeEditor(); 
             await loadPosts();
             document.getElementById('posts-list').scrollIntoView({ behavior: 'smooth' });
-        } else if(error) {
-            console.error('Supabase error:', error);
+        } else {
+            console.error('Save failed:', error);
+            alert('保存に失敗しました。');
         }
     };
 
