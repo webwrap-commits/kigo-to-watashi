@@ -69,7 +69,7 @@
         <div id="posts-list"></div>
     </div>
     <div id="mypage-view">
-        <h2 style="font-family: var(--font-serif); margin: 2rem 0; text-align:center;">私の季節の移ろい録</h2>
+        <h2 style="font-family: var(--font-serif); font-weight: 200; margin: 2rem 0; text-align:center;">私と季節の移ろい録</h2>
         <div class="eto-card" style="margin: 0 auto 2rem;"><div id="eto-today-label" class="eto-title"></div><div class="eto-container"><img src="https://res.cloudinary.com/dh6zibjr8/image/upload/v1769359321/eto2_p5uqwq.png" class="eto-image"><div id="eto-pointer" class="eto-pointer"></div></div><div id="eto-description" class="eto-desc"></div></div>
         <div class="mypage-tabs" style="margin: 0 auto 2rem;"><button id="tab-my" class="tab-btn active" onclick="switchTab('my')">私の綴り</button><button id="tab-save" class="tab-btn" onclick="switchTab('save')">心に留めた綴り</button></div>
         <div id="mypage-posts-list"></div>
@@ -175,7 +175,7 @@
         const btn = document.getElementById('btn-save'); btn.disabled = true;
         
         try {
-            const { data, error } = await supabaseClient.from('posts').insert([{ content, kigo: currentKigo, pen_name: penName, biyori_message: 'ことば日和が, あなたの綴りごとを読み解いています……' }]).select();
+            const { data, error } = await supabaseClient.from('posts').insert([{ content, kigo: currentKigo, pen_name: penName, biyori_message: 'ことば日和が、あなたの綴りごとを読み解いています……' }]).select();
             if (data && data[0]) {
                 await fetch(MAKE_WEBHOOK_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: data[0].id, text: content, kigo: currentKigo, pen_name: penName }) });
             }
