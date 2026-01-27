@@ -14,10 +14,7 @@
         body { font-family: var(--font-sans); background-color: var(--background); color: var(--foreground); margin: 0; padding: 0; line-height: 1.8; display: flex; flex-direction: column; align-items: center; font-weight: 200; -webkit-text-size-adjust: 100%; }
         header { width: 100%; max-width: 48rem; padding: 4rem 1.5rem 1rem; display: flex; justify-content: space-between; align-items: center; box-sizing: border-box; }
         h1 { font-family: var(--font-serif); font-size: 1.1rem; font-weight: 200; letter-spacing: 0.3rem; margin: 0; color: var(--foreground); cursor: pointer; }
-        
-        /* 青い文字対策 */
         a, button { color: inherit; text-decoration: none; -webkit-tap-highlight-color: transparent; }
-        
         .btn-outline { display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.5rem 1rem; border-radius: 0.5rem; font-size: 0.75rem; border: 1px solid var(--border); background: white; cursor: pointer; color: var(--foreground); }
         #timeline-view, #mypage-view { width: 100%; display: none; flex-direction: column; align-items: center; }
         #timeline-view.active, #mypage-view.active { display: flex; }
@@ -40,17 +37,13 @@
         .ai-footer { background-color: #fafafa; padding: 1.5rem; border-top: 1px solid #f0f0f0; margin-top: 0.5rem; }
         .ai-label { font-size: 0.75rem; color: #999; margin-bottom: 0.8rem; display: block; }
         .ai-box { font-family: var(--font-sans); font-size: 0.95rem; color: #666; line-height: 1.8; white-space: pre-wrap; }
-        
-        /* エディタ内の季語表示（グレーの台紙） */
         .editor-kigo-hint { background: #f4f4f5; border-radius: 0.5rem; padding: 1.5rem; margin-bottom: 1.5rem; text-align: center; }
         .editor-kigo-name { font-family: var(--font-serif); font-size: 1.8rem; letter-spacing: 0.5rem; color: var(--foreground); }
-
         #editor-container { display: none; width: 100%; max-width: 42rem; padding: 0 1.5rem 5rem; box-sizing: border-box; }
         .editor-box { background: white; border: 1px solid var(--border); border-radius: var(--radius-xl); padding: 1.5rem; }
         #pen-name, #post-content { width: 100%; padding: 0.8rem; border: 1px solid #eee; border-radius: 0.4rem; box-sizing: border-box; font-family: var(--font-sans); font-size: 0.9rem; margin-bottom: 1rem; }
         #post-content { height: 180px; resize: none; }
         .btn-submit { background: var(--foreground); color: white; padding: 0.8rem; border-radius: 3rem; width: 100%; border: none; cursor: pointer; font-family: var(--font-serif); }
-        
         .eto-card { background: white; border: 1px solid var(--border); border-radius: var(--radius-xl); padding: 2rem 1.5rem; margin-bottom: 2rem; width: 100%; max-width: 36rem; box-sizing: border-box; }
         .eto-title { font-family: var(--font-serif); font-size: 1.4rem; margin-bottom: 1.5rem; text-align: center; }
         .eto-container { position: relative; width: 280px; height: 280px; margin: 0 auto 2rem; }
@@ -60,7 +53,6 @@
         .mypage-tabs { display: flex; justify-content: center; gap: 2rem; margin-bottom: 2rem; border-bottom: 1px solid var(--border); width: 100%; max-width: 36rem; }
         .tab-btn { background: none; border: none; padding: 1rem; cursor: pointer; font-size: 0.9rem; color: var(--muted-foreground); }
         .tab-btn.active { color: var(--foreground); border-bottom: 2px solid var(--foreground); }
-        
         @media (max-width: 640px) { header { padding: 2.5rem 1.5rem 1rem; } .kigo-word { font-size: 2.2rem; } .intro-card { padding: 1.5rem; } }
     </style>
 </head>
@@ -76,17 +68,7 @@
                 <div class="kigo-label">今日の季語</div><div id="kigo-display" class="kigo-word"></div><div id="kigo-desc-area"></div><button id="toggle-editor" class="btn-write"><span class="material-symbols-outlined">edit_note</span>綴る</button>
             </section>
         </div>
-        <div id="editor-container">
-            <div class="editor-box">
-                <div class="editor-kigo-hint"><span id="editor-kigo-name" class="editor-kigo-name"></span></div>
-                <input type="text" id="pen-name" placeholder="ペンネーム">
-                <textarea id="post-content" maxlength="200" placeholder="物語を綴ってください..." oninput="updateCharCount()"></textarea>
-                <div style="text-align:right; font-size:0.7rem; color:#999; margin-bottom:1rem;"><span id="char-count">0</span> / 200</div>
-                <button id="btn-save" class="btn-submit">物語を綴る</button>
-                <div onclick="closeEditor()" style="text-align:center; padding:1.5rem 1rem 0; cursor:pointer; font-size:0.8rem; color:var(--muted-foreground);">戻る</div>
-                <p id="error-msg" style="color:#ef4444; font-size:0.75rem; text-align:center;"></p>
-            </div>
-        </div>
+        <div id="editor-container"><div class="editor-box"><div class="editor-kigo-hint"><span id="editor-kigo-name" class="editor-kigo-name"></span></div><input type="text" id="pen-name" placeholder="ペンネーム"><textarea id="post-content" maxlength="200" placeholder="物語を綴ってください..." oninput="updateCharCount()"></textarea><div style="text-align:right; font-size:0.7rem; color:#999; margin-bottom:1rem;"><span id="char-count">0</span> / 200</div><button id="btn-save" class="btn-submit">物語を綴る</button><div onclick="closeEditor()" style="text-align:center; padding:1.5rem 1rem 0; cursor:pointer; font-size:0.8rem; color:var(--muted-foreground);">戻る</div><p id="error-msg" style="color:#ef4444; font-size:0.75rem; text-align:center;"></p></div></div>
         <div id="posts-list"></div>
     </div>
     <div id="mypage-view">
@@ -115,20 +97,7 @@
     document.getElementById('kigo-display').onclick = () => { const a = document.getElementById('kigo-desc-area'); a.style.display = a.style.display === 'block' ? 'none' : 'block'; };
     function updateCharCount() { document.getElementById('char-count').innerText = document.getElementById('post-content').value.length; }
 
-    const etoData = [
-        { name: "子", desc: "子だくさんのネズミのように、子孫繁栄や物事の始まりに良い日。" },
-        { name: "丑", desc: "粘り強く歩む牛のように、じっくり取り組むのに良い日。" },
-        { name: "寅", desc: "黄金色の毛並みから、金運を呼び寄せる日。" },
-        { name: "卯", desc: "ぴょんぴょん跳ねるウサギのように、物事がとんとん拍子に進む日。" },
-        { name: "辰", desc: "力強い龍のエネルギーが溢れる日。" },
-        { name: "巳", desc: "弁財天様と縁が深く、お金や芸事の才能を育ててくれる日。" },
-        { name: "午", desc: "太陽のエネルギーが満ちる日。豊かな暮らしに感謝する日です。" },
-        { name: "未", desc: "群れで仲良く暮らす羊のように、平和に過ごすのが良い日。" },
-        { name: "申", desc: "「去る」にかけて、悩みや災いが去っていく日。" },
-        { name: "酉", desc: "「とりこむ」という言葉から、福や商売の運をかき集める日。" },
-        { name: "戌", desc: "安産や子供の健やかな成長を祈る、絆を深める日。" },
-        { name: "亥", desc: "猪突猛進するイノシシのように、情熱を持って進む日。" }
-    ];
+    const etoData = [ { name: "子", desc: "子だくさんのネズミのように、子孫繁栄や物事の始まりに良い日。" }, { name: "丑", desc: "粘り強く歩む牛のように、じっくり取り組むのに良い日。" }, { name: "寅", desc: "黄金色の毛並みから、金運を呼び寄せる日。" }, { name: "卯", desc: "ぴょんぴょん跳ねるウサギのように、物事がとんとん拍子に進む日。" }, { name: "辰", desc: "力強い龍のエネルギーが溢れる日。" }, { name: "巳", desc: "弁財天様と縁が深く、お金や芸事の才能を育ててくれる日。" }, { name: "午", desc: "太陽のエネルギーが満ちる日。豊かな暮らしに感謝する日です。" }, { name: "未", desc: "群れで仲良く暮らす羊のように、平和に過ごすのが良い日。" }, { name: "申", desc: "「去る」にかけて、悩みや災いが去っていく日。" }, { name: "酉", desc: "「とりこむ」という言葉から、福や商売の運をかき集める日。" }, { name: "戌", desc: "安産や子供の健やかな成長を祈る、絆を深める日。" }, { name: "亥", desc: "猪突猛進するイノシシのように、情熱を持って進む日。" } ];
 
     function calculateEto() {
         const now = getJST(); if (now.getFullYear() !== 2026) return;
@@ -141,7 +110,7 @@
 
     async function loadPosts() {
         const { data } = await supabaseClient.from('posts').select('*').order('created_at', { ascending: false });
-        renderList(data, document.getElementById('posts-list'));
+        renderList(data, document.getElementById('posts-list'), false);
     }
 
     function renderList(data, listElement, isMypageFilter = false) {
@@ -153,7 +122,6 @@
             const isSaved = savedIds.includes(String(post.id));
             const isMyPost = myPostIds.includes(String(post.id)) || (post.author_name === '私');
             
-            // マイページタブ表示の時は、自分の投稿以外はスキップ
             if(isMypageFilter && !isMyPost) return;
 
             const cleanMessage = (post.biyori_message || '...').replace(/\\n/g, '\n');
@@ -183,12 +151,11 @@
         document.getElementById('tab-save').classList.toggle('active', t === 'save');
         const { data } = await supabaseClient.from('posts').select('*').order('created_at', { ascending: false });
         const list = document.getElementById('mypage-posts-list');
-        
         if(t === 'save') {
             const savedIds = JSON.parse(localStorage.getItem('saved_kigo_posts') || '[]');
             renderList(data.filter(p => savedIds.includes(String(p.id))), list, false);
         } else {
-            renderList(data, list, true); // trueを渡して「自分の投稿」で絞り込む
+            renderList(data, list, true);
         }
     }
 
@@ -197,15 +164,38 @@
         document.getElementById('timeline-view').classList.toggle('active', !isTimeline);
         document.getElementById('mypage-view').classList.toggle('active', isTimeline);
         document.getElementById('header-btn-text').innerText = isTimeline ? 'もどる' : 'マイページ';
-        if(isTimeline) { calculateEto(); switchTab('my'); } else { loadPosts(); }
+        if(!isTimeline) { calculateEto(); switchTab('my'); } else { loadPosts(); }
     }
 
     function closeEditor() { document.getElementById('editor-container').style.display = 'none'; document.getElementById('toggle-editor').style.display = 'inline-flex'; document.getElementById('main-content-area').style.display = 'block'; }
-    document.getElementById('toggle-editor').onclick = () => { document.getElementById('editor-container').style.display = 'block'; document.getElementById('toggle-editor').style.display = 'none'; document.getElementById('main-content-area').style.display = 'none'; if (bgm.paused) bgm.play(); };
-    document.getElementById('audio-toggle').onclick = () => { if (bgm.paused) { bgm.play(); document.getElementById('audio-icon').innerText = 'volume_up'; document.getElementById('audio-text').innerText = '調べが流れる'; } else { bgm.pause(); document.getElementById('audio-icon').innerText = 'volume_off'; document.getElementById('audio-text').innerText = '静寂の中'; } };
+    document.getElementById('toggle-editor').onclick = () => { document.getElementById('editor-container').style.display = 'block'; document.getElementById('toggle-editor').style.display = 'none'; document.getElementById('main-content-area').style.display = 'none'; if (!bgm.paused) bgm.play(); };
+    
+    document.getElementById('audio-toggle').onclick = () => { 
+        if (bgm.paused) { 
+            bgm.play(); 
+            document.getElementById('audio-icon').innerText = 'volume_up'; 
+            document.getElementById('audio-text').innerText = '調べが流れる'; 
+        } else { 
+            bgm.pause(); 
+            document.getElementById('audio-icon').innerText = 'volume_off'; 
+            document.getElementById('audio-text').innerText = '静寂の中'; 
+        } 
+    };
 
-    // 音楽のブラウザ停止対策
-    document.addEventListener("visibilitychange", () => { if (document.hidden) { bgm.pause(); } else if (document.getElementById('audio-text').innerText === '調べが流れる') { bgm.play(); } });
+    // 音楽のブラウザ停止・復帰対策（再開時は常にミュート確認）
+    document.addEventListener("visibilitychange", () => { 
+        if (document.hidden) { 
+            bgm.pause(); 
+        } else {
+            // 復帰した時は、画面の表示が「静寂の中」なら鳴らさない
+            if (document.getElementById('audio-text').innerText === '静寂の中') {
+                bgm.pause();
+            } else {
+                // 明示的に再生中だった場合のみ、ユーザーがびっくりしないよう配慮しつつ再生
+                bgm.play().catch(() => {}); 
+            }
+        }
+    });
 
     document.getElementById('btn-save').onclick = async () => {
         const content = document.getElementById('post-content').value;
@@ -228,7 +218,7 @@
     window.onload = () => { 
         const savedName = localStorage.getItem('kigo_pen_name');
         if(savedName) document.getElementById('pen-name').value = savedName;
-        fetchKigo(); calculateEto(); loadPosts(); 
+        fetchKigo(); loadPosts(); 
     };
 </script>
 </body>
