@@ -264,35 +264,47 @@
             return;
         }
 
-        // 1. Supabaseに保存し、結果を待つ
-        const { data, error } = await supabaseClient
-            .from('posts')
-            .insert([{ 
-                content, kigo: currentKigo, pen_name: penName,
-                biyori_message: 'ことば日和が、あなたの綴りごとを読み解いています……' 
-            }])
-            .select(); // 保存した直後のデータを取得する指示
+        // 保存前にボタンを無効化（二重投稿防止）
+        const btn = document.getElementById('btn-save');
+        btn.disabled = true;
+        btn.innerText = '物語を届けています...';
 
-        if(!error && data && data.length > 0) {
-            // 2. 確実にIDを取得してからMakeへ送信
-            await fetch(MAKE_WEBHOOK_URL, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ 
-                    id: data[0].id, // ここで確実に数値が入ります
-                    text: content, 
-                    kigo: currentKigo, 
-                    pen_name: penName 
-                })
-            }).catch(e => console.error('Make error:', e));
+        try {
+            // 1. Supabaseに保存
+            const { data, error } = await supabaseClient
+                .from('posts')
+                .insert([{ 
+                    content, kigo: currentKigo, pen_name: penName,
+                    biyori_message: 'ことば日和が、あなたの綴りごとを読み解いています……' 
+                }])
+                .select(); // ここが重要：保存したデータを返してもらう
+
+            if (error) throw error;
+
+            if (data && data[0]) {
+                // 2. 成功したらそのIDを持ってMakeへ
+                await fetch(MAKE_WEBHOOK_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        id: data[0].id,
+                        text: content, 
+                        kigo: currentKigo, 
+                        pen_name: penName 
+                    })
+                });
+            }
 
             document.getElementById('post-content').value = '';
             closeEditor(); 
             await loadPosts();
             document.getElementById('posts-list').scrollIntoView({ behavior: 'smooth' });
-        } else {
-            console.error('Save failed:', error);
-            alert('保存に失敗しました。');
+        } catch (err) {
+            console.error('Error:', err);
+            alert('投稿に失敗しました。時間をおいてお試しください。');
+        } finally {
+            btn.disabled = false;
+            btn.innerText = '物語を綴る';
         }
     };
 
