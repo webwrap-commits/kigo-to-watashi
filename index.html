@@ -170,13 +170,43 @@
         }
     }
 
-    function closeEditor() { document.getElementById('editor-container').style.display = 'none'; document.getElementById('toggle-editor').style.display = 'inline-flex'; document.getElementById('main-content-area').style.display = 'block'; }
-    document.getElementById('toggle-editor').onclick = () => { document.getElementById('editor-container').style.display = 'block'; document.getElementById('toggle-editor').style.display = 'none'; document.getElementById('main-content-area').style.display = 'none'; };
-    document.getElementById('audio-toggle').onclick = () => { 
-        if (bgm.paused) { bgm.play(); document.getElementById('audio-icon').innerText = 'volume_up'; document.getElementById('audio-text').innerText = '調べが流れる'; } 
-        else { bgm.pause(); document.getElementById('audio-icon').innerText = 'volume_off'; document.getElementById('audio-text').innerText = '静寂の中'; } 
+    function closeEditor() { 
+        document.getElementById('editor-container').style.display = 'none'; 
+        document.getElementById('toggle-editor').style.display = 'inline-flex'; 
+        document.getElementById('main-content-area').style.display = 'block'; 
+    }
+    
+    document.getElementById('toggle-editor').onclick = () => { 
+        document.getElementById('editor-container').style.display = 'block'; 
+        document.getElementById('toggle-editor').style.display = 'none'; 
+        document.getElementById('main-content-area').style.display = 'none'; 
+        // 投稿フォーム表示時に音楽を再生
+        if (bgm.paused) {
+            bgm.play();
+            document.getElementById('audio-icon').innerText = 'volume_up';
+            document.getElementById('audio-text').innerText = '調べが流れる';
+        }
     };
-    document.addEventListener("visibilitychange", () => { bgm.pause(); document.getElementById('audio-icon').innerText = 'volume_off'; document.getElementById('audio-text').innerText = '静寂の中'; });
+    
+    document.getElementById('audio-toggle').onclick = () => { 
+        if (bgm.paused) { 
+            bgm.play(); 
+            document.getElementById('audio-icon').innerText = 'volume_up'; 
+            document.getElementById('audio-text').innerText = '調べが流れる'; 
+        } else { 
+            bgm.pause(); 
+            document.getElementById('audio-icon').innerText = 'volume_off'; 
+            document.getElementById('audio-text').innerText = '静寂の中'; 
+        } 
+    };
+    
+    document.addEventListener("visibilitychange", () => { 
+        if (document.hidden) {
+            bgm.pause(); 
+            document.getElementById('audio-icon').innerText = 'volume_off'; 
+            document.getElementById('audio-text').innerText = '静寂の中'; 
+        }
+    });
 
     document.getElementById('btn-save').onclick = async () => {
         const content = document.getElementById('post-content').value; const penName = document.getElementById('pen-name').value || '私';
