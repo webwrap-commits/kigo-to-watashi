@@ -154,7 +154,7 @@
         if(document.getElementById('mypage-view').classList.contains('active')) switchTab(myTab); else loadPosts();
     }
 
-    function handleHeaderBtnClick() {
+    async function handleHeaderBtnClick() {
         const isMypageOpen = document.getElementById('mypage-view').classList.contains('active');
         if (isMypageOpen) {
             document.getElementById('mypage-view').classList.remove('active');
@@ -166,7 +166,7 @@
             document.getElementById('mypage-view').classList.add('active');
             document.getElementById('header-btn-text').innerText = 'もどる';
             calculateEto(); 
-            switchTab('my'); // 遷移の瞬間にデータを強制読み込み
+            await switchTab('my');
         }
     }
 
