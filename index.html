@@ -29,7 +29,7 @@
         .kigo-word { font-family: var(--font-serif); font-size: 2.8rem; font-weight: 200; letter-spacing: 0.8rem; margin: 0; cursor: pointer; color: var(--foreground); min-height: 4rem; display: block; width: 100%; }
         #kigo-desc-area { max-width: 28rem; margin: 2rem auto; font-size: 0.85rem; color: #555; line-height: 2; text-align: left; display: none; padding: 1.5rem; border: 1px solid #eee; background: #fafafa; border-radius: 0.5rem; }
         .btn-write { display: inline-flex; align-items: center; justify-content: center; gap: 0.8rem; margin-top: 2.5rem; border: 1px solid var(--foreground); padding: 0.8rem 2.5rem; border-radius: 3rem; font-family: var(--font-serif); font-size: 0.95rem; letter-spacing: 0.2rem; cursor: pointer; background: white; color: var(--foreground); }
-        .audio-control-btn { position: sticky; top: 1rem; align-self: flex-end; margin-right: 1.5rem; margin-top: -3rem; margin-bottom: 1rem; z-index: 100; background: rgba(255,255,255,0.8); backdrop-filter: blur(4px); border: 1px solid var(--border); border-radius: 2rem; padding: 0.4rem 1rem; display: flex; align-items: center; gap: 0.5rem; font-size: 0.65rem; color: var(--muted-foreground); cursor: pointer; width: fit-content; }
+        .audio-control-btn { position: sticky; top: 1rem; margin-left: auto; margin-right: 1.5rem; margin-bottom: 1rem; z-index: 100; background: rgba(255,255,255,0.8); backdrop-filter: blur(4px); border: 1px solid var(--border); border-radius: 2rem; padding: 0.4rem 1rem; display: flex; align-items: center; gap: 0.5rem; font-size: 0.65rem; color: var(--muted-foreground); cursor: pointer; width: fit-content; }
         #posts-list, #mypage-posts-list { width: 100%; max-width: 42rem; padding: 0 1.5rem 5rem; box-sizing: border-box; }
         .card { background-color: var(--card); border: 1px solid var(--border); border-radius: var(--radius-xl); margin-bottom: 2rem; overflow: hidden; position: relative; }
         .card-inner { padding: 1.5rem; }
@@ -41,9 +41,9 @@
         .ai-footer { background-color: #fafafa; padding: 1.5rem; border-top: 1px solid #f0f0f0; margin-top: 0.5rem; }
         .ai-label { font-size: 0.75rem; color: #999; margin-bottom: 0.8rem; display: block; }
         .ai-box { font-family: var(--font-sans); font-size: 0.95rem; color: #666; line-height: 1.8; white-space: pre-wrap; }
-        .editor-kigo-hint { background: #f4f4f5; border-radius: 0.5rem; padding: 1.5rem; margin-bottom: 1.5rem; text-align: center; }
+        .editor-kigo-hint { background: #fafafa; border: 1px solid #eee; border-radius: 0.5rem; padding: 1.5rem; margin-bottom: 1.5rem; text-align: center; }
         .editor-kigo-name { font-family: var(--font-serif); font-size: 1.8rem; letter-spacing: 0.5rem; color: var(--foreground); }
-        #editor-container { display: none; width: 100%; max-width: 42rem; padding: 0 1.5rem 5rem; box-sizing: border-box; }
+        #editor-container { display: none; width: 100%; max-width: 42rem; padding: 0 1.5rem 5rem; box-sizing: border-box; margin-top: 2rem; }
         .editor-box { background: white; border: 1px solid var(--border); border-radius: var(--radius-xl); padding: 1.5rem; }
         #pen-name, #post-content { width: 100%; padding: 0.8rem; border: 1px solid #eee; border-radius: 0.4rem; box-sizing: border-box; font-family: var(--font-sans); font-size: 0.9rem; margin-bottom: 1rem; }
         #post-content { height: 180px; resize: none; }
@@ -77,7 +77,7 @@
     <div id="mypage-view">
         <h2 style="font-family: var(--font-serif); font-weight: 200; margin: 2rem 0; text-align:center;">私と季節の移ろい録</h2>
         <div class="eto-card" style="margin: 0 auto 2rem;"><div id="eto-today-label" class="eto-title"></div><div class="eto-container"><img src="https://res.cloudinary.com/dh6zibjr8/image/upload/v1769359321/eto2_p5uqwq.png" class="eto-image"><div id="eto-pointer" class="eto-pointer"></div></div><div id="eto-description" class="eto-desc"></div></div>
-        <div class="mypage-tabs" style="margin: 0 auto 2rem;"><button id="tab-my" class="tab-btn active" onclick="switchTab('my')">私の綴り</button><button id="tab-save" class="tab-btn" onclick="switchTab('save')">心に留めた綴り</button></div>
+        <div class="mypage-tabs" style="margin: 0 auto 2rem;"><button id="tab-my" class="tab-btn active" onclick="switchTab('my')">私の綴りごと</button><button id="tab-save" class="tab-btn" onclick="switchTab('save')">心に留めた綴りごと</button></div>
         <div id="mypage-posts-list"></div>
     </div>
 </main>
@@ -187,6 +187,10 @@
             document.getElementById('audio-icon').innerText = 'volume_up';
             document.getElementById('audio-text').innerText = '音色を奏でる';
         }
+        // 季語が見えるようにスクロール
+        setTimeout(() => {
+            document.getElementById('editor-container').scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }, 100);
     };
     
     document.getElementById('audio-toggle').onclick = () => { 
