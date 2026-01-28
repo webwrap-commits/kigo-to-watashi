@@ -10,9 +10,10 @@
         :root {
             --background: #fdfdfd; --foreground: #1a1a1a; --card: #ffffff; --border: #e4e4e7;
             --muted-foreground: #71717a; --radius-xl: 0.75rem; --font-serif: 'Noto Serif JP', serif; --font-sans: 'Noto Sans JP', sans-serif;
+            --accent-color: #eb6101;
         }
         body { font-family: var(--font-sans); background-color: var(--background); color: var(--foreground); margin: 0; padding: 0; line-height: 1.8; display: flex; flex-direction: column; align-items: center; font-weight: 200; -webkit-text-size-adjust: 100%; }
-        header { width: 100%; max-width: 48rem; padding: 4rem 1.5rem 1rem; display: flex; justify-content: space-between; align-items: center; box-sizing: border-box; }
+        header { width: 100%; max-width: 48rem; padding: 4rem 1.5rem 1rem; display: flex; justify-content: space-between; align-items: center; box-sizing: border-box; position: relative; }
         h1 { font-family: var(--font-serif); font-size: 1.1rem; font-weight: 200; letter-spacing: 0.3rem; margin: 0; color: var(--foreground); cursor: pointer; }
         a, button { color: inherit; text-decoration: none; -webkit-tap-highlight-color: transparent; }
         .btn-outline { display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.5rem 1rem; border-radius: 0.5rem; font-size: 0.75rem; border: 1px solid var(--border); background: white; cursor: pointer; color: var(--foreground); }
@@ -28,7 +29,7 @@
         .kigo-word { font-family: var(--font-serif); font-size: 2.8rem; font-weight: 200; letter-spacing: 0.8rem; margin: 0; cursor: pointer; color: var(--foreground); min-height: 4rem; display: block; width: 100%; }
         #kigo-desc-area { max-width: 28rem; margin: 2rem auto; font-size: 0.85rem; color: #555; line-height: 2; text-align: left; display: none; padding: 1.5rem; border: 1px solid #eee; background: #fafafa; border-radius: 0.5rem; }
         .btn-write { display: inline-flex; align-items: center; justify-content: center; gap: 0.8rem; margin-top: 2.5rem; border: 1px solid var(--foreground); padding: 0.8rem 2.5rem; border-radius: 3rem; font-family: var(--font-serif); font-size: 0.95rem; letter-spacing: 0.2rem; cursor: pointer; background: white; color: var(--foreground); }
-        .audio-control-btn { position: fixed; top: 7.5rem; right: 1.5rem; z-index: 100; background: rgba(255,255,255,0.8); backdrop-filter: blur(4px); border: 1px solid var(--border); border-radius: 2rem; padding: 0.4rem 1rem; display: flex; align-items: center; gap: 0.5rem; font-size: 0.65rem; color: var(--muted-foreground); cursor: pointer; }
+        .audio-control-btn { position: sticky; top: 1rem; align-self: flex-end; margin-right: 1.5rem; margin-top: -3rem; margin-bottom: 1rem; z-index: 100; background: rgba(255,255,255,0.8); backdrop-filter: blur(4px); border: 1px solid var(--border); border-radius: 2rem; padding: 0.4rem 1rem; display: flex; align-items: center; gap: 0.5rem; font-size: 0.65rem; color: var(--muted-foreground); cursor: pointer; width: fit-content; }
         #posts-list, #mypage-posts-list { width: 100%; max-width: 42rem; padding: 0 1.5rem 5rem; box-sizing: border-box; }
         .card { background-color: var(--card); border: 1px solid var(--border); border-radius: var(--radius-xl); margin-bottom: 2rem; overflow: hidden; position: relative; }
         .card-inner { padding: 1.5rem; }
@@ -36,7 +37,7 @@
         .pen-name { font-family: var(--font-serif); font-weight: 600; font-size: 0.95rem; } 
         .card-content { font-family: var(--font-sans); font-size: 1.05rem; line-height: 2; white-space: pre-wrap; color: #333; } 
         .save-btn { background: none; border: none; cursor: pointer; color: var(--muted-foreground); display: flex; align-items: center; }
-        .save-btn.active { color: #d4af37; font-variation-settings: 'FILL' 1; }
+        .save-btn.active { color: var(--accent-color); font-variation-settings: 'FILL' 1; }
         .ai-footer { background-color: #fafafa; padding: 1.5rem; border-top: 1px solid #f0f0f0; margin-top: 0.5rem; }
         .ai-label { font-size: 0.75rem; color: #999; margin-bottom: 0.8rem; display: block; }
         .ai-box { font-family: var(--font-sans); font-size: 0.95rem; color: #666; line-height: 1.8; white-space: pre-wrap; }
@@ -51,7 +52,7 @@
         .eto-title { font-family: var(--font-serif); font-size: 1.4rem; margin-bottom: 1.5rem; text-align: center; }
         .eto-container { position: relative; width: 280px; height: 280px; margin: 0 auto 2rem; }
         .eto-image { width: 100%; height: 100%; object-fit: contain; }
-        .eto-pointer { position: absolute; top: 50%; left: 50%; width: 1px; height: 85px; background: #eb6101; transform-origin: bottom center; transform: translate(-50%, -100%) rotate(0deg); transition: transform 1s ease; z-index: 10; }
+        .eto-pointer { position: absolute; top: 50%; left: 50%; width: 1px; height: 85px; background: var(--accent-color); transform-origin: bottom center; transform: translate(-50%, -100%) rotate(0deg); transition: transform 1s ease; z-index: 10; }
         .eto-desc { font-size: 0.9rem; color: #555; text-align: left; max-width: 28rem; margin: 0 auto; }
         .mypage-tabs { display: flex; justify-content: center; gap: 2rem; margin-bottom: 2rem; border-bottom: 1px solid var(--border); width: 100%; max-width: 36rem; }
         .tab-btn { background: none; border: none; padding: 1rem; cursor: pointer; font-size: 0.9rem; color: var(--muted-foreground); }
@@ -61,8 +62,8 @@
 <body>
 <header><h1 onclick="location.reload()">季語と私の綴りごと</h1><button id="header-btn" class="btn-outline" onclick="handleHeaderBtnClick()"><span id="header-btn-icon" class="material-symbols-outlined" style="font-size: 1rem;">person</span><span id="header-btn-text">マイページ</span></button></header>
 <audio id="bgm" loop preload="auto"><source src="https://res.cloudinary.com/dh6zibjr8/video/upload/v1769330871/kigo-bgm_t0r9ai.mp3" type="audio/mpeg"></audio>
-<button id="audio-toggle" class="audio-control-btn"><span id="audio-icon" class="material-symbols-outlined" style="font-size: 1rem;">volume_off</span><span id="audio-text">静寂の中</span></button>
-<main style="width: 100%;">
+<main style="width: 100%; max-width: 48rem;">
+    <button id="audio-toggle" class="audio-control-btn"><span id="audio-icon" class="material-symbols-outlined" style="font-size: 1rem;">volume_off</span><span id="audio-text">静寂の中</span></button>
     <div id="timeline-view" class="active">
         <div id="main-content-area">
             <section class="kigo-section">
@@ -184,7 +185,7 @@
         if (bgm.paused) {
             bgm.play();
             document.getElementById('audio-icon').innerText = 'volume_up';
-            document.getElementById('audio-text').innerText = '調べが流れる';
+            document.getElementById('audio-text').innerText = '音色を奏でる';
         }
     };
     
@@ -192,7 +193,7 @@
         if (bgm.paused) { 
             bgm.play(); 
             document.getElementById('audio-icon').innerText = 'volume_up'; 
-            document.getElementById('audio-text').innerText = '調べが流れる'; 
+            document.getElementById('audio-text').innerText = '音色を奏でる'; 
         } else { 
             bgm.pause(); 
             document.getElementById('audio-icon').innerText = 'volume_off'; 
